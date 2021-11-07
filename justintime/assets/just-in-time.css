@@ -89,14 +89,14 @@ H5, H3 {
     font-weight: bold;
 }
 
-#patient_volume_card, #wait_time_card {
+#mean_std_by_plane_card, #wait_time_card {
     background-color: #FFFFFF;
     padding: 1rem;
     margin: auto;
     margin-top: 20px;
 }
 
-#patient_volume_card > b, #wait_time_card > b {
+#mean_std_by_plane_card > b, #wait_time_card > b {
     line-height: 2.5;
 }
 

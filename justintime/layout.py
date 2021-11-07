@@ -1,5 +1,5 @@
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 from dash.dependencies import Input, Output, ClientsideFunction
 
 import numpy as np
@@ -7,6 +7,7 @@ import pandas as pd
 import datetime
 from datetime import datetime as dt
 import pathlib
+from os.path import splitext
 
 
 def description_card():
@@ -28,26 +29,25 @@ def description_card():
 
 
 
-def generate_control_card():
+def generate_control_card(engine):
     """
 
     :return: A Div containing controls for graphs.
     """
-    clinic_list = ['aaa', 'bbb', 'ccc']
-    admit_list = ['1', '2', '3']
     return html.Div(
         id="control-card",
         children=[
             html.P("Select Raw Data File"),
             dcc.Dropdown(
                 id="raw-data-file-select",
-                multi=True,
+                # multi=True,
+                options=[{'label': splitext(f)[0], 'value':f} for f in engine.list_files()]
             ),
             html.Br(),
             html.P("Select Trigger Record"),
             dcc.Dropdown(
                 id="trigger-record-select",
-                multi=True,
+                # multi=True,
             ),
             html.Br(),
             # html.P("Select Check-In Time"),
@@ -76,15 +76,15 @@ def generate_control_card():
         ],
     )
 
-def generate():
+def generate(engine):
     return html.Div(
         id="app-container",
         children=[
             # Left column
             html.Div(
                 id="left-column",
-                className="four columns",
-                children=[description_card(), generate_control_card()]
+                className="three columns",
+                children=[description_card(), generate_control_card(engine)]
                 + [
                     html.Div(
                         ["initial child"], id="output-clientside", style={"display": "none"}
@@ -94,15 +94,15 @@ def generate():
             # Right column
             html.Div(
                 id="right-column",
-                className="eight columns",
+                className="nine columns",
                 children=[
                     # Patient Volume Heatmap
                     html.Div(
-                        id="patient_volume_card",
+                        id="mean_std_by_plane_card",
                         children=[
-                            html.B("Patient Volume"),
-                            html.Hr(),
-                            dcc.Graph(id="patient_volume_hm"),
+                            html.B("Hello"),
+                            # html.Hr(),
+                            # dcc.Graph(id="mean_std_plan_subplots"),
                         ],
                     ),
                 ],
