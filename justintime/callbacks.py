@@ -9,10 +9,13 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
+import numpy as np
+import pandas as pd
+
 import logging
 from itertools import groupby
 
-def attach(app: Dash, engine) -> None:
+def attach(app: Dash, brain) -> None:
     
     @app.callback(
         Output('trigger-record-select', 'options'),
@@ -23,7 +26,7 @@ def attach(app: Dash, engine) -> None:
 
         if not raw_data_file:
             return []
-        tr_nums = [{'label':str(n), 'value':str(n)} for n in engine.get_trigger_record_list(raw_data_file)]
+        tr_nums = [{'label':str(n), 'value':str(n)} for n in brain.get_trigger_record_list(raw_data_file)]
         logging.info(f'Trigger nums: {tr_nums}')
         return tr_nums
 
@@ -40,14 +43,14 @@ def attach(app: Dash, engine) -> None:
             raise PreventUpdate
 
         #----
-        df = engine.load_trigger_record(raw_data_file, int(trig_rec_num))
+        df = brain.load_trigger_record(raw_data_file, int(trig_rec_num))
         logging.debug(f"Trigger record {trig_rec_num} from {raw_data_file} loaded")
         df_std = df.std()
         df_mean = df.mean()
         logging.debug(f"Mean and standard deviation calculated")
 
         # Group channel by plane
-        group_planes = groupby(df.columns, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
+        group_planes = groupby(df.columns, lambda ch: brain.ch_map.get_plane_from_offline_channel(int(ch)))
         planes = {k: [x for x in d] for k,d in group_planes}
         
         df_p0_mean = df_mean[planes[0]]
@@ -87,6 +90,9 @@ def attach(app: Dash, engine) -> None:
             showlegend=False
         )
 
+        logging.debug(f"Mean plots created")
+
+
         fig_std = make_subplots(rows=1, cols=3,
                             subplot_titles=("STD U-Plane", "STD V-Plane", "STD Z-Plane"))
         fig_std.add_trace(
@@ -116,11 +122,38 @@ def attach(app: Dash, engine) -> None:
             showlegend=False
         )
 
+        logging.debug(f"STD plots created")
+
+
+
+        #----
+        df_sum_U = df[planes[0]].sum(axis=1).to_frame()
+        df_sum_U = df_sum_U.rename(columns= {0: 'U-plane'})
+        df_sum_V = df[planes[1]].sum(axis=1).to_frame()
+        df_sum_V = df_sum_V.rename(columns= {0: 'V-plane'})
+        df_sum_Z = df[planes[2]].sum(axis=1).to_frame()
+        df_sum_Z = df_sum_Z.rename(columns= {0: 'Z-plane'})
+        df_sums = pd.concat([df_sum_U, df_sum_V, df_sum_Z], axis=1)
+
+
+        df_fft = df_sums.apply(np.fft.fft)
+        df_fft2 = np.abs(df_fft) ** 2
+        freq = np.fft.fftfreq(8192, 0.5e-6)
+        df_fft2['Freq'] = freq
+        df_fft2 = df_fft2[df_fft2['Freq']>0]
+        df_fft2 = df_fft2.set_index('Freq')
+        fig_fft = px.line(df_fft2.sort_index())
+
+        logging.debug(f"FFT plots created")
+
         #----
 
         fig_hm_p0 = px.imshow(df[planes[0]])
         fig_hm_p1 = px.imshow(df[planes[1]])
         fig_hm_p2 = px.imshow(df[planes[2]])
+
+
+        logging.debug(f"Heatmaps created")
 
         return [
                 html.B("Mean by plane"),
@@ -129,7 +162,10 @@ def attach(app: Dash, engine) -> None:
                 html.B("STD by plane"),
                 html.Hr(),
                 dcc.Graph(figure=fig_std),
-                html.B("Heat map U plane"),
+                html.B("FFT by plane"),
+                html.Hr(),
+                dcc.Graph(figure=fig_fft),
+                html.B("Heat map U-plane"),
                 html.Hr(),
                 dcc.Graph(figure=fig_hm_p0),
                 html.B("Heat map V-plane"),

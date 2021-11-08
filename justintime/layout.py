@@ -19,17 +19,18 @@ def description_card():
         id="description-card",
         children=[
             html.H5("Just-in-Time"),
-            html.H3("(Proto)DUNE Prompt-Feedback"),
+            html.H4("(Proto)DUNE"),
+            html.H4("Prompt-Feedback"),
             html.Div(
                 id="intro",
-                children="Select the data file and the trigger record in it.",
+                children="Select data file and trigger record",
             ),
         ],
     )
 
 
 
-def generate_control_card(engine):
+def generate_control_card(brain):
     """
 
     :return: A Div containing controls for graphs.
@@ -41,7 +42,7 @@ def generate_control_card(engine):
             dcc.Dropdown(
                 id="raw-data-file-select",
                 # multi=True,
-                options=[{'label': splitext(f)[0], 'value':f} for f in engine.list_files()]
+                options=[{'label': splitext(f)[0], 'value':f} for f in brain.list_files()]
             ),
             html.Br(),
             html.P("Select Trigger Record"),
@@ -76,7 +77,7 @@ def generate_control_card(engine):
         ],
     )
 
-def generate(engine):
+def generate(brain):
     return html.Div(
         id="app-container",
         children=[
@@ -84,7 +85,7 @@ def generate(engine):
             html.Div(
                 id="left-column",
                 className="three columns",
-                children=[description_card(), generate_control_card(engine)]
+                children=[description_card(), generate_control_card(brain)]
                 + [
                     html.Div(
                         ["initial child"], id="output-clientside", style={"display": "none"}
