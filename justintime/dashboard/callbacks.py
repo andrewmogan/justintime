@@ -12,9 +12,15 @@ from plotly.subplots import make_subplots
 import numpy as np
 import pandas as pd
 
+from ..cruncher.signal import butter_highpass_filter
+
 import logging
 from itertools import groupby
 import rich
+
+
+
+
 
 def attach(app: Dash, brain) -> None:
 
@@ -67,18 +73,19 @@ def attach(app: Dash, brain) -> None:
         logging.debug(f"Mean and standard deviation calculated")
 
         # Group channel by plane
-        group_planes_a = groupby(df.columns, lambda ch: ch_map.get_plane_from_offline_channel(int(ch)))
-        planes_a = {k: [x for x in d] for k,d in group_planes_a}
+        group_planes = groupby(df.columns, lambda ch: ch_map.get_plane_from_offline_channel(int(ch)))
+        planes = {k: [x for x in d] for k,d in group_planes}
         
-        df_p0_mean = df_mean[planes_a[0]]
-        df_p1_mean = df_mean[planes_a[1]]
-        df_p2_mean = df_mean[planes_a[2]]
+        df_p0_mean = df_mean[planes[0]]
+        df_p1_mean = df_mean[planes[1]]
+        df_p2_mean = df_mean[planes[2]]
 
-        df_p0_std = df_std[planes_a[0]]
-        df_p1_std = df_std[planes_a[1]]
-        df_p2_std = df_std[planes_a[2]]
+        df_p0_std = df_std[planes[0]]
+        df_p1_std = df_std[planes[1]]
+        df_p2_std = df_std[planes[2]]
 
-        return (df_std, df_mean, df_p0_mean, df_p1_mean, df_p2_mean, df_p0_std, df_p1_std, df_p2_std)
+        return (planes, df_std, df_mean, df_p0_mean, df_p1_mean, df_p2_mean, df_p0_std, df_p1_std, df_p2_std)
+
 
 
 
@@ -103,8 +110,8 @@ def attach(app: Dash, brain) -> None:
         info_b, df_b = brain.load_trigger_record(raw_data_file_b, int(trig_rec_num_b))
         logging.debug(f"Trigger record {trig_rec_num_b} from {raw_data_file_b} loaded")
 
-        df_a_std, df_a_mean, df_a_p0_mean, df_a_p1_mean, df_a_p2_mean, df_a_p0_std, df_a_p1_std, df_a_p2_std = mean_std_by_plane(df_a, brain.ch_map)
-        df_b_std, df_b_mean, df_b_p0_mean, df_b_p1_mean, df_b_p2_mean, df_b_p0_std, df_b_p1_std, df_b_p2_std = mean_std_by_plane(df_b, brain.ch_map)
+        planes_a, df_a_std, df_a_mean, df_a_p0_mean, df_a_p1_mean, df_a_p2_mean, df_a_p0_std, df_a_p1_std, df_a_p2_std = mean_std_by_plane(df_a, brain.ch_map)
+        planes_b, df_b_std, df_b_mean, df_b_p0_mean, df_b_p1_mean, df_b_p2_mean, df_b_p0_std, df_b_p1_std, df_b_p2_std = mean_std_by_plane(df_b, brain.ch_map)
 
 
 
@@ -234,9 +241,9 @@ def attach(app: Dash, brain) -> None:
         # #             'x': df.columns.tolist(),
         # #             'y': df.index.tolist()}
 
-        # # fig_hm_p0 = go.Figure(data=go.Heatmapgl(df_to_plotly(df[planes[0]])))
-        # # fig_hm_p1 = go.Figure(data=go.Heatmapgl(df_to_plotly(df[planes[1]])))
-        # # fig_hm_p2 = go.Figure(data=go.Heatmapgl(df_to_plotly(df[planes[2]])))
+        # fig_hm_p0 = go.Figure(data=go.Heatmapgl(df_to_plotly(df[planes[0]])))
+        # fig_hm_p1 = go.Figure(data=go.Heatmapgl(df_to_plotly(df[planes[1]])))
+        # fig_hm_p2 = go.Figure(data=go.Heatmapgl(df_to_plotly(df[planes[2]])))
 
         # logging.debug(f"Heatmaps created")
 
@@ -247,7 +254,34 @@ def attach(app: Dash, brain) -> None:
 
         dt_a = datetime.datetime.fromtimestamp(ts_a).strftime('%c')
         dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
+
+        dt_a_2_rst = df_a[planes_a[2]].reset_index()
+        dt_b_2_rst = df_b[planes_a[2]].reset_index()
+        dt_ab_2_diff = (dt_a_2_rst-dt_b_2_rst+4096).drop('ts', axis=1)
         # rich.print(f"{dt_a} {dt_b}")
+        fps=2000000
+        df_ab_2_filt = butter_highpass_filter(dt_ab_2_diff, 25000, fps)
+
+        # fig_a_2 = px.imshow(df_a[planes_a[2]],  aspect='auto')
+        fig_ab_2_diff = px.imshow(dt_ab_2_diff, aspect='auto', zmin=3000, zmax=5000)
+        fig_ab_2_filt = px.imshow(df_ab_2_filt, aspect='auto', zmax=300, zmin=-500)
+        # fig_a_2 = px.imshow(df_b[planes_b[2]])
+        # fig_ab_2_diff = px.imshow(dt_ab_2_diff)
+
+        # fig_a_2.update_layout(
+        #     width=1800,
+        #     height=1200,
+        # )
+
+        fig_ab_2_diff.update_layout(
+            width=1500,
+            height=1000,
+        )
+
+        fig_ab_2_filt.update_layout(
+            width=1500,
+            height=1000,
+        )
 
         return [
                 html.Div(
@@ -257,6 +291,7 @@ def attach(app: Dash, brain) -> None:
                                 html.H4(f"Trigger Record A"),
                                 html.H2(f"Run: {info_a['run_number']} Trigger: {info_a['trigger_number']}"),
                                 html.H5(f"Timestamp {dt_a}"),
+                                html.H6(f"{raw_data_file_a}"),
                                 ], 
                             style={'display': 'inline-block', 'width': '50%'}
                         ),
@@ -265,6 +300,7 @@ def attach(app: Dash, brain) -> None:
                                 html.H4(f"Trigger Record B"),
                                 html.H2(f"Run: {info_b['run_number']} Trigger: {info_b['trigger_number']}"),
                                 html.H5(f"Timestamp {dt_b}"),
+                                html.H6(f"{raw_data_file_b}"),
                             ],
                             style={'display': 'inline-block', 'width': '50%'}
                         ),
@@ -286,7 +322,17 @@ def attach(app: Dash, brain) -> None:
                 # html.B("Heat map V-plane"),
                 # html.Hr(),
                 # dcc.Graph(figure=fig_hm_p1),
-                # html.B("Heat map Z-plane"),
+                # html.B("Heat map Z-plane A"),
                 # html.Hr(),
-                # dcc.Graph(figure=fig_hm_p2),
+                # dcc.Graph(figure=fig_a_2),
+                # dcc.Graph(figure=px.imshow(df_a[planes_a[2]])),
+                # html.B("Heat map Z-plane B"),
+                # html.Hr(),
+                # dcc.Graph(figure=fig_b_2),
+                html.B("Heat map Z-plane A-B"),
+                html.Hr(),
+                dcc.Graph(figure=fig_ab_2_diff),
+                html.B("Heat map Z-plane A-B (high-pass 50 kHz filter)"),
+                html.Hr(),
+                dcc.Graph(figure=fig_ab_2_filt),
             ]

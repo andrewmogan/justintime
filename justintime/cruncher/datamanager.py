@@ -119,7 +119,7 @@ class RawDataManager:
                 adcs[i] = [wf.get_channel(c) for c in range(256)]
             logging.debug(f"Unpacking {d} completed")
             
-            df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(f'{off_chans[c]:04}', adcs[:,c]) for c in range(256)]))
+            df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(256)]))
             df = df.set_index('ts')
 
             dfs.append(df)
