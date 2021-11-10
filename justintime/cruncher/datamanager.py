@@ -67,12 +67,12 @@ class RawDataManager:
             logging.debug(f"Fragment code : {frag.get_fragment_type_code()}")
             logging.debug(f"Size          : {frag.get_size()}")
 
-            n_frames = (frag.get_size()-frag_hdr.sizeof())//detdataformats.WIBFrame.sizeof()
+            n_frames = (frag.get_size()-frag_hdr.sizeof())//detdataformats.wib.WIBFrame.sizeof()
             # rich.print(f"Number of WIB frames: {n_frames}")
             if not n_frames:
                 continue
 
-            wf = detdataformats.WIBFrame(frag.get_data())
+            wf = detdataformats.wib.WIBFrame(frag.get_data())
             wh = wf.get_wib_header()
 
             logging.debug(f"crate: {wh.crate_no}, slot: {wh.slot_no}, fibre: {wh.fiber_no}")
@@ -90,7 +90,7 @@ class RawDataManager:
             for i in range(n_frames):
                 # progress.update(task2, advance=1)
 
-                wf = detdataformats.WIBFrame(frag.get_data(i*detdataformats.WIBFrame.sizeof())) 
+                wf = detdataformats.wib.WIBFrame(frag.get_data(i*detdataformats.wib.WIBFrame.sizeof())) 
                 ts[i] = wf.get_timestamp()
                 adcs[i] = [wf.get_channel(c) for c in range(256)]
             logging.debug(f"Unpacking {d} completed")

@@ -3,8 +3,8 @@
 import logging
 import rich
 
-from cruncher.datamanager import RawDataManager
-from justintime import init_app
+from .cruncher.datamanager import RawDataManager
+from .dashboard import init_app
 
 
 rdm = RawDataManager('data/')

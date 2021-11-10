@@ -64,15 +64,15 @@ def attach(app: Dash, brain) -> None:
         fig_mean = make_subplots(rows=1, cols=3,
                             subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
         fig_mean.add_trace(
-            go.Scatter(x=df_p0_mean.index.astype(int), y=df_p0_mean, mode='markers'),
+            go.Scattergl(x=df_p0_mean.index.astype(int), y=df_p0_mean, mode='markers'),
             row=1, col=1
         )
         fig_mean.add_trace(
-            go.Scatter(x=df_p1_mean.index.astype(int), y=df_p1_mean, mode='markers'),
+            go.Scattergl(x=df_p1_mean.index.astype(int), y=df_p1_mean, mode='markers'),
             row=1, col=2
         )
         fig_mean.add_trace(
-            go.Scatter(x=df_p2_mean.index.astype(int), y=df_p2_mean, mode='markers'),
+            go.Scattergl(x=df_p2_mean.index.astype(int), y=df_p2_mean, mode='markers'),
             row=1, col=3
         )
 
@@ -96,15 +96,15 @@ def attach(app: Dash, brain) -> None:
         fig_std = make_subplots(rows=1, cols=3,
                             subplot_titles=("STD U-Plane", "STD V-Plane", "STD Z-Plane"))
         fig_std.add_trace(
-            go.Scatter(x=df_p0_std.index.astype(int), y=df_p0_std, mode='markers'),
+            go.Scattergl(x=df_p0_std.index.astype(int), y=df_p0_std, mode='markers'),
             row=1, col=1
         )
         fig_std.add_trace(
-            go.Scatter(x=df_p1_std.index.astype(int), y=df_p1_std, mode='markers'),
+            go.Scattergl(x=df_p1_std.index.astype(int), y=df_p1_std, mode='markers'),
             row=1, col=2
         )
         fig_std.add_trace(
-            go.Scatter(x=df_p2_std.index.astype(int), y=df_p2_std, mode='markers'),
+            go.Scattergl(x=df_p2_std.index.astype(int), y=df_p2_std, mode='markers'),
             row=1, col=3
         )
 
@@ -152,6 +152,14 @@ def attach(app: Dash, brain) -> None:
         fig_hm_p1 = px.imshow(df[planes[1]])
         fig_hm_p2 = px.imshow(df[planes[2]])
 
+        # def df_to_plotly(df):
+        #     return {'z': df.values.tolist(),
+        #             'x': df.columns.tolist(),
+        #             'y': df.index.tolist()}
+
+        # fig_hm_p0 = go.Figure(data=go.Heatmapgl(df_to_plotly(df[planes[0]])))
+        # fig_hm_p1 = go.Figure(data=go.Heatmapgl(df_to_plotly(df[planes[1]])))
+        # fig_hm_p2 = go.Figure(data=go.Heatmapgl(df_to_plotly(df[planes[2]])))
 
         logging.debug(f"Heatmaps created")
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from cruncher.datamanager import RawDataManager
+from justintime.cruncher.datamanager import RawDataManager
 import sys
 import rich
 import logging
@@ -18,6 +18,10 @@ def main(data_path: str) -> None:
         rich.print(f"Reading trigger record {trl[0]}")
         df = rdm.load_trigger_record(f, trl[0])
         rich.print(df)
+
+        df.reset_index(inplace=True)
+        df.to_feather("trigger_record.feather")
+        df.from_feather("trigger_record.feather")
 
 
 if __name__ == "__main__":
