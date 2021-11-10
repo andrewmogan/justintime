@@ -8,20 +8,22 @@ import logging
 def main(data_path: str) -> None:
 
     rdm = RawDataManager(data_path)
-    data_files = rdm.list_files()
+    data_files = sorted(rdm.list_files(), reverse=True)
     rich.print(data_files)
-    for f in data_files:
+    for f in data_files[:1]:
         rich.print(f)
         trl = rdm.get_trigger_record_list(f)
         rich.print(trl)
 
         rich.print(f"Reading trigger record {trl[0]}")
-        df = rdm.load_trigger_record(f, trl[0])
+        info, df = rdm.load_trigger_record(f, trl[0])
+        rich.print(info)
+
         rich.print(df)
 
-        df.reset_index(inplace=True)
-        df.to_feather("trigger_record.feather")
-        df.from_feather("trigger_record.feather")
+    #     df.reset_index(inplace=True)
+    #     df.to_feather("trigger_record.feather")
+    #     df.from_feather("trigger_record.feather")
 
 
 if __name__ == "__main__":

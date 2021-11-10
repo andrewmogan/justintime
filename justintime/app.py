@@ -7,7 +7,7 @@ from .cruncher.datamanager import RawDataManager
 from .dashboard import init_app
 
 
-rdm = RawDataManager('data/')
+rdm = RawDataManager('/data0/')
 data_files = rdm.list_files()
 rich.print(data_files)
 app = init_app(rdm)

@@ -38,19 +38,40 @@ def generate_control_card(brain):
     return html.Div(
         id="control-card",
         children=[
-            html.P("Select Raw Data File"),
+            html.P("Select Raw Data File A"),
             dcc.Dropdown(
-                id="raw-data-file-select",
+                id="raw-data-file-select-A",
                 # multi=True,
-                options=[{'label': splitext(f)[0], 'value':f} for f in brain.list_files()]
+                options=[{'label': f, 'value':f} for f in sorted(brain.list_files(), reverse=True)]
             ),
             html.Br(),
-            html.P("Select Trigger Record"),
+            html.P("Select Trigger Record A"),
             dcc.Dropdown(
-                id="trigger-record-select",
+                id="trigger-record-select-A",
                 # multi=True,
             ),
             html.Br(),
+            html.P("Select Raw Data File B"),
+            dcc.Dropdown(
+                id="raw-data-file-select-B",
+                # multi=True,
+                options=[{'label': f, 'value':f} for f in sorted(brain.list_files(), reverse=True)]
+            ),
+            html.Br(),
+            html.P("Select Trigger Record B"),
+            dcc.Dropdown(
+                id="trigger-record-select-B",
+                # multi=True,
+            ),
+            html.Br(),
+            html.Button('Refresh Files', id='refresh_files', n_clicks=0),
+            html.Button('Plot', id='plot_button', n_clicks=0),
+            html.Br(),
+            html.Br(),
+            # html.P("Cached datasets"),
+            
+            html.Br(),
+
             # html.P("Select Check-In Time"),
             # dcc.DatePickerRange(
             #     id="date-picker-select",
@@ -81,6 +102,7 @@ def generate(brain):
     return html.Div(
         id="app-container",
         children=[
+            dcc.Location(id='url', refresh=False),
             # Left column
             html.Div(
                 id="left-column",

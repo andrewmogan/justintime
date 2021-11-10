@@ -6,7 +6,7 @@ import re
 
 # DUNE DAQ includes
 import daqdataformats
-import detdataformats
+import detdataformats.wib
 import detchannelmaps
 import hdf5libs
 import logging
@@ -14,6 +14,7 @@ import logging
 import numpy as np
 import pandas as pd
 import collections
+import rich
 
 """
 RawDataManager is responsible of raw data information management: discovery, loading, and reference runs handling
@@ -21,8 +22,10 @@ RawDataManager is responsible of raw data information management: discovery, loa
 """
 class RawDataManager:
     
-    match_expr = '*.hdf5'
-    
+    # match_exprs = ['*.hdf5','*.hdf5.copied']
+    match_exprs = ['*.hdf5', '*.hdf5.copied']
+    max_cache_size = 100
+
     def __init__(self, data_path: str) -> None:
 
         if not os.path.isdir(data_path):
@@ -31,10 +34,14 @@ class RawDataManager:
         self.data_path = data_path
         self.ch_map = detchannelmaps.make_map('VDColdboxChannelMap')
         self.trig_rec_hdr_regex = re.compile(r"\/\/TriggerRecord(\d{5})\/TriggerRecordHeader")
+        self.cache = collections.OrderedDict()
     
 
     def list_files(self) -> list:
-        return fnmatch.filter(next(walk(self.data_path), (None, None, []))[2], self.match_expr)  # [] if no file
+        files = []
+        for m in self.match_exprs:
+            files += fnmatch.filter(next(walk(self.data_path), (None, None, []))[2], m)  # [] if no file
+        return files
 
 
     def get_trigger_record_list(self, file_name: str) -> list:
@@ -45,12 +52,32 @@ class RawDataManager:
     
 
     def load_trigger_record(self, file_name: str, tr_num: int) -> list:
+
+        uid = (file_name, tr_num)
+        if uid in self.cache:
+            logging.info(f"{file_name}:{tr_num} already loaded. returning cached dataframe")
+            tr_info, tr_df = self.cache[uid]
+            self.cache.move_to_end(uid, False)
+            return tr_info, tr_df
+
         file_path = os.path.join(self.data_path, file_name)
         dd = hdf5libs.DAQDecoder(file_path, 10000) # number of events = 10000 is not used
         datasets = dd.get_datasets()
 
         # TODO: replace with regex?
         frag_datasets = [ d for d in datasets if d.startswith(f'//TriggerRecord{tr_num:05}') and 'TriggerRecordHeader' not in d]
+        trghdr_datasets = [ d for d in datasets if d.startswith(f'//TriggerRecord{tr_num:05}') and 'TriggerRecordHeader' in d]
+
+        if len(trghdr_datasets) != 1:
+            logging.warning(f"Multiple trigger record headers found {trghdr_datasets}")
+
+        trghdr = dd.get_trh_ptr(trghdr_datasets[0])
+
+        tr_info = {
+            'run_number': trghdr.get_run_number(),
+            'trigger_number': trghdr.get_trigger_number(),
+            'trigger_timestamp': trghdr.get_trigger_timestamp(),
+        }
 
         dfs = []
         for d in frag_datasets:
@@ -83,9 +110,6 @@ class RawDataManager:
 
             ts = np.zeros(n_frames, dtype='uint64')
             adcs = np.zeros(n_frames, dtype=('uint16', 256))
-            # with Progress() as progress:
-
-                # task2 = progress.add_task("[green]Processing...", total=n_frames)
 
             for i in range(n_frames):
                 # progress.update(task2, advance=1)
@@ -102,4 +126,9 @@ class RawDataManager:
 
         tr_df = pd.concat(dfs, axis=1)
         tr_df = tr_df.reindex(sorted(tr_df.columns), axis=1)
-        return tr_df
+        self.cache[uid] = (tr_info, tr_df)
+        if len(self.cache) > self.max_cache_size:
+            old_uid, _ = self.cache.popitem(False)
+            logging.info(f"Removing {old_uid[0]}:{old_uid[1]} from cache")
+
+        return tr_info, tr_df
