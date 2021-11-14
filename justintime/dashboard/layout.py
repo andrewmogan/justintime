@@ -38,59 +38,138 @@ def generate_control_card(brain):
     return html.Div(
         id="control-card",
         children=[
-            html.P("Select Raw Data File A"),
+            html.P("Raw Data File A"),
             dcc.Dropdown(
                 id="raw-data-file-select-A",
                 # multi=True,
                 options=[{'label': f, 'value':f} for f in sorted(brain.list_files(), reverse=True)]
             ),
-            html.Br(),
-            html.P("Select Trigger Record A"),
+            # html.Br(),
+            html.P("Trigger Record A"),
             dcc.Dropdown(
                 id="trigger-record-select-A",
                 # multi=True,
             ),
             html.Br(),
-            html.P("Select Raw Data File B"),
+            html.P("Raw Data File B"),
             dcc.Dropdown(
                 id="raw-data-file-select-B",
                 # multi=True,
                 options=[{'label': f, 'value':f} for f in sorted(brain.list_files(), reverse=True)]
             ),
-            html.Br(),
-            html.P("Select Trigger Record B"),
+            # html.Br(),
+            html.P("Trigger Record B"),
             dcc.Dropdown(
                 id="trigger-record-select-B",
                 # multi=True,
+            ),
+            html.Br(),
+            html.P("Plots"),
+            dcc.Checklist(
+                id='plot_selection',
+                options=[
+                    {'label': 'Mean & STD', 'value': 'Mean_STD'},
+                    {'label': 'Fourier Transform', 'value': 'FFT'},
+                ],
+                value=['Mean_STD', 'FFT']
+            ),
+            html.Br(),
+            html.P("ADC Maps"),
+            html.Div(
+                'TR A planes :',
+                style={'display': 'inline-block'}
+            ),
+            dcc.Checklist(
+                id='adcmap-selection-a',
+                options=[
+                    {'label': 'Z', 'value': 'Z'},
+                    {'label': 'V', 'value': 'V'},
+                    {'label': 'U', 'value': 'U'},
+               ],
+                value=[],
+                labelStyle={'display': 'inline-block'},
+                style={'display': 'inline-block'},
+            ),
+            html.Br(),
+            html.Div(
+                'TR B planes : ',
+                style={'display': 'inline-block'}
+            ),
+            dcc.Checklist(
+                id='adcmap-selection-b',
+                options=[
+                    {'label': 'Z', 'value': 'Z'},
+                    {'label': 'V', 'value': 'V'},
+                    {'label': 'U', 'value': 'U'},
+               ],
+                value=[],
+                labelStyle={'display': 'inline-block'},
+                style={'display': 'inline-block'},
+            ),
+            html.Br(),
+            html.Div(
+                'TR (A-B) planes : ',
+                style={'display': 'inline-block'}
+            ),
+            dcc.Checklist(
+                id='adcmap-selection-ab-diff',
+                options=[
+                    {'label': 'Z', 'value': 'Z'},
+                    {'label': 'V', 'value': 'V'},
+                    {'label': 'U', 'value': 'U'},
+               ],
+                value=[],
+                labelStyle={'display': 'inline-block'},
+                style={'display': 'inline-block'},
+            ),
+            html.Br(),
+            html.Div(
+                'TR A (filtered) planes : ',
+                style={'display': 'inline-block'}
+            ),
+            dcc.Checklist(
+                id='adcmap-selection-a-filt',
+                options=[
+                    {'label': 'Z', 'value': 'Z'},
+                    {'label': 'V', 'value': 'V'},
+                    {'label': 'U', 'value': 'U'},
+               ],
+                value=[],
+                labelStyle={'display': 'inline-block'},
+                style={'display': 'inline-block'},
+            ),
+            html.Br(),
+            html.Div(
+                'TR A (self-subtracted) planes : ',
+                style={'display': 'inline-block'}
+            ),
+            dcc.Checklist(
+                id='adcmap-selection-a-filt-x',
+                options=[
+                    {'label': 'Z', 'value': 'Z'},
+                    {'label': 'V', 'value': 'V'},
+                    {'label': 'U', 'value': 'U'},
+               ],
+                value=[],
+                labelStyle={'display': 'inline-block'},
+                style={'display': 'inline-block'},
+            ),
+            html.Br(),
+            html.P("color bar range"),
+            dcc.RangeSlider(
+                id='ab-diff-range-slider',
+                min=-2048,
+                max=2048,
+                step=64,
+                value=[-320, 192],
+                marks={ v:f"{v}" for v in range(-2048, 2049, 512) }
             ),
             html.Br(),
             html.Button('Refresh Files', id='refresh_files', n_clicks=0),
             html.Button('Plot', id='plot_button', n_clicks=0),
             html.Br(),
             html.Br(),
-            # html.P("Cached datasets"),
-            
-            html.Br(),
 
-            # html.P("Select Check-In Time"),
-            # dcc.DatePickerRange(
-            #     id="date-picker-select",
-            #     start_date=dt(2014, 1, 1),
-            #     end_date=dt(2014, 1, 15),
-            #     min_date_allowed=dt(2014, 1, 1),
-            #     max_date_allowed=dt(2014, 12, 31),
-            #     initial_visible_month=dt(2014, 1, 1),
-            # ),
-            # html.Br(),
-            # html.Br(),
-            # html.P("Select Admit Source"),
-            # dcc.Dropdown(
-            #     id="admit-select",
-            #     options=[{"label": i, "value": i} for i in admit_list],
-            #     value=admit_list[:],
-            #     multi=True,
-            # ),
-            # html.Br(),
             html.Div(
                 id="reset-btn-outer",
                 children=html.Button(id="reset-btn", children="Reset", n_clicks=0),
@@ -123,9 +202,13 @@ def generate(brain):
                     html.Div(
                         id="mean_std_by_plane_card",
                         children=[
-                            html.B("Hello"),
-                            # html.Hr(),
-                            # dcc.Graph(id="mean_std_plan_subplots"),
+    
+                            html.H1("DUNE Prompt Feedback", className="display-3"),
+                            html.P(
+                                "Minimal plotting service to asses raw data quality just-in-time.",
+                                className="lead",
+                            ),
+        
                         ],
                     ),
                 ],

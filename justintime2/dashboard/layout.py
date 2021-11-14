@@ -91,7 +91,7 @@ def generate_splash():
             [
                 html.H1("DUNE Prompt Feedback", className="display-3"),
                 html.P(
-                    "Minimal plotting service to asses raw data quality jsut-in-time.",
+                    "Minimal plotting service to asses raw data quality just-in-time.",
                     className="lead",
                 ),
                 html.Hr(className="my-2"),
