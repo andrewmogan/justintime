@@ -480,6 +480,7 @@ def attach(app: Dash, brain) -> None:
         # fembs = {k: [int(x) for x in d] for k,d in group_fembs}
         femb_to_chans = {k: [int(x) for x in d] for k,d in groupby(offchan_to_hw, femb_id_from_off)}
         df_sub = df_a.copy()
+        df_sub = df_sub-df_sub.mean()
         for p in planes:
             for f in femb_to_chans:
                 chans = list(set(planes[p]) & set(femb_to_chans[f]))
@@ -487,7 +488,8 @@ def attach(app: Dash, brain) -> None:
 
         fzmin, fzmax = ab_diff_range
         if 'Z' in adcmap_selection_a_filt_x:
-            fig = px.imshow(df_sub[planes[2]]-df_sub[planes[2]].mean(), zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            # fig = px.imshow(df_sub[planes[2]]-df_sub[planes[2]].mean(), zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_sub[planes[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -499,7 +501,8 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'V' in adcmap_selection_a_filt_x:
-            fig = px.imshow(df_sub[planes[1]]-df_sub[planes[1]].mean(), zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            # fig = px.imshow(df_sub[planes[1]]-df_sub[planes[1]].mean(), zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_sub[planes[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -511,7 +514,8 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'U' in adcmap_selection_a_filt_x:
-            fig = px.imshow(df_sub[planes[0]]-df_sub[planes[0]].mean(), zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            # fig = px.imshow(df_sub[planes[0]]-df_sub[planes[0]].mean(), zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_sub[planes[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
