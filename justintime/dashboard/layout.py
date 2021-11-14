@@ -124,22 +124,6 @@ def generate_control_card(brain):
             ),
             html.Br(),
             html.Div(
-                'TR A (filtered) planes : ',
-                style={'display': 'inline-block'}
-            ),
-            dcc.Checklist(
-                id='adcmap-selection-a-filt',
-                options=[
-                    {'label': 'Z', 'value': 'Z'},
-                    {'label': 'V', 'value': 'V'},
-                    {'label': 'U', 'value': 'U'},
-               ],
-                value=[],
-                labelStyle={'display': 'inline-block'},
-                style={'display': 'inline-block'},
-            ),
-            html.Br(),
-            html.Div(
                 'TR A (self-subtracted) planes : ',
                 style={'display': 'inline-block'}
             ),

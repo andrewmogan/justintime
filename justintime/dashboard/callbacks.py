@@ -412,52 +412,6 @@ def attach(app: Dash, brain) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        fps=2000000
-        cutoff = 25000
-        df_ab_U_filt = butter_highpass_filter(dt_ab_U_diff, cutoff, fps)
-        df_ab_V_filt = butter_highpass_filter(dt_ab_V_diff, cutoff, fps)
-        df_ab_Z_filt = butter_highpass_filter(dt_ab_Z_diff, cutoff, fps)
-
-
-        fzmin, fzmax = ab_diff_range
-        if 'Z' in adcmap_selection_a_filt:
-            fig = px.imshow(df_ab_Z_filt, zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-            fig.update_layout(
-                width=fig_w,
-                height=fig_h,
-            )
-            children += [
-                html.B("Heat map Z-plane A-B"),
-                html.Hr(),
-                dcc.Graph(figure=fig),
-            ]
-
-        if 'V' in adcmap_selection_a_filt:
-            fig = px.imshow(df_ab_V_filt, zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-            fig.update_layout(
-                width=fig_w,
-                height=fig_h,
-            )
-            children += [
-                html.B("Heat map V-plane A-B"),
-                html.Hr(),
-                dcc.Graph(figure=fig),
-            ]
-
-        if 'U' in adcmap_selection_a_filt:
-            fig = px.imshow(df_ab_U_filt, zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-            fig.update_layout(
-                width=fig_w,
-                height=fig_h,
-            )
-            children += [
-                html.B("Heat map U-plane A-B"),
-                html.Hr(),
-                dcc.Graph(figure=fig),
-            ]
-
-
-
         # 
         crate_no = 4 # Randomish number
         offchan_to_hw = {}
@@ -488,7 +442,6 @@ def attach(app: Dash, brain) -> None:
 
         fzmin, fzmax = ab_diff_range
         if 'Z' in adcmap_selection_a_filt_x:
-            # fig = px.imshow(df_sub[planes[2]]-df_sub[planes[2]].mean(), zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig = px.imshow(df_sub[planes[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
@@ -501,7 +454,6 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'V' in adcmap_selection_a_filt_x:
-            # fig = px.imshow(df_sub[planes[1]]-df_sub[planes[1]].mean(), zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig = px.imshow(df_sub[planes[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
@@ -514,7 +466,6 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'U' in adcmap_selection_a_filt_x:
-            # fig = px.imshow(df_sub[planes[0]]-df_sub[planes[0]].mean(), zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig = px.imshow(df_sub[planes[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
