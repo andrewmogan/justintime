@@ -122,8 +122,7 @@ def attach(app: Dash, brain) -> None:
         State('adcmap-selection-a', 'value'),
         State('adcmap-selection-b', 'value'),
         State('adcmap-selection-ab-diff', 'value'),
-        State('adcmap-selection-a-filt', 'value'),
-        State('adcmap-selection-a-filt-x', 'value'),
+        State('adcmap-selection-a-cnr', 'value'),
         State('ab-diff-range-slider', 'value'),
         )
     def update_plots(
@@ -137,7 +136,6 @@ def attach(app: Dash, brain) -> None:
         adcmap_selection_b,
         adcmap_selection_ab_diff,
         adcmap_selection_a_filt,
-        adcmap_selection_a_filt_x,
         ab_diff_range
         ):
         # ctx = dash.callback_context
@@ -441,7 +439,7 @@ def attach(app: Dash, brain) -> None:
                 df_sub[chans] = df_sub[chans].sub(df_sub[chans].mean(axis=1), axis=0)
 
         fzmin, fzmax = ab_diff_range
-        if 'Z' in adcmap_selection_a_filt_x:
+        if 'Z' in adcmap_selection_a_filt:
             fig = px.imshow(df_sub[planes[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
@@ -453,7 +451,7 @@ def attach(app: Dash, brain) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        if 'V' in adcmap_selection_a_filt_x:
+        if 'V' in adcmap_selection_a_filt:
             fig = px.imshow(df_sub[planes[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
@@ -465,7 +463,7 @@ def attach(app: Dash, brain) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        if 'U' in adcmap_selection_a_filt_x:
+        if 'U' in adcmap_selection_a_filt:
             fig = px.imshow(df_sub[planes[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
