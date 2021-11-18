@@ -13,11 +13,11 @@ import numpy as np
 import pandas as pd
 import datetime
 
-from ..cruncher.signal import butter_highpass_filter
-
 import logging
 from itertools import groupby
 import rich
+
+from . layout import generate_tr_card
 
 
 
@@ -73,23 +73,26 @@ def attach(app: Dash, brain) -> None:
         df_mean = df.mean()
         logging.debug(f"Mean and standard deviation calculated")
 
-        df_p0_mean = df_mean[planes[0]]
-        df_p1_mean = df_mean[planes[1]]
-        df_p2_mean = df_mean[planes[2]]
+        p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
+        df_p0_mean = df_mean[p[0]]
+        df_p1_mean = df_mean[p[1]]
+        df_p2_mean = df_mean[p[2]]
 
-        df_p0_std = df_std[planes[0]]
-        df_p1_std = df_std[planes[1]]
-        df_p2_std = df_std[planes[2]]
+        df_p0_std = df_std[p[0]]
+        df_p1_std = df_std[p[1]]
+        df_p2_std = df_std[p[2]]
 
         return (df_std, df_mean, df_p0_mean, df_p1_mean, df_p2_mean, df_p0_std, df_p1_std, df_p2_std)
 
 
     def calc_fft(df, planes):
-        df_sum_U = df[planes[0]].sum(axis=1).to_frame()
+        p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
+
+        df_sum_U = df[p[0]].sum(axis=1).to_frame()
         df_sum_U = df_sum_U.rename(columns= {0: 'U-plane'})
-        df_sum_V = df[planes[1]].sum(axis=1).to_frame()
+        df_sum_V = df[p[1]].sum(axis=1).to_frame()
         df_sum_V = df_sum_V.rename(columns= {0: 'V-plane'})
-        df_sum_Z = df[planes[2]].sum(axis=1).to_frame()
+        df_sum_Z = df[p[2]].sum(axis=1).to_frame()
         df_sum_Z = df_sum_Z.rename(columns= {0: 'Z-plane'})
         df_sums = pd.concat([df_sum_U, df_sum_V, df_sum_Z], axis=1)
 
@@ -103,13 +106,14 @@ def attach(app: Dash, brain) -> None:
 
         return df_fft2.sort_index()
 
-    def calc_diffs(df_a, df_b, planes):
+    def calc_diffs(df_a, df_b):
+
         # value_offset=4096
         dt_a_rst = df_a.reset_index().drop('ts', axis=1)
         dt_b_rst = df_b.reset_index().drop('ts', axis=1)
         dt_ab_diff = (dt_a_rst.astype('int')-dt_b_rst.astype('int'))
 
-        return (dt_ab_diff[planes[0]], dt_ab_diff[planes[1]], dt_ab_diff[planes[2]])
+        return dt_ab_diff
 
     @app.callback(
         Output('mean_std_by_plane_card', 'children'),
@@ -140,66 +144,79 @@ def attach(app: Dash, brain) -> None:
         ):
         # ctx = dash.callback_context
 
+
         children = []
 
         if not trig_rec_num_a or not trig_rec_num_b:
             raise PreventUpdate
         # #----
+
+        group_planes = groupby(range(0,3200), lambda ch: brain.ch_map.get_plane_from_offline_channel(int(ch)))
+        planes = {k: [x for x in d if x] for k,d in group_planes}
+        rich.print(planes)
+
         info_a, df_a = brain.load_trigger_record(raw_data_file_a, int(trig_rec_num_a))
+        # Timestamp information
+        ts_a = info_a['trigger_timestamp']*20/1000000000
+        dt_a = datetime.datetime.fromtimestamp(ts_a).strftime('%c')
+        # Splitting by plane
+        planes_a = {k:list(set(v) & set(df_a.columns)) for k,v in planes.items()}
+        df_aU = df_a[planes_a[0]]
+        df_aV = df_a[planes_a[1]]
+        df_aZ = df_a[planes_a[2]]
+
+        df_aU_mean, df_aU_std = df_aU.mean(), df_aU.std()
+        df_aV_mean, df_aV_std = df_aV.mean(), df_aV.std()
+        df_aZ_mean, df_aZ_std = df_aZ.mean(), df_aZ.std()
+
         logging.debug(f"Trigger record {trig_rec_num_a} from {raw_data_file_a} loaded")
 
         # #----
         info_b, df_b = brain.load_trigger_record(raw_data_file_b, int(trig_rec_num_b))
+        # Timestamp information
+        ts_b = info_b['trigger_timestamp']*20/1000000000
+        dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
+        planes_b = {k:list(set(v) & set(df_b.columns)) for k,v in planes.items()}
+        # Splitting by plane
+        df_bU = df_b[planes_b[0]]
+        df_bV = df_b[planes_b[1]]
+        df_bZ = df_b[planes_b[2]]
         logging.debug(f"Trigger record {trig_rec_num_b} from {raw_data_file_b} loaded")
 
-        # Timestamp information
-        ts_a = info_a['trigger_timestamp']*20/1000000000
-        ts_b = info_b['trigger_timestamp']*20/1000000000
-
-        dt_a = datetime.datetime.fromtimestamp(ts_a).strftime('%c')
-        dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
-
-        # Group channel by plane
-        group_planes = groupby(range(0,3200), lambda ch: brain.ch_map.get_plane_from_offline_channel(int(ch)))
-        planes = {k: [x for x in d] for k,d in group_planes}
-        rich.print(planes)
-
-
-        df_a_std, df_a_mean, df_a_p0_mean, df_a_p1_mean, df_a_p2_mean, df_a_p0_std, df_a_p1_std, df_a_p2_std = calc_mean_std_by_plane(df_a, planes)
-        df_b_std, df_b_mean, df_b_p0_mean, df_b_p1_mean, df_b_p2_mean, df_b_p0_std, df_b_p1_std, df_b_p2_std = calc_mean_std_by_plane(df_b, planes)
-
+        df_bU_mean, df_bU_std = df_bU.mean(), df_bU.std()
+        df_bV_mean, df_bV_std = df_bV.mean(), df_bV.std()
+        df_bZ_mean, df_bZ_std = df_bZ.mean(), df_bZ.std()
 
         if 'Mean_STD' in plot_selection:
 
             fig_mean = make_subplots(rows=1, cols=3,
                                 subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
             fig_mean.add_trace(
-                go.Scattergl(x=df_a_p0_mean.index.astype(int), y=df_a_p0_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                go.Scattergl(x=df_aU_mean.index.astype(int), y=df_aU_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
                 row=1, col=1
             )
             fig_mean.add_trace(
-                go.Scattergl(x=df_b_p0_mean.index.astype(int), y=df_b_p0_mean, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
+                go.Scattergl(x=df_bU_mean.index.astype(int), y=df_bU_mean, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                 row=1, col=1
             )
 
             fig_mean.add_trace(
-                go.Scattergl(x=df_a_p1_mean.index.astype(int), y=df_a_p1_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                go.Scattergl(x=df_aV_mean.index.astype(int), y=df_aV_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
                 row=1, col=2
             )
             fig_mean.add_trace(
-                go.Scattergl(x=df_b_p1_mean.index.astype(int), y=df_b_p1_mean, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
+                go.Scattergl(x=df_bV_mean.index.astype(int), y=df_bV_mean, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                 row=1, col=2
             )
 
             fig_mean.add_trace(
-                go.Scattergl(x=df_a_p2_mean.index.astype(int), y=df_a_p2_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                go.Scattergl(x=df_aZ_mean.index.astype(int), y=df_aZ_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
                 row=1, col=3
             )
             fig_mean.add_trace(
-                go.Scattergl(x=df_b_p2_mean.index.astype(int), y=df_b_p2_mean, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
+                go.Scattergl(x=df_bZ_mean.index.astype(int), y=df_bZ_mean, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                 row=1, col=3
             )
-
 
             fig_mean.update_layout(
                 # autosize=False,
@@ -221,29 +238,29 @@ def attach(app: Dash, brain) -> None:
             fig_std = make_subplots(rows=1, cols=3,
                                 subplot_titles=("STD U-Plane", "STD V-Plane", "STD Z-Plane"))
             fig_std.add_trace(
-                go.Scattergl(x=df_a_p0_std.index.astype(int), y=df_a_p0_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                go.Scattergl(x=df_aU_std.index.astype(int), y=df_aU_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
                 row=1, col=1
             )
             fig_std.add_trace(
-                go.Scattergl(x=df_b_p0_std.index.astype(int), y=df_b_p0_std, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
+                go.Scattergl(x=df_bU_std.index.astype(int), y=df_bU_std, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                 row=1, col=1
             )
 
             fig_std.add_trace(
-                go.Scattergl(x=df_a_p1_std.index.astype(int), y=df_a_p1_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                go.Scattergl(x=df_aV_std.index.astype(int), y=df_aV_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
                 row=1, col=2
             )
             fig_std.add_trace(
-                go.Scattergl(x=df_b_p1_std.index.astype(int), y=df_b_p1_std, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
+                go.Scattergl(x=df_bV_std.index.astype(int), y=df_bV_std, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                 row=1, col=2
             )
 
             fig_std.add_trace(
-                go.Scattergl(x=df_a_p2_std.index.astype(int), y=df_a_p2_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                go.Scattergl(x=df_aZ_std.index.astype(int), y=df_aZ_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
                 row=1, col=3
             )
             fig_std.add_trace(
-                go.Scattergl(x=df_b_p2_std.index.astype(int), y=df_b_p2_std, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
+                go.Scattergl(x=df_bZ_std.index.astype(int), y=df_bZ_std, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                 row=1, col=3
             )
 
@@ -299,7 +316,7 @@ def attach(app: Dash, brain) -> None:
         fig_w, fig_h = 1500, 1000
         # Waveforms A
         if 'Z' in adcmap_selection_a:
-            fig = px.imshow(df_a[planes[2]], title=f"Z-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_aZ, title=f"Z-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -311,7 +328,7 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'V' in adcmap_selection_a:
-            fig = px.imshow(df_a[planes[1]], title=f"V-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_aV, title=f"V-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -323,7 +340,7 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'U' in adcmap_selection_a:
-            fig = px.imshow(df_a[planes[0]], title=f"U-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_aU, title=f"U-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -337,7 +354,7 @@ def attach(app: Dash, brain) -> None:
 
         # Waveforms B
         if 'Z' in adcmap_selection_b:
-            fig = px.imshow(df_b[planes[2]], title=f"Z-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_bZ, title=f"Z-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -349,7 +366,7 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'V' in adcmap_selection_b:
-            fig = px.imshow(df_b[planes[1]], title=f"V-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_bV, title=f"V-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -361,7 +378,7 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'U' in adcmap_selection_b:
-            fig = px.imshow(df_b[planes[0]], title=f"U-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_bU, title=f"U-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -372,7 +389,9 @@ def attach(app: Dash, brain) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        dt_ab_U_diff, dt_ab_V_diff, dt_ab_Z_diff = calc_diffs(df_a, df_b, planes)
+        dt_ab_U_diff = calc_diffs(df_aU, df_bU)
+        dt_ab_V_diff = calc_diffs(df_aV, df_bV)
+        dt_ab_Z_diff = calc_diffs(df_aZ, df_bZ)
 
         if 'Z' in adcmap_selection_ab_diff:
             fig = px.imshow(dt_ab_Z_diff, title=f"Z-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
@@ -431,16 +450,16 @@ def attach(app: Dash, brain) -> None:
         # group_fembs = groupby(offchan_to_hw, femb_id_from_off)
         # fembs = {k: [int(x) for x in d] for k,d in group_fembs}
         femb_to_chans = {k: [int(x) for x in d] for k,d in groupby(offchan_to_hw, femb_id_from_off)}
-        df_sub = df_a.copy()
-        df_sub = df_sub-df_sub.mean()
-        for p in planes:
-            for f in femb_to_chans:
-                chans = list(set(planes[p]) & set(femb_to_chans[f]))
-                df_sub[chans] = df_sub[chans].sub(df_sub[chans].mean(axis=1), axis=0)
+        df_a_cnr = df_a.copy()
+        df_a_cnr = df_a_cnr-df_a_cnr.mean()
+        for p, p_chans in planes_a.items():
+            for f,f_chans in femb_to_chans.items():
+                chans = list(set(p_chans) & set(f_chans))
+                df_a_cnr[chans] = df_a_cnr[chans].sub(df_a_cnr[chans].mean(axis=1), axis=0)
 
         fzmin, fzmax = ab_diff_range
         if 'Z' in adcmap_selection_a_filt:
-            fig = px.imshow(df_sub[planes[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -452,7 +471,7 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'V' in adcmap_selection_a_filt:
-            fig = px.imshow(df_sub[planes[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -464,7 +483,7 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'U' in adcmap_selection_a_filt:
-            fig = px.imshow(df_sub[planes[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -478,26 +497,10 @@ def attach(app: Dash, brain) -> None:
         return [
                 html.Div(
                     children=[
-                        html.Div(
-                            children=[
-                                html.H4(f"Trigger Record A"),
-                                html.H2(f"Run: {info_a['run_number']} Trigger: {info_a['trigger_number']}"),
-                                html.H5(f"{dt_a}"),
-                                html.H6(f"{raw_data_file_a}"),
-                                ], 
-                            style={'display': 'inline-block', 'width': '50%'}
-                        ),
-                        html.Div(
-                            children=[
-                                html.H4(f"Trigger Record B"),
-                                html.H2(f"Run: {info_b['run_number']} Trigger: {info_b['trigger_number']}"),
-                                html.H5(f"{dt_b}"),
-                                html.H6(f"{raw_data_file_b}"),
-                            ],
-                            style={'display': 'inline-block', 'width': '50%'}
-                        ),
+                        generate_tr_card("A", info_a['run_number'], info_a['trigger_number'], dt_a, raw_data_file_a),
+                        generate_tr_card("B", info_b['run_number'], info_b['trigger_number'], dt_b, raw_data_file_b),
                     ]
-                ),
+                )
                 ] + children
 
         

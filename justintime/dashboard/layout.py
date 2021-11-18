@@ -10,6 +10,18 @@ import pathlib
 from os.path import splitext
 
 
+def generate_tr_card(id: str, run: int, tr_num: int, date: str, filename: str):
+    return html.Div(
+        id=f"tr_card_{id}",
+        children=[
+            html.H4(f"Trigger Record {id}"),
+            html.H2(f"Run: {run} Trigger: {tr_num}"),
+            html.H5(f"{date}"),
+            html.H6(f"{filename}"),
+            ], 
+        style={'display': 'inline-block', 'width': '50%'}
+    )
+
 def description_card():
     """
 
