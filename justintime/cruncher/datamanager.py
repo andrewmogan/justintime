@@ -26,13 +26,13 @@ class RawDataManager:
     match_exprs = ['*.hdf5', '*.hdf5.copied']
     max_cache_size = 100
 
-    def __init__(self, data_path: str) -> None:
+    def __init__(self, data_path: str, ch_map_id: str = 'VDColdboxChannelMap') -> None:
 
         if not os.path.isdir(data_path):
             raise ValueError(f"Directory {data_path} does not exist" )
 
         self.data_path = data_path
-        self.ch_map = detchannelmaps.make_map('VDColdboxChannelMap')
+        self.ch_map = detchannelmaps.make_map(ch_map_id)
         self.trig_rec_hdr_regex = re.compile(r"\/\/TriggerRecord(\d{5})\/TriggerRecordHeader")
         self.cache = collections.OrderedDict()
     
@@ -118,7 +118,7 @@ class RawDataManager:
                 ts[i] = wf.get_timestamp()
                 adcs[i] = [wf.get_channel(c) for c in range(256)]
             logging.debug(f"Unpacking {d} completed")
-            
+
             df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(256)]))
             df = df.set_index('ts')
 

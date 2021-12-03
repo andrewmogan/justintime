@@ -99,7 +99,7 @@ def attach(app: Dash, brain) -> None:
 
         df_fft = df_sums.apply(np.fft.fft)
         df_fft2 = np.abs(df_fft) ** 2
-        freq = np.fft.fftfreq(8192, 0.5e-6)
+        freq = np.fft.fftfreq(df_sums.index.size, 0.5e-6)
         df_fft2['Freq'] = freq
         df_fft2 = df_fft2[df_fft2['Freq']>0]
         df_fft2 = df_fft2.set_index('Freq')
@@ -151,16 +151,30 @@ def attach(app: Dash, brain) -> None:
             raise PreventUpdate
         # #----
 
-        group_planes = groupby(range(0,3200), lambda ch: brain.ch_map.get_plane_from_offline_channel(int(ch)))
-        planes = {k: [x for x in d if x] for k,d in group_planes}
-        rich.print(planes)
 
+        # Load records
         info_a, df_a = brain.load_trigger_record(raw_data_file_a, int(trig_rec_num_a))
         # Timestamp information
         ts_a = info_a['trigger_timestamp']*20/1000000000
         dt_a = datetime.datetime.fromtimestamp(ts_a).strftime('%c')
+
+        # #----
+        info_b, df_b = brain.load_trigger_record(raw_data_file_b, int(trig_rec_num_b))
+        # Timestamp information
+        ts_b = info_b['trigger_timestamp']*20/1000000000
+        dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
+
+
+        channels = list(set(df_a.columns) | set(df_b.columns))
+
+
+        group_planes = groupby(channels, lambda ch: brain.ch_map.get_plane_from_offline_channel(int(ch)))
+        planes = {k: [x for x in d if x] for k,d in group_planes}
+        rich.print(planes)
+
         # Splitting by plane
         planes_a = {k:list(set(v) & set(df_a.columns)) for k,v in planes.items()}
+        rich.print(planes_a)
         df_aU = df_a[planes_a[0]]
         df_aV = df_a[planes_a[1]]
         df_aZ = df_a[planes_a[2]]
@@ -171,13 +185,9 @@ def attach(app: Dash, brain) -> None:
 
         logging.debug(f"Trigger record {trig_rec_num_a} from {raw_data_file_a} loaded")
 
-        # #----
-        info_b, df_b = brain.load_trigger_record(raw_data_file_b, int(trig_rec_num_b))
-        # Timestamp information
-        ts_b = info_b['trigger_timestamp']*20/1000000000
-        dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
-        planes_b = {k:list(set(v) & set(df_b.columns)) for k,v in planes.items()}
+
         # Splitting by plane
+        planes_b = {k:list(set(v) & set(df_b.columns)) for k,v in planes.items()}
         df_bU = df_b[planes_b[0]]
         df_bV = df_b[planes_b[1]]
         df_bZ = df_b[planes_b[2]]
@@ -459,7 +469,7 @@ def attach(app: Dash, brain) -> None:
 
         fzmin, fzmax = ab_diff_range
         if 'Z' in adcmap_selection_a_filt:
-            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -471,7 +481,7 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'V' in adcmap_selection_a_filt:
-            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -483,7 +493,7 @@ def attach(app: Dash, brain) -> None:
             ]
 
         if 'U' in adcmap_selection_a_filt:
-            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (filtered - X) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
