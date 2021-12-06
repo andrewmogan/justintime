@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 import collections
 import rich
+from itertools import groupby
 
 """
 RawDataManager is responsible of raw data information management: discovery, loading, and reference runs handling
@@ -32,10 +33,41 @@ class RawDataManager:
             raise ValueError(f"Directory {data_path} does not exist" )
 
         self.data_path = data_path
+        self.ch_map_name = 'VDColdboxChannelMap'
         self.ch_map = detchannelmaps.make_map(ch_map_id)
+        self.offch_to_hw_map = self._init_o2h_map()
+        self.femb_to_offch = {k: [int(x) for x in d] for k,d in groupby(self.offch_to_hw_map, self.femb_id_from_offch)}
+
         self.trig_rec_hdr_regex = re.compile(r"\/\/TriggerRecord(\d{5})\/TriggerRecordHeader")
         self.cache = collections.OrderedDict()
     
+
+
+    def _init_o2h_map(self):
+        if self.ch_map_name == 'VDColdboxChannelMap':
+            crate_no = 4
+            slots = range(4)
+            fibres = range(1,3)
+            chans = range(256)
+        else:
+            return {}
+
+        o2h_map = {}
+        for slot_no in slots:
+            for fiber_no in fibres:
+                for ch_no in chans:
+                    off_ch = self.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, ch_no)
+                    if off_ch == 4294967295:
+                        continue
+                    o2h_map[off_ch] = (crate_no, slot_no, fiber_no, ch_no)
+
+        return o2h_map
+
+    def femb_id_from_offch(self, off_ch):
+        # off_ch_str = str(off_ch)
+        crate, slot, link, ch = self.offch_to_hw_map[off_ch]
+        return 4*slot+2*(link-1)+ch//128 
+
 
     def list_files(self) -> list:
         files = []

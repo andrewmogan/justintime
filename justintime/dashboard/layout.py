@@ -82,11 +82,12 @@ def generate_control_card(brain):
                 options=[
                     {'label': 'Mean & STD', 'value': 'Mean_STD'},
                     {'label': 'Fourier Transform', 'value': 'FFT'},
+                    {'label': 'Fourier Transform Phase (22 kHz)', 'value': 'FFT_phase'},
                 ],
                 value=['Mean_STD', 'FFT']
             ),
             html.Br(),
-            html.P("ADC Maps"),
+            html.P("Trigger Record Display"),
             html.Div(
                 'TR A planes :',
                 style={'display': 'inline-block'}
@@ -151,9 +152,9 @@ def generate_control_card(brain):
                 style={'display': 'inline-block'},
             ),
             html.Br(),
-            html.P("color bar range"),
+            html.P("Color range"),
             dcc.RangeSlider(
-                id='ab-diff-range-slider',
+                id='tr-color-range-slider',
                 min=-2048,
                 max=2048,
                 step=64,

@@ -19,11 +19,13 @@ import rich
 
 from . layout import generate_tr_card
 
+from ..cruncher import signal
 
 
 
 
-def attach(app: Dash, brain) -> None:
+
+def attach(app: Dash, engine) -> None:
 
     @app.callback(
         Output('raw-data-file-select-A', 'options'),
@@ -31,9 +33,9 @@ def attach(app: Dash, brain) -> None:
         Input('refresh_files', 'n_clicks')      
         )
     def update_file_list(pathname):
-        fl = sorted(brain.list_files(), reverse=True)
+        fl = sorted(engine.list_files(), reverse=True)
         logging.debug(f"Updatd file list: {fl}")
-        opts = [{'label': f, 'value':f} for f in sorted(brain.list_files(), reverse=True)]
+        opts = [{'label': f, 'value':f} for f in sorted(engine.list_files(), reverse=True)]
         return (
             opts,
             opts
@@ -49,7 +51,7 @@ def attach(app: Dash, brain) -> None:
 
         if not raw_data_file:
             return []
-        tr_nums = [{'label':str(n), 'value':str(n)} for n in brain.get_trigger_record_list(raw_data_file)]
+        tr_nums = [{'label':str(n), 'value':str(n)} for n in engine.get_trigger_record_list(raw_data_file)]
         logging.debug(f'Trigger nums: {tr_nums}')
         return tr_nums
 
@@ -63,57 +65,70 @@ def attach(app: Dash, brain) -> None:
 
         if not raw_data_file:
             return []
-        tr_nums = [{'label':str(n), 'value':str(n)} for n in brain.get_trigger_record_list(raw_data_file)]
+        tr_nums = [{'label':str(n), 'value':str(n)} for n in engine.get_trigger_record_list(raw_data_file)]
         logging.debug(f'Trigger nums: {tr_nums}')
         return tr_nums
 
 
-    def calc_mean_std_by_plane(df, planes):
-        df_std = df.std()
-        df_mean = df.mean()
-        logging.debug(f"Mean and standard deviation calculated")
+    # def calc_mean_std_by_plane(df, planes):
+    #     df_std = df.std()
+    #     df_mean = df.mean()
+    #     logging.debug(f"Mean and standard deviation calculated")
 
-        p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
-        df_p0_mean = df_mean[p[0]]
-        df_p1_mean = df_mean[p[1]]
-        df_p2_mean = df_mean[p[2]]
+    #     p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
+    #     df_p0_mean = df_mean[p[0]]
+    #     df_p1_mean = df_mean[p[1]]
+    #     df_p2_mean = df_mean[p[2]]
 
-        df_p0_std = df_std[p[0]]
-        df_p1_std = df_std[p[1]]
-        df_p2_std = df_std[p[2]]
+    #     df_p0_std = df_std[p[0]]
+    #     df_p1_std = df_std[p[1]]
+    #     df_p2_std = df_std[p[2]]
 
-        return (df_std, df_mean, df_p0_mean, df_p1_mean, df_p2_mean, df_p0_std, df_p1_std, df_p2_std)
+    #     return (df_std, df_mean, df_p0_mean, df_p1_mean, df_p2_mean, df_p0_std, df_p1_std, df_p2_std)
+   
+
+    # def calc_fft(df):
+    #     df_fft = df.apply(np.fft.fft)
+    #     df_fft_sq = np.abs(df_fft) ** 2
+    #     freq = np.fft.fftfreq(df.index.size, 0.5e-6)
+    #     df_fft['Freq'] = freq
+    #     df_fft_sq['Freq'] = freq
+    #     # Cleanup fft2 for plotting
+    #     df_fft_sq = df_fft_sq[df_fft_sq['Freq']>0]
+    #     df_fft_sq = df_fft_sq.set_index('Freq')
+    #     return df_fft, df_fft_sq
 
 
-    def calc_fft(df, planes):
-        p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
+    # def calc_fft_sum_by_plane(df, planes):
+    #     p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
 
-        df_sum_U = df[p[0]].sum(axis=1).to_frame()
-        df_sum_U = df_sum_U.rename(columns= {0: 'U-plane'})
-        df_sum_V = df[p[1]].sum(axis=1).to_frame()
-        df_sum_V = df_sum_V.rename(columns= {0: 'V-plane'})
-        df_sum_Z = df[p[2]].sum(axis=1).to_frame()
-        df_sum_Z = df_sum_Z.rename(columns= {0: 'Z-plane'})
-        df_sums = pd.concat([df_sum_U, df_sum_V, df_sum_Z], axis=1)
+    #     df_sum_U = df[p[0]].sum(axis=1).to_frame()
+    #     df_sum_U = df_sum_U.rename(columns= {0: 'U-plane'})
+    #     df_sum_V = df[p[1]].sum(axis=1).to_frame()
+    #     df_sum_V = df_sum_V.rename(columns= {0: 'V-plane'})
+    #     df_sum_Z = df[p[2]].sum(axis=1).to_frame()
+    #     df_sum_Z = df_sum_Z.rename(columns= {0: 'Z-plane'})
+    #     df_sums = pd.concat([df_sum_U, df_sum_V, df_sum_Z], axis=1)
 
 
-        df_fft = df_sums.apply(np.fft.fft)
-        df_fft2 = np.abs(df_fft) ** 2
-        freq = np.fft.fftfreq(df_sums.index.size, 0.5e-6)
-        df_fft2['Freq'] = freq
-        df_fft2 = df_fft2[df_fft2['Freq']>0]
-        df_fft2 = df_fft2.set_index('Freq')
+    #     df_fft = df_sums.apply(np.fft.fft)
+    #     df_fft2 = np.abs(df_fft) ** 2
+    #     freq = np.fft.fftfreq(df_sums.index.size, 0.5e-6)
+    #     df_fft2['Freq'] = freq
+    #     df_fft2 = df_fft2[df_fft2['Freq']>0]
+    #     df_fft2 = df_fft2.set_index('Freq')
 
-        return df_fft2.sort_index()
+    #     return df_fft2.sort_index()
 
-    def calc_diffs(df_a, df_b):
 
-        # value_offset=4096
-        dt_a_rst = df_a.reset_index().drop('ts', axis=1)
-        dt_b_rst = df_b.reset_index().drop('ts', axis=1)
-        dt_ab_diff = (dt_a_rst.astype('int')-dt_b_rst.astype('int'))
+    # def calc_diffs(df_a, df_b):
 
-        return dt_ab_diff
+    #     # value_offset=4096
+    #     dt_a_rst = df_a.reset_index().drop('ts', axis=1)
+    #     dt_b_rst = df_b.reset_index().drop('ts', axis=1)
+    #     dt_ab_diff = (dt_a_rst.astype('int')-dt_b_rst.astype('int'))
+
+    #     return dt_ab_diff
 
     @app.callback(
         Output('mean_std_by_plane_card', 'children'),
@@ -127,7 +142,7 @@ def attach(app: Dash, brain) -> None:
         State('adcmap-selection-b', 'value'),
         State('adcmap-selection-ab-diff', 'value'),
         State('adcmap-selection-a-cnr', 'value'),
-        State('ab-diff-range-slider', 'value'),
+        State('tr-color-range-slider', 'value'),
         )
     def update_plots(
         n_clicks,
@@ -139,8 +154,8 @@ def attach(app: Dash, brain) -> None:
         adcmap_selection_a,
         adcmap_selection_b,
         adcmap_selection_ab_diff,
-        adcmap_selection_a_filt,
-        ab_diff_range
+        adcmap_selection_a_cnr,
+        tr_color_range
         ):
         # ctx = dash.callback_context
 
@@ -153,13 +168,13 @@ def attach(app: Dash, brain) -> None:
 
 
         # Load records
-        info_a, df_a = brain.load_trigger_record(raw_data_file_a, int(trig_rec_num_a))
+        info_a, df_a = engine.load_trigger_record(raw_data_file_a, int(trig_rec_num_a))
         # Timestamp information
         ts_a = info_a['trigger_timestamp']*20/1000000000
         dt_a = datetime.datetime.fromtimestamp(ts_a).strftime('%c')
 
         # #----
-        info_b, df_b = brain.load_trigger_record(raw_data_file_b, int(trig_rec_num_b))
+        info_b, df_b = engine.load_trigger_record(raw_data_file_b, int(trig_rec_num_b))
         # Timestamp information
         ts_b = info_b['trigger_timestamp']*20/1000000000
         dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
@@ -167,8 +182,7 @@ def attach(app: Dash, brain) -> None:
 
         channels = list(set(df_a.columns) | set(df_b.columns))
 
-
-        group_planes = groupby(channels, lambda ch: brain.ch_map.get_plane_from_offline_channel(int(ch)))
+        group_planes = groupby(channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
         planes = {k: [x for x in d if x] for k,d in group_planes}
         rich.print(planes)
 
@@ -301,8 +315,8 @@ def attach(app: Dash, brain) -> None:
 
         if 'FFT' in plot_selection:
 
-            df_a_fft2 = calc_fft(df_a, planes)
-            df_b_fft2 = calc_fft(df_b, planes)
+            df_a_fft2 = signal.calc_fft_sum_by_plane(df_a, planes)
+            df_b_fft2 = signal.calc_fft_sum_by_plane(df_b, planes)
 
             df_U_plane = pd.concat([df_a_fft2['U-plane'], df_b_fft2['U-plane']], axis=1, keys=["A", "B"])
             df_V_plane = pd.concat([df_a_fft2['V-plane'], df_b_fft2['V-plane']], axis=1, keys=["A", "B"])
@@ -321,8 +335,44 @@ def attach(app: Dash, brain) -> None:
                 html.Hr(),
                 dcc.Graph(figure=px.line(df_Z_plane, log_y=True)),
             ]
-        #----
 
+        if 'FFT_phase' in plot_selection:
+
+            def find_plane(offch):
+                m={0:'U', 1:'V', 2:'Z'}
+                p = engine.ch_map.get_plane_from_offline_channel(offch)
+                if p in m:
+                    return m[p]
+                else:
+                    return 'D'
+
+            df_a_fft = signal.calc_fft(df_a)
+            df_a_phase = signal.calc_fft_phase(df_a_fft, 21000, 24000)
+
+            logging.debug(f"FFT phase calculated")
+
+            df_a_phase['femb'] = df_a_phase.index.map(engine.femb_id_from_offch)
+            df_a_phase['plane'] = df_a_phase.index.map(find_plane)
+            logging.debug(f"FFT phase - femb and plane added")
+
+
+            fig = px.scatter(df_a_phase, y='phase', color=df_a_phase['femb'].astype(str), labels={'color':'FEMB ID'}, facet_col='plane', facet_col_wrap=2, facet_col_spacing=0.03, facet_row_spacing=0.07, title=f"A: Run {info_a['run_number']}, {info_a['trigger_number']}")
+
+            fig.update_xaxes(matches=None)
+            fig.update_yaxes(matches=None)
+            fig.update_layout(height=900)
+            logging.debug(f"FFT phase plots created")
+
+
+            children += [
+                html.B("Noise phase by FEMB"),
+                html.Hr(),
+                dcc.Graph(figure=fig),
+            ]
+
+
+        #-------------
+        # Trigger Record Displays
         fig_w, fig_h = 1500, 1000
         # Waveforms A
         if 'Z' in adcmap_selection_a:
@@ -332,7 +382,7 @@ def attach(app: Dash, brain) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("Heat map Z-plane"),
+                html.B("ADC Counts: Z-plane"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
@@ -344,7 +394,7 @@ def attach(app: Dash, brain) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("Heat map V-plane"),
+                html.B("ADC Counts: V-plane"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
@@ -356,7 +406,7 @@ def attach(app: Dash, brain) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("Heat map U-plane"),
+                html.B("ADC Counts: U-plane"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
@@ -370,7 +420,7 @@ def attach(app: Dash, brain) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("Heat map Z-plane"),
+                html.B("ADC Counts: Z-plane"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
@@ -382,7 +432,7 @@ def attach(app: Dash, brain) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("Heat map V-plane"),
+                html.B("ADC Counts: V-plane"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
@@ -394,14 +444,14 @@ def attach(app: Dash, brain) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("Heat map U-plane"),
+                html.B("ADC Counts: U-plane"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
 
-        dt_ab_U_diff = calc_diffs(df_aU, df_bU)
-        dt_ab_V_diff = calc_diffs(df_aV, df_bV)
-        dt_ab_Z_diff = calc_diffs(df_aZ, df_bZ)
+        dt_ab_U_diff = signal.calc_diffs(df_aU, df_bU)
+        dt_ab_V_diff = signal.calc_diffs(df_aV, df_bV)
+        dt_ab_Z_diff = signal.calc_diffs(df_aZ, df_bZ)
 
         if 'Z' in adcmap_selection_ab_diff:
             fig = px.imshow(dt_ab_Z_diff, title=f"Z-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
@@ -410,7 +460,7 @@ def attach(app: Dash, brain) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("Heat map Z-plane A-B"),
+                html.B("ADC Counts: Z-plane A-B"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
@@ -422,7 +472,7 @@ def attach(app: Dash, brain) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("Heat map V-plane A-B"),
+                html.B("ADC Counts: V-plane A-B"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
@@ -434,72 +484,72 @@ def attach(app: Dash, brain) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("Heat map U-plane A-B"),
+                html.B("ADC Counts: U-plane A-B"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
 
-        # 
-        crate_no = 4 # Randomish number
-        offchan_to_hw = {}
-        for slot_no in range(4):
-            for fiber_no in range(1,3):
-                for c in range(256):
-                    off_ch = brain.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, c)
-                    # offchan_to_hw[off_ch] = (crate_no, slot_no, fiber_no, c)
-                    if off_ch == 4294967295:
-                        continue
-                    offchan_to_hw[off_ch] = (crate_no, slot_no, fiber_no, c)
+        # # 
+        # crate_no = 4 # Randomish number
+        # offchan_to_hw = {}
+        # for slot_no in range(4):
+        #     for fiber_no in range(1,3):
+        #         for c in range(256):
+        #             off_ch = engine.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, c)
+        #             # offchan_to_hw[off_ch] = (crate_no, slot_no, fiber_no, c)
+        #             if off_ch == 4294967295:
+        #                 continue
+        #             offchan_to_hw[off_ch] = (crate_no, slot_no, fiber_no, c)
 
-        def femb_id_from_off(off_ch):
-            # off_ch_str = str(off_ch)
-            crate, slot, link, ch = offchan_to_hw[off_ch]
-            # return off_femb_map[ch_str][:3]+[off_femb_map[ch_str][3]//128]
-            return 4*slot+2*(link-1)+ch//128 
+        # def femb_id_from_off(off_ch):
+        #     # off_ch_str = str(off_ch)
+        #     crate, slot, link, ch = offchan_to_hw[off_ch]
+        #     # return off_femb_map[ch_str][:3]+[off_femb_map[ch_str][3]//128]
+        #     return 4*slot+2*(link-1)+ch//128 
 
-        # group_fembs = groupby(offchan_to_hw, femb_id_from_off)
-        # fembs = {k: [int(x) for x in d] for k,d in group_fembs}
-        femb_to_chans = {k: [int(x) for x in d] for k,d in groupby(offchan_to_hw, femb_id_from_off)}
+        # # group_fembs = groupby(offchan_to_hw, femb_id_from_off)
+        # # fembs = {k: [int(x) for x in d] for k,d in group_fembs}
+        # femb_to_chans = {k: [int(x) for x in d] for k,d in groupby(offchan_to_hw, femb_id_from_off)}
         df_a_cnr = df_a.copy()
         df_a_cnr = df_a_cnr-df_a_cnr.mean()
         for p, p_chans in planes_a.items():
-            for f,f_chans in femb_to_chans.items():
+            for f,f_chans in engine.femb_to_offch.items():
                 chans = list(set(p_chans) & set(f_chans))
                 df_a_cnr[chans] = df_a_cnr[chans].sub(df_a_cnr[chans].mean(axis=1), axis=0)
 
-        fzmin, fzmax = ab_diff_range
-        if 'Z' in adcmap_selection_a_filt:
-            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+        fzmin, fzmax = tr_color_range
+        if 'Z' in adcmap_selection_a_cnr:
+            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
             )
             children += [
-                html.B("Heat map Z-plane A-B"),
+                html.B("ADC Counts: Z-plane A-B"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
 
-        if 'V' in adcmap_selection_a_filt:
-            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+        if 'V' in adcmap_selection_a_cnr:
+            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
             )
             children += [
-                html.B("Heat map V-plane A-B"),
+                html.B("ADC Counts: V-plane A-B"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
 
-        if 'U' in adcmap_selection_a_filt:
-            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+        if 'U' in adcmap_selection_a_cnr:
+            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
             )
             children += [
-                html.B("Heat map U-plane A-B"),
+                html.B("ADC Counts: U-plane A-B"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
                 ]
