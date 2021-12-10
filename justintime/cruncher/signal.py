@@ -102,20 +102,6 @@ def calc_diffs(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.DataFrame:
     return dt_ab_diff
 
 def calc_fft_phase(df_fft: pd.DataFrame, fmin: float=0., fmax: float=2e6) -> pd.DataFrame:
-    """Calculates the average fft phase in a frequency range
+    df_phase = df_fft[(df_fft['Freq'] > fmin) & (df_fft['Freq'] < fmax)].drop('Freq', axis=1).apply(np.angle).mean().to_frame('phase')
     
-    Args:
-        df_fft (pd.DataFrame): Description
-        fmin (float, optional): min frequency
-        fmax (float, optional): max frequency
-    
-    Returns:
-        pd.DataFrame: Description
-    """
-    ch_list = list(df_fft.columns)
-    ch_list.remove('Freq')
-    df_fft_phase = df_fft.copy()
-    df_fft_phase[ch_list] = df_fft[ch_list].apply(np.angle)
-    df_mean_phase = df_fft_phase[(df_fft_phase['Freq'] > fmin) & (df_fft_phase['Freq'] < fmax)].mean().drop('Freq').to_frame('phase')    
-    
-    return df_mean_phase
+    return df_phase

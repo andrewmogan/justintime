@@ -35,7 +35,7 @@ def attach(app: Dash, engine) -> None:
     def update_file_list(pathname):
         fl = sorted(engine.list_files(), reverse=True)
         logging.debug(f"Updatd file list: {fl}")
-        opts = [{'label': f, 'value':f} for f in sorted(engine.list_files(), reverse=True)]
+        opts = [{'label': f, 'value':f} for f in engine.list_files()]
         return (
             opts,
             opts
@@ -179,16 +179,13 @@ def attach(app: Dash, engine) -> None:
         ts_b = info_b['trigger_timestamp']*20/1000000000
         dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
 
-
         channels = list(set(df_a.columns) | set(df_b.columns))
 
         group_planes = groupby(channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
         planes = {k: [x for x in d if x] for k,d in group_planes}
-        rich.print(planes)
 
         # Splitting by plane
-        planes_a = {k:list(set(v) & set(df_a.columns)) for k,v in planes.items()}
-        rich.print(planes_a)
+        planes_a = {k:sorted(set(v) & set(df_a.columns)) for k,v in planes.items()}
         df_aU = df_a[planes_a[0]]
         df_aV = df_a[planes_a[1]]
         df_aZ = df_a[planes_a[2]]
@@ -346,30 +343,79 @@ def attach(app: Dash, engine) -> None:
                 else:
                     return 'D'
 
+            logging.debug(f"Calculating FFT")
+
             df_a_fft = signal.calc_fft(df_a)
-            df_a_phase = signal.calc_fft_phase(df_a_fft, 21000, 24000)
+
+            logging.debug(f"Extracting FFT phase (22kHz) peak ")
+            fmin = 21000
+            fmax = 24000
+            df_a_phase_22 = signal.calc_fft_phase(df_a_fft, fmin, fmax)
 
             logging.debug(f"FFT phase calculated")
 
-            df_a_phase['femb'] = df_a_phase.index.map(engine.femb_id_from_offch)
-            df_a_phase['plane'] = df_a_phase.index.map(find_plane)
+            df_a_phase_22['femb'] = df_a_phase_22.index.map(engine.femb_id_from_offch)
+            df_a_phase_22['plane'] = df_a_phase_22.index.map(find_plane)
             logging.debug(f"FFT phase - femb and plane added")
 
 
-            fig = px.scatter(df_a_phase, y='phase', color=df_a_phase['femb'].astype(str), labels={'color':'FEMB ID'}, facet_col='plane', facet_col_wrap=2, facet_col_spacing=0.03, facet_row_spacing=0.07, title=f"A: Run {info_a['run_number']}, {info_a['trigger_number']}")
+            fig_22 = px.scatter(df_a_phase_22, y='phase', color=df_a_phase_22['femb'].astype(str), labels={'color':'FEMB ID'}, facet_col='plane', facet_col_wrap=2, facet_col_spacing=0.03, facet_row_spacing=0.07, title=f"Trigger record A: Run {info_a['run_number']}, {info_a['trigger_number']} 22kHz")
 
-            fig.update_xaxes(matches=None)
-            fig.update_yaxes(matches=None)
-            fig.update_layout(height=900)
+            fig_22.update_xaxes(matches=None, showticklabels=True)
+            fig_22.update_yaxes(matches=None, showticklabels=True)
+            fig_22.update_layout(height=900)
+            logging.debug(f"FFT phase plots created")
+
+
+            logging.debug(f"Extracting FFT phase (210kHz) peak ")
+            fmin = 129000
+            fmax = 220000
+            df_a_phase_210 = signal.calc_fft_phase(df_a_fft, fmin, fmax)
+
+            logging.debug(f"FFT phase calculated")
+
+            df_a_phase_210['femb'] = df_a_phase_210.index.map(engine.femb_id_from_offch)
+            df_a_phase_210['plane'] = df_a_phase_210.index.map(find_plane)
+            logging.debug(f"FFT phase - femb and plane added")
+
+
+            fig_210 = px.scatter(df_a_phase_210, y='phase', color=df_a_phase_210['femb'].astype(str), labels={'color':'FEMB ID'}, facet_col='plane', facet_col_wrap=2, facet_col_spacing=0.03, facet_row_spacing=0.07, title=f"Trigger record A: Run {info_a['run_number']}, {info_a['trigger_number']} 21kHz")
+
+            fig_210.update_xaxes(matches=None, showticklabels=True)
+            fig_210.update_yaxes(matches=None, showticklabels=True)
+            fig_210.update_layout(height=900)
+            logging.debug(f"FFT phase plots created")
+
+
+            logging.debug(f"Extracting FFT phase (430kHz) peak ")
+            fmin=405000
+            fmax=435000
+            df_a_phase_430 = signal.calc_fft_phase(df_a_fft, fmin, fmax)
+
+            logging.debug(f"FFT phase calculated")
+
+            df_a_phase_430['femb'] = df_a_phase_430.index.map(engine.femb_id_from_offch)
+            df_a_phase_430['plane'] = df_a_phase_430.index.map(find_plane)
+            logging.debug(f"FFT phase - femb and plane added")
+
+
+            fig_430 = px.scatter(df_a_phase_430, y='phase', color=df_a_phase_430['femb'].astype(str), labels={'color':'FEMB ID'}, facet_col='plane', facet_col_wrap=2, facet_col_spacing=0.03, facet_row_spacing=0.07, title=f"Trigger record A: Run {info_a['run_number']}, {info_a['trigger_number']} 430kHz")
+
+            fig_430.update_xaxes(matches=None, showticklabels=True)
+            fig_430.update_yaxes(matches=None, showticklabels=True)
+            fig_430.update_layout(height=900)
             logging.debug(f"FFT phase plots created")
 
 
             children += [
-                html.B("Noise phase by FEMB"),
+                html.B("Noise phase by FEMB (430 Khz) peak"),
                 html.Hr(),
-                dcc.Graph(figure=fig),
+                dcc.Graph(figure=fig_22),
+                html.Hr(),
+                dcc.Graph(figure=fig_210),
+                html.Hr(),
+                dcc.Graph(figure=fig_430),
             ]
-
 
         #-------------
         # Trigger Record Displays
@@ -454,7 +500,7 @@ def attach(app: Dash, engine) -> None:
         dt_ab_Z_diff = signal.calc_diffs(df_aZ, df_bZ)
 
         if 'Z' in adcmap_selection_ab_diff:
-            fig = px.imshow(dt_ab_Z_diff, title=f"Z-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(dt_ab_Z_diff, title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -525,7 +571,7 @@ def attach(app: Dash, engine) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("ADC Counts: Z-plane A-B"),
+                html.B("ADC Counts: Z-plane A (CNR)"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
@@ -537,7 +583,7 @@ def attach(app: Dash, engine) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("ADC Counts: V-plane A-B"),
+                html.B("ADC Counts: V-plane A (CNR)"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
             ]
@@ -549,7 +595,7 @@ def attach(app: Dash, engine) -> None:
                 height=fig_h,
             )
             children += [
-                html.B("ADC Counts: U-plane A-B"),
+                html.B("ADC Counts: U-plane A (CNR)"),
                 html.Hr(),
                 dcc.Graph(figure=fig),
                 ]

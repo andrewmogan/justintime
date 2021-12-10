@@ -66,14 +66,15 @@ class RawDataManager:
     def femb_id_from_offch(self, off_ch):
         # off_ch_str = str(off_ch)
         crate, slot, link, ch = self.offch_to_hw_map[off_ch]
-        return 4*slot+2*(link-1)+ch//128 
+        return (4*slot+2*(link-1)+ch//128)+1 
 
 
     def list_files(self) -> list:
         files = []
         for m in self.match_exprs:
             files += fnmatch.filter(next(walk(self.data_path), (None, None, []))[2], m)  # [] if no file
-        return files
+
+        return sorted(files, reverse=True, key=lambda f: os.path.getmtime(os.path.join(self.data_path, f)))
 
 
     def get_trigger_record_list(self, file_name: str) -> list:

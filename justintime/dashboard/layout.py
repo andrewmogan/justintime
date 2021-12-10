@@ -155,11 +155,11 @@ def generate_control_card(brain):
             html.P("Color range"),
             dcc.RangeSlider(
                 id='tr-color-range-slider',
-                min=-2048,
-                max=2048,
+                min=-1024,
+                max=1024,
                 step=64,
-                value=[-320, 192],
-                marks={ v:f"{v}" for v in range(-2048, 2049, 512) }
+                value=[-192, 192],
+                marks={ v:f"{v}" for v in range(-1024, 1025, 256) }
             ),
             html.Br(),
             html.Button('Refresh Files', id='refresh_files', n_clicks=0),
