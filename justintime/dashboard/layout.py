@@ -63,7 +63,11 @@ def generate_control_card(brain):
                 # multi=True,
             ),
             html.Br(),
-            html.P("Raw Data File B"),
+            dcc.Checklist(
+                id="add-second-graph-check",
+                options=[{'label': 'Raw Data File B', 'value': 'Y'}],
+                value=['Y']
+            ),
             dcc.Dropdown(
                 id="raw-data-file-select-B",
                 # multi=True,
