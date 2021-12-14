@@ -48,7 +48,7 @@ def attach(app: Dash, engine) -> None:
         Output("adcmap-selection-ab-diff",'options'),
         Input("add-second-graph-check", "value"))
     def enable_secondary_plots(check):
-        options=[
+         options=[
             {'label': 'Z', 'value': 'Z', 'disabled' : ("Y" not in check)},
             {'label': 'V', 'value': 'V', 'disabled' : ("Y" not in check)},
             {'label': 'U', 'value': 'U', 'disabled' : ("Y" not in check)},
@@ -242,27 +242,24 @@ def attach(app: Dash, engine) -> None:
                 go.Scattergl(x=df_aU_mean.index.astype(int), y=df_aU_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
                 row=1, col=1
             )
+            fig_mean.add_trace(
+                go.Scattergl(x=df_aV_mean.index.astype(int), y=df_aV_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                row=1, col=2
+            )
+            fig_mean.add_trace(
+                go.Scattergl(x=df_aZ_mean.index.astype(int), y=df_aZ_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                row=1, col=3
+            )
+
             if plot_two_plots:
                 fig_mean.add_trace(
                     go.Scattergl(x=df_bU_mean.index.astype(int), y=df_bU_mean, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                     row=1, col=1
                 )
-
-            fig_mean.add_trace(
-                go.Scattergl(x=df_aV_mean.index.astype(int), y=df_aV_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
-                row=1, col=2
-            )
-            if plot_two_plots:
                 fig_mean.add_trace(
                     go.Scattergl(x=df_bV_mean.index.astype(int), y=df_bV_mean, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                     row=1, col=2
                 )
-
-            fig_mean.add_trace(
-                go.Scattergl(x=df_aZ_mean.index.astype(int), y=df_aZ_mean, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
-                row=1, col=3
-            )
-            if plot_two_plots:
                 fig_mean.add_trace(
                     go.Scattergl(x=df_bZ_mean.index.astype(int), y=df_bZ_mean, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                     row=1, col=3
@@ -291,27 +288,24 @@ def attach(app: Dash, engine) -> None:
                 go.Scattergl(x=df_aU_std.index.astype(int), y=df_aU_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
                 row=1, col=1
             )
+            fig_std.add_trace(
+                go.Scattergl(x=df_aV_std.index.astype(int), y=df_aV_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                row=1, col=2
+            )
+            fig_std.add_trace(
+                go.Scattergl(x=df_aZ_std.index.astype(int), y=df_aZ_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
+                row=1, col=3
+            )
+
             if plot_two_plots:
                 fig_std.add_trace(
                     go.Scattergl(x=df_bU_std.index.astype(int), y=df_bU_std, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                     row=1, col=1
                 )
-
-            fig_std.add_trace(
-                go.Scattergl(x=df_aV_std.index.astype(int), y=df_aV_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
-                row=1, col=2
-            )
-            if plot_two_plots:
                 fig_std.add_trace(
                     go.Scattergl(x=df_bV_std.index.astype(int), y=df_bV_std, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                     row=1, col=2
                 )
-
-            fig_std.add_trace(
-                go.Scattergl(x=df_aZ_std.index.astype(int), y=df_aZ_std, mode='markers', name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"),
-                row=1, col=3
-            )
-            if plot_two_plots:
                 fig_std.add_trace(
                     go.Scattergl(x=df_bZ_std.index.astype(int), y=df_bZ_std, mode='markers', name=f"Run {info_b['run_number']}: {info_b['trigger_number']}"),
                     row=1, col=3
