@@ -65,7 +65,7 @@ def generate_control_card(brain):
             html.Br(),
             dcc.Checklist(
                 id="add-second-graph-check",
-                options=[{'label': 'Raw Data File B', 'value': 'Y'}],
+                options=[{'label': 'Raw Data File Reference', 'value': 'Y'}],
                 value=['Y']
             ),
             dcc.Dropdown(
@@ -74,7 +74,7 @@ def generate_control_card(brain):
                 options=[{'label': f, 'value':f} for f in sorted(brain.list_files(), reverse=True)]
             ),
             # html.Br(),
-            html.P("Trigger Record B"),
+            html.P("Trigger Record Reference"),
             dcc.Dropdown(
                 id="trigger-record-select-B",
                 # multi=True,
@@ -109,7 +109,7 @@ def generate_control_card(brain):
             ),
             html.Br(),
             html.Div(
-                'TR B planes : ',
+                'TR Reference (R) planes : ',
                 style={'display': 'inline-block'}
             ),
             dcc.Checklist(
@@ -125,7 +125,7 @@ def generate_control_card(brain):
             ),
             html.Br(),
             html.Div(
-                'TR (A-B) planes : ',
+                'TR (A-R) planes : ',
                 style={'display': 'inline-block'}
             ),
             dcc.Checklist(

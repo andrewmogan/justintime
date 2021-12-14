@@ -44,11 +44,18 @@ def attach(app: Dash, engine) -> None:
     @app.callback(
         Output("raw-data-file-select-B",'disabled'),
         Output("trigger-record-select-B",'disabled'),
+        Output("adcmap-selection-b",'options'),
+        Output("adcmap-selection-ab-diff",'options'),
         Input("add-second-graph-check", "value"))
     def enable_secondary_plots(check):
+        options=[
+            {'label': 'Z', 'value': 'Z', 'disabled' : ("Y" not in check)},
+            {'label': 'V', 'value': 'V', 'disabled' : ("Y" not in check)},
+            {'label': 'U', 'value': 'U', 'disabled' : ("Y" not in check)},
+        ]
         if "Y" in check:
-            return(False, False)
-        return(True, True)
+            return(False, False,options,options)
+        return(True, True, options, options)
 
 
     @app.callback(
