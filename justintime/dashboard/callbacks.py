@@ -70,66 +70,6 @@ def attach(app: Dash, engine) -> None:
         return tr_nums
 
 
-    # def calc_mean_std_by_plane(df, planes):
-    #     df_std = df.std()
-    #     df_mean = df.mean()
-    #     logging.debug(f"Mean and standard deviation calculated")
-
-    #     p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
-    #     df_p0_mean = df_mean[p[0]]
-    #     df_p1_mean = df_mean[p[1]]
-    #     df_p2_mean = df_mean[p[2]]
-
-    #     df_p0_std = df_std[p[0]]
-    #     df_p1_std = df_std[p[1]]
-    #     df_p2_std = df_std[p[2]]
-
-    #     return (df_std, df_mean, df_p0_mean, df_p1_mean, df_p2_mean, df_p0_std, df_p1_std, df_p2_std)
-   
-
-    # def calc_fft(df):
-    #     df_fft = df.apply(np.fft.fft)
-    #     df_fft_sq = np.abs(df_fft) ** 2
-    #     freq = np.fft.fftfreq(df.index.size, 0.5e-6)
-    #     df_fft['Freq'] = freq
-    #     df_fft_sq['Freq'] = freq
-    #     # Cleanup fft2 for plotting
-    #     df_fft_sq = df_fft_sq[df_fft_sq['Freq']>0]
-    #     df_fft_sq = df_fft_sq.set_index('Freq')
-    #     return df_fft, df_fft_sq
-
-
-    # def calc_fft_sum_by_plane(df, planes):
-    #     p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
-
-    #     df_sum_U = df[p[0]].sum(axis=1).to_frame()
-    #     df_sum_U = df_sum_U.rename(columns= {0: 'U-plane'})
-    #     df_sum_V = df[p[1]].sum(axis=1).to_frame()
-    #     df_sum_V = df_sum_V.rename(columns= {0: 'V-plane'})
-    #     df_sum_Z = df[p[2]].sum(axis=1).to_frame()
-    #     df_sum_Z = df_sum_Z.rename(columns= {0: 'Z-plane'})
-    #     df_sums = pd.concat([df_sum_U, df_sum_V, df_sum_Z], axis=1)
-
-
-    #     df_fft = df_sums.apply(np.fft.fft)
-    #     df_fft2 = np.abs(df_fft) ** 2
-    #     freq = np.fft.fftfreq(df_sums.index.size, 0.5e-6)
-    #     df_fft2['Freq'] = freq
-    #     df_fft2 = df_fft2[df_fft2['Freq']>0]
-    #     df_fft2 = df_fft2.set_index('Freq')
-
-    #     return df_fft2.sort_index()
-
-
-    # def calc_diffs(df_a, df_b):
-
-    #     # value_offset=4096
-    #     dt_a_rst = df_a.reset_index().drop('ts', axis=1)
-    #     dt_b_rst = df_b.reset_index().drop('ts', axis=1)
-    #     dt_ab_diff = (dt_a_rst.astype('int')-dt_b_rst.astype('int'))
-
-    #     return dt_ab_diff
-
     @app.callback(
         Output('plots_card', 'children'),
         Input('plot_button', 'n_clicks'),
@@ -172,14 +112,14 @@ def attach(app: Dash, engine) -> None:
         # Load records
         info_a, df_a = engine.load_trigger_record(raw_data_file_a, int(trig_rec_num_a))
         # Timestamp information
-        ts_a = info_a['trigger_timestamp']*20/1000000000
-        dt_a = datetime.datetime.fromtimestamp(ts_a).strftime('%c')
+        tr_ts_sec_a = info_a['trigger_timestamp']*20/1000000000
+        dt_a = datetime.datetime.fromtimestamp(tr_ts_sec_a).strftime('%c')
 
         # #----
         info_b, df_b = engine.load_trigger_record(raw_data_file_b, int(trig_rec_num_b))
         # Timestamp information
-        ts_b = info_b['trigger_timestamp']*20/1000000000
-        dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
+        tr_ts_sec_b = info_b['trigger_timestamp']*20/1000000000
+        dt_b = datetime.datetime.fromtimestamp(tr_ts_sec_b).strftime('%c')
 
         channels = list(set(df_a.columns) | set(df_b.columns))
 
@@ -543,7 +483,7 @@ def attach(app: Dash, engine) -> None:
         # Trigger Record Displays
         fig_w, fig_h = 1500, 1000
         fzmin, fzmax = tr_color_range
-        
+
         # Waveforms A
         if 'Z' in adcmap_selection_a_offset:
             fig = px.imshow(df_aZ-df_aZ.mean(), zmin=fzmin, zmax=fzmax, title=f"Z-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')

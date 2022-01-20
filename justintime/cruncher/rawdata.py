@@ -44,6 +44,7 @@ def read_trigger_record(file_path: str, tr_num: int, ch_map: detchannelmaps.TPCC
         'trigger_timestamp': trghdr.get_trigger_timestamp(),
     }
 
+    tr_ts = trghdr.get_trigger_timestamp()
     links = {}
     for d in frag_datasets:
         frag = dd.get_frag_ptr(d)
@@ -79,11 +80,11 @@ def read_trigger_record(file_path: str, tr_num: int, ch_map: detchannelmaps.TPCC
         #     # progress.update(task2, advance=1)
 
             wf = detdataformats.wib.WIBFrame(frag.get_data(i*detdataformats.wib.WIBFrame.sizeof())) 
-            ts[i] = wf.get_timestamp()
+            ts[i] = wf.get_timestamp()-tr_ts
             adcs[i] = [wf.get_channel(c) for c in range(256)]
         logging.debug(f"Unpacking {d} completed")
         links[d] = (ts, adcs)
-
+    
     return tr_info, links
 
 if __name__ == '__main__':
