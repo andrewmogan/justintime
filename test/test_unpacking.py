@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # DUNE DAQ includes
 import daqdataformats
 import detdataformats.wib
@@ -66,7 +68,9 @@ def read_trigger_record(file_path, tr_num):
         fiber_no = wh.fiber_no
 
         ts = np.zeros(n_frames, dtype='uint64')
-        adcs = np.zeros(n_frames, dtype=('uint16', 256))
+        adcs = np.zeros((n_frames,256), dtype='uint16')
+
+        # adcs = np.zeros(n_frames, dtype=('uint16', 256))
         off_chans = [ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, c) for c in range(256)]
 
         for i in range(n_frames):
@@ -74,9 +78,13 @@ def read_trigger_record(file_path, tr_num):
 
             wf = detdataformats.wib.WIBFrame(frag.get_data(i*detdataformats.wib.WIBFrame.sizeof())) 
             ts[i] = wf.get_timestamp()
-            adcs[i] = [wf.get_channel(c) for c in range(256)]
+            for c in range(256):
+                adcs[i, c] = wf.get_channel(c) 
+                # adcs[i, c] = 1 
+            # adcs[i] = [wf.get_channel(c) for c in range(256)]
         logging.debug(f"Unpacking {d} completed")
         links[d] = (ts, adcs)
+        # break
 
     return tr_info, links
 
@@ -98,3 +106,5 @@ if __name__ == '__main__':
     rich.print(tr_list)
     
     links = read_trigger_record(file_path, tr_list[0])
+    rich.print(links)
+

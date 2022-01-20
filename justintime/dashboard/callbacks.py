@@ -70,68 +70,8 @@ def attach(app: Dash, engine) -> None:
         return tr_nums
 
 
-    # def calc_mean_std_by_plane(df, planes):
-    #     df_std = df.std()
-    #     df_mean = df.mean()
-    #     logging.debug(f"Mean and standard deviation calculated")
-
-    #     p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
-    #     df_p0_mean = df_mean[p[0]]
-    #     df_p1_mean = df_mean[p[1]]
-    #     df_p2_mean = df_mean[p[2]]
-
-    #     df_p0_std = df_std[p[0]]
-    #     df_p1_std = df_std[p[1]]
-    #     df_p2_std = df_std[p[2]]
-
-    #     return (df_std, df_mean, df_p0_mean, df_p1_mean, df_p2_mean, df_p0_std, df_p1_std, df_p2_std)
-   
-
-    # def calc_fft(df):
-    #     df_fft = df.apply(np.fft.fft)
-    #     df_fft_sq = np.abs(df_fft) ** 2
-    #     freq = np.fft.fftfreq(df.index.size, 0.5e-6)
-    #     df_fft['Freq'] = freq
-    #     df_fft_sq['Freq'] = freq
-    #     # Cleanup fft2 for plotting
-    #     df_fft_sq = df_fft_sq[df_fft_sq['Freq']>0]
-    #     df_fft_sq = df_fft_sq.set_index('Freq')
-    #     return df_fft, df_fft_sq
-
-
-    # def calc_fft_sum_by_plane(df, planes):
-    #     p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
-
-    #     df_sum_U = df[p[0]].sum(axis=1).to_frame()
-    #     df_sum_U = df_sum_U.rename(columns= {0: 'U-plane'})
-    #     df_sum_V = df[p[1]].sum(axis=1).to_frame()
-    #     df_sum_V = df_sum_V.rename(columns= {0: 'V-plane'})
-    #     df_sum_Z = df[p[2]].sum(axis=1).to_frame()
-    #     df_sum_Z = df_sum_Z.rename(columns= {0: 'Z-plane'})
-    #     df_sums = pd.concat([df_sum_U, df_sum_V, df_sum_Z], axis=1)
-
-
-    #     df_fft = df_sums.apply(np.fft.fft)
-    #     df_fft2 = np.abs(df_fft) ** 2
-    #     freq = np.fft.fftfreq(df_sums.index.size, 0.5e-6)
-    #     df_fft2['Freq'] = freq
-    #     df_fft2 = df_fft2[df_fft2['Freq']>0]
-    #     df_fft2 = df_fft2.set_index('Freq')
-
-    #     return df_fft2.sort_index()
-
-
-    # def calc_diffs(df_a, df_b):
-
-    #     # value_offset=4096
-    #     dt_a_rst = df_a.reset_index().drop('ts', axis=1)
-    #     dt_b_rst = df_b.reset_index().drop('ts', axis=1)
-    #     dt_ab_diff = (dt_a_rst.astype('int')-dt_b_rst.astype('int'))
-
-    #     return dt_ab_diff
-
     @app.callback(
-        Output('mean_std_by_plane_card', 'children'),
+        Output('plots_card', 'children'),
         Input('plot_button', 'n_clicks'),
         State('raw-data-file-select-A', 'value'),
         State('trigger-record-select-A', 'value'),
@@ -141,6 +81,7 @@ def attach(app: Dash, engine) -> None:
         State('adcmap-selection-a', 'value'),
         State('adcmap-selection-b', 'value'),
         State('adcmap-selection-ab-diff', 'value'),
+        State('adcmap-selection-a-offset', 'value'),
         State('adcmap-selection-a-cnr', 'value'),
         State('tr-color-range-slider', 'value'),
         )
@@ -154,6 +95,7 @@ def attach(app: Dash, engine) -> None:
         adcmap_selection_a,
         adcmap_selection_b,
         adcmap_selection_ab_diff,
+        adcmap_selection_a_offset,
         adcmap_selection_a_cnr,
         tr_color_range
         ):
@@ -170,14 +112,14 @@ def attach(app: Dash, engine) -> None:
         # Load records
         info_a, df_a = engine.load_trigger_record(raw_data_file_a, int(trig_rec_num_a))
         # Timestamp information
-        ts_a = info_a['trigger_timestamp']*20/1000000000
-        dt_a = datetime.datetime.fromtimestamp(ts_a).strftime('%c')
+        tr_ts_sec_a = info_a['trigger_timestamp']*20/1000000000
+        dt_a = datetime.datetime.fromtimestamp(tr_ts_sec_a).strftime('%c')
 
         # #----
         info_b, df_b = engine.load_trigger_record(raw_data_file_b, int(trig_rec_num_b))
         # Timestamp information
-        ts_b = info_b['trigger_timestamp']*20/1000000000
-        dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
+        tr_ts_sec_b = info_b['trigger_timestamp']*20/1000000000
+        dt_b = datetime.datetime.fromtimestamp(tr_ts_sec_b).strftime('%c')
 
         channels = list(set(df_a.columns) | set(df_b.columns))
 
@@ -324,13 +266,13 @@ def attach(app: Dash, engine) -> None:
             children += [
                 html.B("FFT U-Plane"),
                 html.Hr(),
-                dcc.Graph(figure=px.line(df_U_plane, log_y=True)),
+                dcc.Graph(figure=px.line(df_U_plane, log_y=True, title=f"FFT U-plane, A vs B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}")),
                 html.B("FFT V-Plane"),
                 html.Hr(),
-                dcc.Graph(figure=px.line(df_V_plane, log_y=True)),
+                dcc.Graph(figure=px.line(df_V_plane, log_y=True, title=f"FFT V-plane, A vs B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}")),
                 html.B("FFT Z-Plane"),
                 html.Hr(),
-                dcc.Graph(figure=px.line(df_Z_plane, log_y=True)),
+                dcc.Graph(figure=px.line(df_Z_plane, log_y=True, title=f"FFT Z-plane, A vs B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}")),
             ]
 
         if 'FFT_phase' in plot_selection:
@@ -379,7 +321,7 @@ def attach(app: Dash, engine) -> None:
             logging.debug(f"FFT phase - femb and plane added")
 
 
-            fig_210 = px.scatter(df_a_phase_210, y='phase', color=df_a_phase_210['femb'].astype(str), labels={'color':'FEMB ID'}, facet_col='plane', facet_col_wrap=2, facet_col_spacing=0.03, facet_row_spacing=0.07, title=f"Trigger record A: Run {info_a['run_number']}, {info_a['trigger_number']} 21kHz")
+            fig_210 = px.scatter(df_a_phase_210, y='phase', color=df_a_phase_210['femb'].astype(str), labels={'color':'FEMB ID'}, facet_col='plane', facet_col_wrap=2, facet_col_spacing=0.03, facet_row_spacing=0.07, title=f"Trigger record A: Run {info_a['run_number']}, {info_a['trigger_number']} 210kHz")
 
             fig_210.update_xaxes(matches=None, showticklabels=True)
             fig_210.update_yaxes(matches=None, showticklabels=True)
@@ -408,11 +350,13 @@ def attach(app: Dash, engine) -> None:
 
 
             children += [
-                html.B("Noise phase by FEMB (430 Khz) peak"),
+                html.B("Noise phase by FEMB (22 Khz) peak"),
                 html.Hr(),
                 dcc.Graph(figure=fig_22),
+                html.B("Noise phase by FEMB (210 Khz) peak"),
                 html.Hr(),
                 dcc.Graph(figure=fig_210),
+                html.B("Noise phase by FEMB (430 Khz) peak"),
                 html.Hr(),
                 dcc.Graph(figure=fig_430),
             ]
@@ -500,7 +444,7 @@ def attach(app: Dash, engine) -> None:
         dt_ab_Z_diff = signal.calc_diffs(df_aZ, df_bZ)
 
         if 'Z' in adcmap_selection_ab_diff:
-            fig = px.imshow(dt_ab_Z_diff, title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(dt_ab_Z_diff, title=f"Z-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -535,27 +479,49 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        # # 
-        # crate_no = 4 # Randomish number
-        # offchan_to_hw = {}
-        # for slot_no in range(4):
-        #     for fiber_no in range(1,3):
-        #         for c in range(256):
-        #             off_ch = engine.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, c)
-        #             # offchan_to_hw[off_ch] = (crate_no, slot_no, fiber_no, c)
-        #             if off_ch == 4294967295:
-        #                 continue
-        #             offchan_to_hw[off_ch] = (crate_no, slot_no, fiber_no, c)
+        #-------------
+        # Trigger Record Displays
+        fig_w, fig_h = 1500, 1000
+        fzmin, fzmax = tr_color_range
 
-        # def femb_id_from_off(off_ch):
-        #     # off_ch_str = str(off_ch)
-        #     crate, slot, link, ch = offchan_to_hw[off_ch]
-        #     # return off_femb_map[ch_str][:3]+[off_femb_map[ch_str][3]//128]
-        #     return 4*slot+2*(link-1)+ch//128 
+        # Waveforms A
+        if 'Z' in adcmap_selection_a_offset:
+            fig = px.imshow(df_aZ-df_aZ.mean(), zmin=fzmin, zmax=fzmax, title=f"Z-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig.update_layout(
+                width=fig_w,
+                height=fig_h,
+            )
+            children += [
+                html.B("ADC Counts: Z-plane"),
+                html.Hr(),
+                dcc.Graph(figure=fig),
+            ]
 
-        # # group_fembs = groupby(offchan_to_hw, femb_id_from_off)
-        # # fembs = {k: [int(x) for x in d] for k,d in group_fembs}
-        # femb_to_chans = {k: [int(x) for x in d] for k,d in groupby(offchan_to_hw, femb_id_from_off)}
+        if 'V' in adcmap_selection_a_offset:
+            fig = px.imshow(df_aV-df_aV.mean(), zmin=fzmin, zmax=fzmax, title=f"V-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig.update_layout(
+                width=fig_w,
+                height=fig_h,
+            )
+            children += [
+                html.B("ADC Counts: V-plane"),
+                html.Hr(),
+                dcc.Graph(figure=fig),
+            ]
+
+        if 'U' in adcmap_selection_a_offset:
+            fig = px.imshow(df_aU-df_aU.mean(), zmin=fzmin, zmax=fzmax, title=f"U-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig.update_layout(
+                width=fig_w,
+                height=fig_h,
+            )
+            children += [
+                html.B("ADC Counts: U-plane"),
+                html.Hr(),
+                dcc.Graph(figure=fig),
+            ]
+
+
         df_a_cnr = df_a.copy()
         df_a_cnr = df_a_cnr-df_a_cnr.mean()
         for p, p_chans in planes_a.items():
@@ -565,7 +531,7 @@ def attach(app: Dash, engine) -> None:
 
         fzmin, fzmax = tr_color_range
         if 'Z' in adcmap_selection_a_cnr:
-            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -577,7 +543,7 @@ def attach(app: Dash, engine) -> None:
             ]
 
         if 'V' in adcmap_selection_a_cnr:
-            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -589,7 +555,7 @@ def attach(app: Dash, engine) -> None:
             ]
 
         if 'U' in adcmap_selection_a_cnr:
-            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
