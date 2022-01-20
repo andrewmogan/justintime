@@ -561,10 +561,10 @@ def attach(app: Dash, engine) -> None:
 
         fzmin, fzmax = tr_color_range
         if 'Z' in adcmap_selection_a_cnr:
+            plot_title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}"
             if plot_two_plots:
-                fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-            else:
-                fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+                plot_title += f", B: Run {info_b['run_number']}: {info_b['trigger_number']}"
+            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=plot_title, aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -576,10 +576,10 @@ def attach(app: Dash, engine) -> None:
             ]
 
         if 'V' in adcmap_selection_a_cnr:
+            plot_title = f"V-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}"
             if plot_two_plots:
-                fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-            else:
-                fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=f"V-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+                plot_title += f", B: Run {info_b['run_number']}: {info_b['trigger_number']}"
+            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=plot_title, aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -591,10 +591,10 @@ def attach(app: Dash, engine) -> None:
             ]
 
         if 'U' in adcmap_selection_a_cnr:
+            plot_title=f"U-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}"
             if plot_two_plots:
-                fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-            else:
-                fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=f"U-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+                plot_title += f", B: Run {info_b['run_number']}: {info_b['trigger_number']}"
+            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=plot_title, aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
