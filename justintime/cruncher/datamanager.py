@@ -66,14 +66,15 @@ class RawDataManager:
     def femb_id_from_offch(self, off_ch):
         # off_ch_str = str(off_ch)
         crate, slot, link, ch = self.offch_to_hw_map[off_ch]
-        return 4*slot+2*(link-1)+ch//128 
+        return (4*slot+2*(link-1)+ch//128)+1 
 
 
     def list_files(self) -> list:
         files = []
         for m in self.match_exprs:
             files += fnmatch.filter(next(walk(self.data_path), (None, None, []))[2], m)  # [] if no file
-        return files
+
+        return sorted(files, reverse=True, key=lambda f: os.path.getmtime(os.path.join(self.data_path, f)))
 
 
     def get_trigger_record_list(self, file_name: str) -> list:
@@ -111,6 +112,8 @@ class RawDataManager:
             'trigger_timestamp': trghdr.get_trigger_timestamp(),
         }
 
+        tr_ts = trghdr.get_trigger_timestamp()
+
         dfs = []
         for d in frag_datasets:
             frag = dd.get_frag_ptr(d)
@@ -140,14 +143,14 @@ class RawDataManager:
             fiber_no = wh.fiber_no
             off_chans = [self.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, c) for c in range(256)]
 
-            ts = np.zeros(n_frames, dtype='uint64')
+            ts = np.zeros(n_frames, dtype='int64')
             adcs = np.zeros(n_frames, dtype=('uint16', 256))
 
             for i in range(n_frames):
                 # progress.update(task2, advance=1)
 
                 wf = detdataformats.wib.WIBFrame(frag.get_data(i*detdataformats.wib.WIBFrame.sizeof())) 
-                ts[i] = wf.get_timestamp()
+                ts[i] = wf.get_timestamp()-tr_ts
                 adcs[i] = [wf.get_channel(c) for c in range(256)]
             logging.debug(f"Unpacking {d} completed")
 
@@ -157,7 +160,10 @@ class RawDataManager:
             dfs.append(df)
 
         tr_df = pd.concat(dfs, axis=1)
+        # Sort columns (channels)
         tr_df = tr_df.reindex(sorted(tr_df.columns), axis=1)
+        # Reverse timestamps (rows)
+        tr_df = tr_df[::-1]
         self.cache[uid] = (tr_info, tr_df)
         if len(self.cache) > self.max_cache_size:
             old_uid, _ = self.cache.popitem(False)

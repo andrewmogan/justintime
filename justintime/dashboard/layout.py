@@ -141,6 +141,22 @@ def generate_control_card(brain):
             ),
             html.Br(),
             html.Div(
+                'TR A (Offset) planes : ',
+                style={'display': 'inline-block'}
+            ),
+            dcc.Checklist(
+                id='adcmap-selection-a-offset',
+                options=[
+                    {'label': 'Z', 'value': 'Z'},
+                    {'label': 'V', 'value': 'V'},
+                    {'label': 'U', 'value': 'U'},
+               ],
+                value=[],
+                labelStyle={'display': 'inline-block'},
+                style={'display': 'inline-block'},
+            ),
+            html.Br(),
+            html.Div(
                 'TR A (CNR) planes : ',
                 style={'display': 'inline-block'}
             ),
@@ -159,11 +175,11 @@ def generate_control_card(brain):
             html.P("Color range"),
             dcc.RangeSlider(
                 id='tr-color-range-slider',
-                min=-2048,
-                max=2048,
+                min=-1024,
+                max=1024,
                 step=64,
-                value=[-320, 192],
-                marks={ v:f"{v}" for v in range(-2048, 2049, 512) }
+                value=[-192, 192],
+                marks={ v:f"{v}" for v in range(-1024, 1025, 256) }
             ),
             html.Br(),
             html.Button('Refresh Files', id='refresh_files', n_clicks=0),
@@ -201,7 +217,7 @@ def generate(brain):
                 children=[
                     # Patient Volume Heatmap
                     html.Div(
-                        id="mean_std_by_plane_card",
+                        id="plots_card",
                         children=[
     
                             html.H1("DUNE Prompt Feedback", className="display-3"),
