@@ -285,23 +285,32 @@ def attach(app: Dash, engine) -> None:
                 df_U_plane = pd.concat([df_a_fft2['U-plane'], df_b_fft2['U-plane']], axis=1, keys=["A", "B"])
                 df_V_plane = pd.concat([df_a_fft2['V-plane'], df_b_fft2['V-plane']], axis=1, keys=["A", "B"])
                 df_Z_plane = pd.concat([df_a_fft2['Z-plane'], df_b_fft2['Z-plane']], axis=1, keys=["A", "B"])
+
+                title_U=f"FFT U-plane, A vs B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}" 
+                title_V=f"FFT V-plane, A vs B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}" 
+                title_Z=f"FFT Z-plane, A vs B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}" 
             else:
                 df_U_plane = pd.concat([df_a_fft2['U-plane']], axis=1, keys=["A", "B"])
                 df_V_plane = pd.concat([df_a_fft2['V-plane']], axis=1, keys=["A", "B"])
                 df_Z_plane = pd.concat([df_a_fft2['Z-plane']], axis=1, keys=["A", "B"])
+
+                title_U=f"FFT U-plane - A: Run {info_a['run_number']}: {info_a['trigger_number']}" 
+                title_V=f"FFT V-plane - A: Run {info_a['run_number']}: {info_a['trigger_number']}" 
+                title_Z=f"FFT Z-plane - A: Run {info_a['run_number']}: {info_a['trigger_number']}" 
+
 
             logging.debug(f"FFT plots created")
 
             children += [
                 html.B("FFT U-Plane"),
                 html.Hr(),
-                dcc.Graph(figure=px.line(df_U_plane, log_y=True, title=f"FFT U-plane, A vs B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}")),
+                dcc.Graph(figure=px.line(df_U_plane, log_y=True, title=title_U)),
                 html.B("FFT V-Plane"),
                 html.Hr(),
-                dcc.Graph(figure=px.line(df_V_plane, log_y=True, title=f"FFT V-plane, A vs B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}")),
+                dcc.Graph(figure=px.line(df_V_plane, log_y=True, title=title_V)),
                 html.B("FFT Z-Plane"),
                 html.Hr(),
-                dcc.Graph(figure=px.line(df_Z_plane, log_y=True, title=f"FFT Z-plane, A vs B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}")),
+                dcc.Graph(figure=px.line(df_Z_plane, log_y=True, title=title_U)),
             ]
 
         if 'FFT_phase' in plot_selection:
