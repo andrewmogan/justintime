@@ -48,7 +48,7 @@ def attach(app: Dash, engine) -> None:
         Output("adcmap-selection-ab-diff",'options'),
         Input("add-second-graph-check", "value"))
     def enable_secondary_plots(check):
-         options=[
+        options=[
             {'label': 'Z', 'value': 'Z', 'disabled' : ("Y" not in check)},
             {'label': 'V', 'value': 'V', 'disabled' : ("Y" not in check)},
             {'label': 'U', 'value': 'U', 'disabled' : ("Y" not in check)},
