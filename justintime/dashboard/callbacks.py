@@ -1,4 +1,4 @@
-import dash
+# import dash
 from dash import Dash
 from dash import dcc
 from dash import html
@@ -9,20 +9,17 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-import numpy as np
+# import numpy as np
 import pandas as pd
 import datetime
 
 import logging
 from itertools import groupby
-import rich
+# import rich
 
 from . layout import generate_tr_card
 
 from ..cruncher import signal
-
-
-
 
 
 def attach(app: Dash, engine) -> None:
@@ -30,22 +27,22 @@ def attach(app: Dash, engine) -> None:
     @app.callback(
         Output('raw-data-file-select-A', 'options'),
         Output('raw-data-file-select-B', 'options'),
-        Input('refresh_files', 'n_clicks')      
-        )
+        Input('refresh_files', 'n_clicks')
+    )
     def update_file_list(pathname):
         fl = sorted(engine.list_files(), reverse=True)
         logging.debug(f"Updatd file list: {fl}")
-        opts = [{'label': f, 'value':f} for f in engine.list_files()]
+        opts = [{'label': f, 'value': f} for f in engine.list_files()]
         return (
             opts,
             opts
-            )
+        )
 
     @app.callback(
-        Output("raw-data-file-select-B",'disabled'),
-        Output("trigger-record-select-B",'disabled'),
-        Output("adcmap-selection-b",'options'),
-        Output("adcmap-selection-ab-diff",'options'),
+        Output("raw-data-file-select-B", 'disabled'),
+        Output("trigger-record-select-B", 'disabled'),
+        Output("adcmap-selection-b", 'options'),
+        Output("adcmap-selection-ab-diff", 'options'),
         Input("add-second-graph-check", "value"))
     def enable_secondary_plots(check):
         options=[
@@ -149,6 +146,7 @@ def attach(app: Dash, engine) -> None:
 
         group_planes = groupby(channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
         planes = {k: [x for x in d if x] for k,d in group_planes}
+        print(planes)
 
         # Splitting by plane
         planes_a = {k:sorted(set(v) & set(df_a.columns)) for k,v in planes.items()}
