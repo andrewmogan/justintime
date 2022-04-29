@@ -39,18 +39,18 @@ class RawDataManager:
         self.ch_map_name = 'VDColdboxChannelMap'
         self.ch_map = detchannelmaps.make_map(ch_map_id)
         self.offch_to_hw_map = self._init_o2h_map()
-        self.femb_to_offch = {k: [int(x) for x in d] for k,d in groupby(self.offch_to_hw_map, self.femb_id_from_offch)}
+        self.femb_to_offch = {k: [int(x) for x in d] for k, d in groupby(self.offch_to_hw_map, self.femb_id_from_offch)}
 
         # self.trig_rec_hdr_regex = re.compile(r"\/\/TriggerRecord(\d{5})\/TriggerRecordHeader")
         self.cache = collections.OrderedDict()
-    
+
 
 
     def _init_o2h_map(self):
         if self.ch_map_name == 'VDColdboxChannelMap':
             crate_no = 4
             slots = range(4)
-            fibres = range(1,3)
+            fibres = range(1, 3)
             chans = range(256)
         else:
             return {}
