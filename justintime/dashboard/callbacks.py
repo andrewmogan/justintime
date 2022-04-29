@@ -1,4 +1,4 @@
-import dash
+# import dash
 from dash import Dash
 from dash import dcc
 from dash import html
@@ -9,43 +9,54 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-import numpy as np
+# import numpy as np
 import pandas as pd
 import datetime
 
 import logging
 from itertools import groupby
-import rich
+# import rich
 
 from . layout import generate_tr_card
 
 from ..cruncher import signal
 
-
-
-
+def add_dunedaq_annotation(figure):
+    figure.add_annotation(dict(font=dict(color="black",size=12),
+                    #x=x_loc,
+                    # x=1,
+                    # y=-0.20,
+                    x=1,
+                    y=1.20,
+                    showarrow=False,
+                    align="right",
+                    text='Powered by DUNE-DAQ',
+                    textangle=0,
+                    xref="paper",
+                    yref="paper"
+                   ))
 
 def attach(app: Dash, engine) -> None:
 
     @app.callback(
         Output('raw-data-file-select-A', 'options'),
         Output('raw-data-file-select-B', 'options'),
-        Input('refresh_files', 'n_clicks')      
-        )
+        Input('refresh_files', 'n_clicks')
+    )
     def update_file_list(pathname):
         fl = sorted(engine.list_files(), reverse=True)
         logging.debug(f"Updatd file list: {fl}")
-        opts = [{'label': f, 'value':f} for f in engine.list_files()]
+        opts = [{'label': f, 'value': f} for f in engine.list_files()]
         return (
             opts,
             opts
-            )
+        )
 
     @app.callback(
-        Output("raw-data-file-select-B",'disabled'),
-        Output("trigger-record-select-B",'disabled'),
-        Output("adcmap-selection-b",'options'),
-        Output("adcmap-selection-ab-diff",'options'),
+        Output("raw-data-file-select-B", 'disabled'),
+        Output("trigger-record-select-B", 'disabled'),
+        Output("adcmap-selection-b", 'options'),
+        Output("adcmap-selection-ab-diff", 'options'),
         Input("add-second-graph-check", "value"))
     def enable_secondary_plots(check):
         options=[
@@ -149,6 +160,7 @@ def attach(app: Dash, engine) -> None:
 
         group_planes = groupby(channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
         planes = {k: [x for x in d if x] for k,d in group_planes}
+        print(planes)
 
         # Splitting by plane
         planes_a = {k:sorted(set(v) & set(df_a.columns)) for k,v in planes.items()}
@@ -219,6 +231,8 @@ def attach(app: Dash, engine) -> None:
                 # showlegend=False
             )
 
+            add_dunedaq_annotation(fig_mean)
+
             logging.debug(f"Mean plots created")
 
 
@@ -265,6 +279,8 @@ def attach(app: Dash, engine) -> None:
                 # showlegend=False
             )
 
+            add_dunedaq_annotation(fig_std)
+
             logging.debug(f"STD plots created")
 
             children += [
@@ -301,16 +317,23 @@ def attach(app: Dash, engine) -> None:
 
             logging.debug(f"FFT plots created")
 
+            fig_U = px.line(df_U_plane, log_y=True, title=title_U)
+            add_dunedaq_annotation(fig_U)
+            fig_V = px.line(df_V_plane, log_y=True, title=title_V)
+            add_dunedaq_annotation(fig_V)
+            fig_Z = px.line(df_Z_plane, log_y=True, title=title_Z)
+            add_dunedaq_annotation(fig_Z)
+
             children += [
                 html.B("FFT U-Plane"),
                 html.Hr(),
-                dcc.Graph(figure=px.line(df_U_plane, log_y=True, title=title_U)),
+                dcc.Graph(figure=fig_U),
                 html.B("FFT V-Plane"),
                 html.Hr(),
-                dcc.Graph(figure=px.line(df_V_plane, log_y=True, title=title_V)),
+                dcc.Graph(figure=fig_V),
                 html.B("FFT Z-Plane"),
                 html.Hr(),
-                dcc.Graph(figure=px.line(df_Z_plane, log_y=True, title=title_U)),
+                dcc.Graph(figure=fig_Z),
             ]
 
         if 'FFT_phase' in plot_selection:
@@ -344,6 +367,7 @@ def attach(app: Dash, engine) -> None:
             fig_22.update_xaxes(matches=None, showticklabels=True)
             fig_22.update_yaxes(matches=None, showticklabels=True)
             fig_22.update_layout(height=900)
+            add_dunedaq_annotation(fig_22)
             logging.debug(f"FFT phase plots created")
 
 
@@ -364,6 +388,7 @@ def attach(app: Dash, engine) -> None:
             fig_210.update_xaxes(matches=None, showticklabels=True)
             fig_210.update_yaxes(matches=None, showticklabels=True)
             fig_210.update_layout(height=900)
+            add_dunedaq_annotation(fig_210)
             logging.debug(f"FFT phase plots created")
 
 
@@ -384,6 +409,7 @@ def attach(app: Dash, engine) -> None:
             fig_430.update_xaxes(matches=None, showticklabels=True)
             fig_430.update_yaxes(matches=None, showticklabels=True)
             fig_430.update_layout(height=900)
+            add_dunedaq_annotation(fig_430)
             logging.debug(f"FFT phase plots created")
 
 
@@ -409,6 +435,7 @@ def attach(app: Dash, engine) -> None:
                 width=fig_w,
                 height=fig_h,
             )
+            add_dunedaq_annotation(fig)
             children += [
                 html.B("ADC Counts: Z-plane"),
                 html.Hr(),
@@ -421,6 +448,7 @@ def attach(app: Dash, engine) -> None:
                 width=fig_w,
                 height=fig_h,
             )
+            add_dunedaq_annotation(fig)
             children += [
                 html.B("ADC Counts: V-plane"),
                 html.Hr(),
@@ -433,6 +461,7 @@ def attach(app: Dash, engine) -> None:
                 width=fig_w,
                 height=fig_h,
             )
+            add_dunedaq_annotation(fig)
             children += [
                 html.B("ADC Counts: U-plane"),
                 html.Hr(),
@@ -448,6 +477,7 @@ def attach(app: Dash, engine) -> None:
                     width=fig_w,
                     height=fig_h,
                 )
+                add_dunedaq_annotation(fig)
                 children += [
                     html.B("ADC Counts: Z-plane"),
                     html.Hr(),
@@ -460,6 +490,7 @@ def attach(app: Dash, engine) -> None:
                     width=fig_w,
                     height=fig_h,
                 )
+                add_dunedaq_annotation(fig)
                 children += [
                     html.B("ADC Counts: V-plane"),
                     html.Hr(),
@@ -472,6 +503,7 @@ def attach(app: Dash, engine) -> None:
                     width=fig_w,
                     height=fig_h,
                 )
+                add_dunedaq_annotation(fig)
                 children += [
                     html.B("ADC Counts: U-plane"),
                     html.Hr(),
@@ -488,6 +520,7 @@ def attach(app: Dash, engine) -> None:
                     width=fig_w,
                     height=fig_h,
                 )
+                add_dunedaq_annotation(fig)
                 children += [
                     html.B("ADC Counts: Z-plane A-B"),
                     html.Hr(),
@@ -500,6 +533,7 @@ def attach(app: Dash, engine) -> None:
                     width=fig_w,
                     height=fig_h,
                 )
+                add_dunedaq_annotation(fig)
                 children += [
                     html.B("ADC Counts: V-plane A-B"),
                     html.Hr(),
@@ -512,6 +546,7 @@ def attach(app: Dash, engine) -> None:
                     width=fig_w,
                     height=fig_h,
                 )
+                add_dunedaq_annotation(fig)
                 children += [
                     html.B("ADC Counts: U-plane A-B"),
                     html.Hr(),
@@ -530,6 +565,7 @@ def attach(app: Dash, engine) -> None:
                 width=fig_w,
                 height=fig_h,
             )
+            add_dunedaq_annotation(fig)
             children += [
                 html.B("ADC Counts: Z-plane"),
                 html.Hr(),
@@ -542,6 +578,7 @@ def attach(app: Dash, engine) -> None:
                 width=fig_w,
                 height=fig_h,
             )
+            add_dunedaq_annotation(fig)
             children += [
                 html.B("ADC Counts: V-plane"),
                 html.Hr(),
@@ -554,6 +591,7 @@ def attach(app: Dash, engine) -> None:
                 width=fig_w,
                 height=fig_h,
             )
+            add_dunedaq_annotation(fig)
             children += [
                 html.B("ADC Counts: U-plane"),
                 html.Hr(),
@@ -578,6 +616,7 @@ def attach(app: Dash, engine) -> None:
                 width=fig_w,
                 height=fig_h,
             )
+            add_dunedaq_annotation(fig)
             children += [
                 html.B("ADC Counts: Z-plane A (CNR)"),
                 html.Hr(),
@@ -593,6 +632,7 @@ def attach(app: Dash, engine) -> None:
                 width=fig_w,
                 height=fig_h,
             )
+            add_dunedaq_annotation(fig)
             children += [
                 html.B("ADC Counts: V-plane A (CNR)"),
                 html.Hr(),
@@ -608,6 +648,7 @@ def attach(app: Dash, engine) -> None:
                 width=fig_w,
                 height=fig_h,
             )
+            add_dunedaq_annotation(fig)
             children += [
                 html.B("ADC Counts: U-plane A (CNR)"),
                 html.Hr(),
