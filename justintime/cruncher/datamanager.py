@@ -7,15 +7,17 @@ import re
 # DUNE DAQ includes
 import daqdataformats
 import detdataformats.wib
+import detdataformats.wib2
 import detchannelmaps
 import hdf5libs
-import rawdatautils.unpack.wib as wib_unpack
+import rawdatautils.unpack.wib as protowib_unpack
+import rawdatautils.unpack.wib2 as wib_unpack
 import logging
 
 import numpy as np
 import pandas as pd
 import collections
-# import rich
+import rich
 from itertools import groupby
 
 """
@@ -23,31 +25,78 @@ RawDataManager is responsible of raw data information management: discovery, loa
 
 """
 
+def get_protowib_header_info( frag ):
+        wf = detdataformats.wib.WIBFrame(frag.get_data())
+        wh = wf.get_wib_header()
+
+        logging.debug(f"detector_id {0}, crate: {wh.crate_no}, slot: {wh.slot_no}, fibre: {wh.fiber_no}")
+
+        return (0, wh.crate_no, wh.slot_no, wh.fiber_no)
+
+def get_wib_header_info( frag ):
+    wf = detdataformats.wib2.WIB2Frame(frag.get_data())
+    wh = wf.get_header()
+    logging.debug(f"detector {wh.detector_id}, crate: {wh.crate}, slot: {wh.slot}, fibre: {wh.link}")
+
+    return (wh.detector_id, wh.crate, wh.slot, wh.link)
+
+class VSTChannelMap(object):
+
+    @staticmethod
+    def get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, ch_no):
+        return 256*fiber_no+ch_no
+
+    @staticmethod
+    def get_plane_from_offline_channel(ch):
+        return 0
+
 
 class RawDataManager:
 
     # match_exprs = ['*.hdf5','*.hdf5.copied']
     match_exprs = ['*.hdf5', '*.hdf5.copied']
     max_cache_size = 100
+    frametype_map = {
+        'ProtoWIB': (get_protowib_header_info, protowib_unpack),
+        'WIB': (get_wib_header_info, wib_unpack),
+    }
 
-    def __init__(self, data_path: str, ch_map_id: str = 'VDColdboxChannelMap') -> None:
+    @staticmethod 
+    def make_channel_map(map_id):
+
+        if map_id == 'VDColdbox':
+            return detchannelmaps.make_map('VDColdboxChannelMap')
+        elif map_id == '':
+            return detchannelmaps.make_map('ProtoDUNESP1ChannelMap')
+        elif map_id == 'VST':
+            return VSTChannelMap()
+        else:
+            raise RuntimeError(f"Unknown channel map id '{map_id}'")
+
+
+    def __init__(self, data_path: str, frame_type: str = 'ProtoWIB', ch_map_id: str = 'VDColdbox') -> None:
 
         if not os.path.isdir(data_path):
             raise ValueError(f"Directory {data_path} does not exist")
 
+        if frame_type not in ['ProtoWIB', "WIB"]:
+            raise ValueError(f"Unknown fragment type {frame_type}")
+
+        logging.warning(f"Frame type: {frame_type}")
         self.data_path = data_path
-        self.ch_map_name = 'VDColdboxChannelMap'
-        self.ch_map = detchannelmaps.make_map(ch_map_id)
+        self.ch_map_name = ch_map_id
+        self.ch_map = self.make_channel_map(ch_map_id) 
+
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         self.offch_to_hw_map = self._init_o2h_map()
         self.femb_to_offch = {k: [int(x) for x in d] for k, d in groupby(self.offch_to_hw_map, self.femb_id_from_offch)}
 
         # self.trig_rec_hdr_regex = re.compile(r"\/\/TriggerRecord(\d{5})\/TriggerRecordHeader")
         self.cache = collections.OrderedDict()
-
-
+        self.get_hdr_info, self.frag_unpack = self.frametype_map[frame_type]
 
     def _init_o2h_map(self):
-        if self.ch_map_name == 'VDColdboxChannelMap':
+        if self.ch_map_name == 'VDColdbox':
             crate_no = 4
             slots = range(4)
             fibres = range(1, 3)
@@ -140,31 +189,19 @@ class RawDataManager:
             if not n_frames:
                 continue
 
-            wf = detdataformats.wib.WIBFrame(frag.get_data())
-            wh = wf.get_wib_header()
+            det_id, crate_no, slot_no, link_no = self.get_hdr_info(frag)
+            logging.debug(f"crate: {crate_no}, slot: {slot_no}, fibre: {link_no}")
 
-            logging.debug(f"crate: {wh.crate_no}, slot: {wh.slot_no}, fibre: {wh.fiber_no}")
-            crate_no = wh.crate_no 
-            slot_no = wh.slot_no
-            fiber_no = wh.fiber_no
-            off_chans = [self.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, c) for c in range(256)]
+            off_chans = [self.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(256)]
 
-            # ts = np.zeros(n_frames, dtype='int64')
-            # adcs = np.zeros(n_frames, dtype=('uint16', 256))
-
-            # for i in range(n_frames):
-            #     # progress.update(task2, advance=1)
-
-            #     wf = detdataformats.wib.WIBFrame(frag.get_data(i*detdataformats.wib.WIBFrame.sizeof())) 
-            #     ts[i] = wf.get_timestamp()-tr_ts
-            #     adcs[i] = [wf.get_channel(c) for c in range(256)]
-            ts = wib_unpack.np_array_timestamp(frag)
-            adcs = wib_unpack.np_array_adc(frag)
+            ts = self.frag_unpack.np_array_timestamp(frag)
+            adcs = self.frag_unpack.np_array_adc(frag)
             ts = (ts - tr_ts).astype('int64')
             logging.debug(f"Unpacking {geoid.system_type} {geoid.region_id} {geoid.element_id} completed")
 
             df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(256)]))
             df = df.set_index('ts')
+            rich.print(df)
 
             dfs.append(df)
 
@@ -178,4 +215,5 @@ class RawDataManager:
             old_uid, _ = self.cache.popitem(False)
             logging.info(f"Removing {old_uid[0]}:{old_uid[1]} from cache")
 
+        print(tr_df)
         return tr_info, tr_df

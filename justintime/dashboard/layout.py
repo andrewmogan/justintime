@@ -66,7 +66,7 @@ def generate_control_card(brain):
             dcc.Checklist(
                 id="add-second-graph-check",
                 options=[{'label': 'Raw Data File Reference', 'value': 'Y'}],
-                value=['Y']
+                value=['N']
             ),
             dcc.Dropdown(
                 id="raw-data-file-select-B",

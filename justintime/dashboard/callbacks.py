@@ -164,9 +164,9 @@ def attach(app: Dash, engine) -> None:
 
         # Splitting by plane
         planes_a = {k:sorted(set(v) & set(df_a.columns)) for k,v in planes.items()}
-        df_aU = df_a[planes_a[0]]
-        df_aV = df_a[planes_a[1]]
-        df_aZ = df_a[planes_a[2]]
+        df_aU = df_a[planes_a.get(0, {})]
+        df_aV = df_a[planes_a.get(1, {})]
+        df_aZ = df_a[planes_a.get(2, {})]
 
         df_aU_mean, df_aU_std = df_aU.mean(), df_aU.std()
         df_aV_mean, df_aV_std = df_aV.mean(), df_aV.std()
@@ -177,9 +177,9 @@ def attach(app: Dash, engine) -> None:
         if plot_two_plots:
             # Splitting by plane
             planes_b = {k:list(set(v) & set(df_b.columns)) for k,v in planes.items()}
-            df_bU = df_b[planes_b[0]]
-            df_bV = df_b[planes_b[1]]
-            df_bZ = df_b[planes_b[2]]
+            df_bU = df_b[planes_b.get(0, {})]
+            df_bV = df_b[planes_b.get(1, {})]
+            df_bZ = df_b[planes_b.get(2, {})]
             logging.debug(f"Trigger record {trig_rec_num_b} from {raw_data_file_b} loaded")
 
             df_bU_mean, df_bU_std = df_bU.mean(), df_bU.std()

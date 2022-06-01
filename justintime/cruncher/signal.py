@@ -63,7 +63,8 @@ def calc_fft_sum_by_plane(df: pd.DataFrame, planes: dict) -> pd.DataFrame:
     Returns:
         TYPE: Description
     """
-    p = {k:list(set(v) & set(df.columns)) for k,v in planes.items()}
+    p = {i:[] for i in range(3)}
+    p.update({k:list(set(v) & set(df.columns)) for k,v in planes.items()})
 
     df_sum_U = df[p[0]].sum(axis=1).to_frame()
     df_sum_U = df_sum_U.rename(columns= {0: 'U-plane'})

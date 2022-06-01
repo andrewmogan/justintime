@@ -7,7 +7,7 @@ import logging
 
 def main(data_path: str) -> None:
 
-    rdm = RawDataManager(data_path)
+    rdm = RawDataManager(data_path, 'WIB', 'VST')
     data_files = sorted(rdm.list_files(), reverse=True)
     rich.print(data_files)
     for f in data_files[:1]:
