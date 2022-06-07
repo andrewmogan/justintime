@@ -66,8 +66,10 @@ class RawDataManager:
 
         if map_id == 'VDColdbox':
             return detchannelmaps.make_map('VDColdboxChannelMap')
-        elif map_id == '':
+        elif map_id == 'ProtoDUNESP1':
             return detchannelmaps.make_map('ProtoDUNESP1ChannelMap')
+        elif map_id == 'PD2HD':
+            return detchannelmaps.make_map('PD2HDChannelMap')
         elif map_id == 'VST':
             return VSTChannelMap()
         else:

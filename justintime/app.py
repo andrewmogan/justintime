@@ -9,7 +9,7 @@ from .dashboard import init_app
 
 @click.command()
 @click.argument('raw_data_path', type=click.Path(exists=True, file_okay=False))
-@click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'VST']))
+@click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST']))
 @click.argument('frame_type', type=click.Choice(['ProtoWIB', 'WIB']))
 def cli(raw_data_path :str, channel_map_id:str, frame_type: str):
 
