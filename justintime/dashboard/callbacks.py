@@ -9,12 +9,17 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 
-# import numpy as np
+import numpy as np
 import pandas as pd
 import datetime
 
 import logging
+
 from itertools import groupby
+from PIL import Image
+from matplotlib import cm
+from matplotlib.colors import Normalize
+
 # import rich
 
 from . layout import generate_tr_card
@@ -36,6 +41,81 @@ def add_dunedaq_annotation(figure):
                     yref="paper"
                    ))
 
+
+def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
+
+
+    xmin, xmax = min(df.columns), max(df.columns)
+    # ymin, ymax = min(df.index), max(df.index)
+    ymin, ymax = max(df.index), min(df.index)
+    col_range = list(range(xmin, xmax))
+
+    df = df.reindex(columns=col_range, fill_value=0)
+
+    img_width = df.columns.size
+    img_height = df.index.size
+
+    a = df.to_numpy()
+    amin = zmin if zmin is not None else np.min(a)
+    amax = zmax if zmax is not None else np.max(a)
+
+    # Some normalization from matplotlib
+    col_norm = Normalize(vmin=amin, vmax=amax)
+    scalarMap  = cm.ScalarMappable(norm=col_norm, cmap='plasma' )
+    seg_colors = scalarMap.to_rgba(a) 
+    img = Image.fromarray(np.uint8(seg_colors*255))
+
+    # Create figure
+    fig = go.Figure()
+
+    # Add invisible scatter trace.
+    # This trace is added to help the autoresize logic work.
+    # We also add a color to the scatter points so we can have a colorbar next to our image
+    fig.add_trace(
+        go.Scatter(
+            x=[xmin, xmax],
+            y=[ymin, ymax],
+            mode="markers",
+            marker={"color":[amin, amax],
+                    "colorscale":'Plasma',
+                    "showscale":True,
+                    "colorbar":{
+                        # "title":"Counts",
+                        "titleside": "right"
+                    },
+                    "opacity": 0
+                   }
+        )
+    )
+
+    # Add image
+    fig.update_layout(
+        images=[go.layout.Image(
+            x=xmin,
+            sizex=xmax-xmin,
+            y=ymax,
+            sizey=ymax-ymin,
+            xref="x",
+            yref="y",
+            opacity=1.0,
+            layer="below",
+            sizing="stretch",
+            source=img)]
+    )
+
+    # Configure other layout
+    fig.update_layout(
+        title=title,
+        xaxis=dict(showgrid=False, zeroline=False, range=[xmin, xmax]),
+        yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
+        # width=img_width,
+        # height=img_height,
+    )
+
+    # fig.show(config={'doubleClick': 'reset'})
+    logging.debug(f"Completed plotting '{title}'")
+    return fig
+
 def attach(app: Dash, engine) -> None:
 
     @app.callback(
@@ -55,18 +135,13 @@ def attach(app: Dash, engine) -> None:
     @app.callback(
         Output("raw-data-file-select-B", 'disabled'),
         Output("trigger-record-select-B", 'disabled'),
-        Output("adcmap-selection-b", 'options'),
-        Output("adcmap-selection-ab-diff", 'options'),
+        # Output("adcmap-selection-b", 'options'),
+        # Output("adcmap-selection-ab-diff", 'options'),
         Input("add-second-graph-check", "value"))
     def enable_secondary_plots(check):
-        options=[
-            {'label': 'Z', 'value': 'Z', 'disabled' : ("Y" not in check)},
-            {'label': 'V', 'value': 'V', 'disabled' : ("Y" not in check)},
-            {'label': 'U', 'value': 'U', 'disabled' : ("Y" not in check)},
-        ]
         if "Y" in check:
-            return(False, False,options,options)
-        return(True, True, options, options)
+            return(False, False)
+        return(True, True)
 
 
     @app.callback(
@@ -106,11 +181,12 @@ def attach(app: Dash, engine) -> None:
         State('raw-data-file-select-B', 'value'),
         State('trigger-record-select-B', 'value'),
         State('plot_selection', 'value'),
-        State('adcmap-selection-a', 'value'),
-        State('adcmap-selection-b', 'value'),
-        State('adcmap-selection-ab-diff', 'value'),
-        State('adcmap-selection-a-offset', 'value'),
-        State('adcmap-selection-a-cnr', 'value'),
+        State('adcmap_selection', 'value'),
+        # State('adcmap-selection-a', 'value'),
+        # # State('adcmap-selection-b', 'value'),
+        # # State('adcmap-selection-ab-diff', 'value'),
+        # State('adcmap-selection-a-offset', 'value'),
+        # State('adcmap-selection-a-cnr', 'value'),
         State('tr-color-range-slider', 'value'),
         )
     def update_plots(
@@ -121,11 +197,12 @@ def attach(app: Dash, engine) -> None:
         raw_data_file_b,
         trig_rec_num_b,
         plot_selection,
-        adcmap_selection_a,
-        adcmap_selection_b,
-        adcmap_selection_ab_diff,
-        adcmap_selection_a_offset,
-        adcmap_selection_a_cnr,
+        adcmap_selection,
+        # adcmap_selection_a,
+        # adcmap_selection_b,
+        # adcmap_selection_ab_diff,
+        # adcmap_selection_a_offset,
+        # adcmap_selection_a_cnr,
         tr_color_range
         ):
         # ctx = dash.callback_context
@@ -160,7 +237,6 @@ def attach(app: Dash, engine) -> None:
 
         group_planes = groupby(channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
         planes = {k: [x for x in d if x] for k,d in group_planes}
-        print(planes)
 
         # Splitting by plane
         planes_a = {k:sorted(set(v) & set(df_a.columns)) for k,v in planes.items()}
@@ -428,9 +504,12 @@ def attach(app: Dash, engine) -> None:
         #-------------
         # Trigger Record Displays
         fig_w, fig_h = 1500, 1000
+        fzmin, fzmax = tr_color_range
         # Waveforms A
-        if 'Z' in adcmap_selection_a:
-            fig = px.imshow(df_aZ, title=f"Z-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+        if 'RAW_ADC' in adcmap_selection:
+        # if 'Z' in adcmap_selection_a:
+            # fig = px.imshow(df_aZ, title=f"Z-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig = make_static_img(df_aZ, zmin=fzmin, zmax=fzmax, title=f"Z-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -442,8 +521,9 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        if 'V' in adcmap_selection_a:
-            fig = px.imshow(df_aV, title=f"V-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+        # if 'V' in adcmap_selection_a:
+            # fig = px.imshow(df_aV, title=f"V-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig = make_static_img(df_aV, zmin=fzmin, zmax=fzmax, title=f"V-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -455,8 +535,9 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        if 'U' in adcmap_selection_a:
-            fig = px.imshow(df_aU, title=f"U-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+        # if 'U' in adcmap_selection_a:
+            # fig = px.imshow(df_aU, title=f"U-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig = make_static_img(df_aU, zmin=fzmin, zmax=fzmax, title=f"U-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -469,98 +550,103 @@ def attach(app: Dash, engine) -> None:
             ]
 
 
-        # Waveforms B
-        if plot_two_plots:
-            if 'Z' in adcmap_selection_b:
-                fig = px.imshow(df_bZ, title=f"Z-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-                fig.update_layout(
-                    width=fig_w,
-                    height=fig_h,
-                )
-                add_dunedaq_annotation(fig)
-                children += [
-                    html.B("ADC Counts: Z-plane"),
-                    html.Hr(),
-                    dcc.Graph(figure=fig),
-                ]
+        # # Waveforms B
+        # if plot_two_plots:
+        #     if 'Z' in adcmap_selection_b:
+        #         # fig = px.imshow(df_bZ, title=f"Z-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+        #         fig = make_static_img(df_bZ, zmin=fzmin, zmax=fzmax, title=f"Z-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}")
+        #         fig.update_layout(
+        #             width=fig_w,
+        #             height=fig_h,
+        #         )
+        #         add_dunedaq_annotation(fig)
+        #         children += [
+        #             html.B("ADC Counts: Z-plane"),
+        #             html.Hr(),
+        #             dcc.Graph(figure=fig),
+        #         ]
 
-            if 'V' in adcmap_selection_b:
-                fig = px.imshow(df_bV, title=f"V-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-                fig.update_layout(
-                    width=fig_w,
-                    height=fig_h,
-                )
-                add_dunedaq_annotation(fig)
-                children += [
-                    html.B("ADC Counts: V-plane"),
-                    html.Hr(),
-                    dcc.Graph(figure=fig),
-                ]
+        #     if 'V' in adcmap_selection_b:
+        #         # fig = px.imshow(df_bV, title=f"V-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+        #         fig = make_static_img(df_bV, zmin=fzmin, zmax=fzmax, title=f"V-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}")
+        #         fig.update_layout(
+        #             width=fig_w,
+        #             height=fig_h,
+        #         )
+        #         add_dunedaq_annotation(fig)
+        #         children += [
+        #             html.B("ADC Counts: V-plane"),
+        #             html.Hr(),
+        #             dcc.Graph(figure=fig),
+        #         ]
 
-            if 'U' in adcmap_selection_b:
-                fig = px.imshow(df_bU, title=f"U-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-                fig.update_layout(
-                    width=fig_w,
-                    height=fig_h,
-                )
-                add_dunedaq_annotation(fig)
-                children += [
-                    html.B("ADC Counts: U-plane"),
-                    html.Hr(),
-                    dcc.Graph(figure=fig),
-                ]
+        #     if 'U' in adcmap_selection_b:
+        #         # fig = px.imshow(df_bU, title=f"U-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+        #         fig = make_static_img(df_bV, zmin=fzmin, zmax=fzmax, title=f"U-plane, B - B: Run {info_b['run_number']}: {info_b['trigger_number']}")
+        #         fig.update_layout(
+        #             width=fig_w,
+        #             height=fig_h,
+        #         )
+        #         add_dunedaq_annotation(fig)
+        #         children += [
+        #             html.B("ADC Counts: U-plane"),
+        #             html.Hr(),
+        #             dcc.Graph(figure=fig),
+        #         ]
 
-            dt_ab_U_diff = signal.calc_diffs(df_aU, df_bU)
-            dt_ab_V_diff = signal.calc_diffs(df_aV, df_bV)
-            dt_ab_Z_diff = signal.calc_diffs(df_aZ, df_bZ)
+        #     dt_ab_U_diff = signal.calc_diffs(df_aU, df_bU)
+        #     dt_ab_V_diff = signal.calc_diffs(df_aV, df_bV)
+        #     dt_ab_Z_diff = signal.calc_diffs(df_aZ, df_bZ)
 
-            if 'Z' in adcmap_selection_ab_diff:
-                fig = px.imshow(dt_ab_Z_diff, title=f"Z-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-                fig.update_layout(
-                    width=fig_w,
-                    height=fig_h,
-                )
-                add_dunedaq_annotation(fig)
-                children += [
-                    html.B("ADC Counts: Z-plane A-B"),
-                    html.Hr(),
-                    dcc.Graph(figure=fig),
-                ]
+        #     if 'Z' in adcmap_selection_ab_diff:
+        #         # fig = px.imshow(dt_ab_Z_diff, title=f"Z-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+        #         fig = make_static_img(dt_ab_Z_diff, zmin=fzmin, zmax=fzmax, title=f"Z-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}")
+        #         fig.update_layout(
+        #             width=fig_w,
+        #             height=fig_h,
+        #         )
+        #         add_dunedaq_annotation(fig)
+        #         children += [
+        #             html.B("ADC Counts: Z-plane A-B"),
+        #             html.Hr(),
+        #             dcc.Graph(figure=fig),
+        #         ]
 
-            if 'V' in adcmap_selection_ab_diff:
-                fig = px.imshow(dt_ab_V_diff, title=f"V-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-                fig.update_layout(
-                    width=fig_w,
-                    height=fig_h,
-                )
-                add_dunedaq_annotation(fig)
-                children += [
-                    html.B("ADC Counts: V-plane A-B"),
-                    html.Hr(),
-                    dcc.Graph(figure=fig),
-                ]
+        #     if 'V' in adcmap_selection_ab_diff:
+        #         # fig = px.imshow(dt_ab_V_diff, title=f"V-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+        #         fig = make_static_img(dt_ab_V_diff, zmin=fzmin, zmax=fzmax, title=f"V-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}")
+        #         fig.update_layout(
+        #             width=fig_w,
+        #             height=fig_h,
+        #         )
+        #         add_dunedaq_annotation(fig)
+        #         children += [
+        #             html.B("ADC Counts: V-plane A-B"),
+        #             html.Hr(),
+        #             dcc.Graph(figure=fig),
+        #         ]
 
-            if 'U' in adcmap_selection_ab_diff:
-                fig = px.imshow(dt_ab_U_diff, title=f"U-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
-                fig.update_layout(
-                    width=fig_w,
-                    height=fig_h,
-                )
-                add_dunedaq_annotation(fig)
-                children += [
-                    html.B("ADC Counts: U-plane A-B"),
-                    html.Hr(),
-                    dcc.Graph(figure=fig),
-                ]
+        #     if 'U' in adcmap_selection_ab_diff:
+        #         # fig = px.imshow(dt_ab_U_diff, title=f"U-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}", aspect='auto')
+        #         fig = make_static_img(dt_ab_U_diff, zmin=fzmin, zmax=fzmax, title=f"U-plane, A-B - A: Run {info_a['run_number']}: {info_a['trigger_number']}, B: Run {info_b['run_number']}: {info_b['trigger_number']}")
+        #         fig.update_layout(
+        #             width=fig_w,
+        #             height=fig_h,
+        #         )
+        #         add_dunedaq_annotation(fig)
+        #         children += [
+        #             html.B("ADC Counts: U-plane A-B"),
+        #             html.Hr(),
+        #             dcc.Graph(figure=fig),
+        #         ]
 
         #-------------
         # Trigger Record Displays
-        fig_w, fig_h = 1500, 1000
-        fzmin, fzmax = tr_color_range
-
         # Waveforms A
-        if 'Z' in adcmap_selection_a_offset:
-            fig = px.imshow(df_aZ-df_aZ.mean(), zmin=fzmin, zmax=fzmax, title=f"Z-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+        if 'ADC_baseline' in adcmap_selection:
+        # if 'Z' in adcmap_selection_a_offset:
+            # fig = px.imshow(df_aZ-df_aZ.mean(), zmin=fzmin, zmax=fzmax, title=f"Z-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig = make_static_img(df_aZ-df_aZ.mean(), zmin=fzmin, zmax=fzmax, title=f"Z-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -572,8 +658,9 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        if 'V' in adcmap_selection_a_offset:
-            fig = px.imshow(df_aV-df_aV.mean(), zmin=fzmin, zmax=fzmax, title=f"V-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+        # if 'V' in adcmap_selection_a_offset:
+            # fig = px.imshow(df_aV-df_aV.mean(), zmin=fzmin, zmax=fzmax, title=f"V-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig = make_static_img(df_aV-df_aV.mean(), zmin=fzmin, zmax=fzmax, title=f"V-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -585,8 +672,9 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        if 'U' in adcmap_selection_a_offset:
-            fig = px.imshow(df_aU-df_aU.mean(), zmin=fzmin, zmax=fzmax, title=f"U-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+        # if 'U' in adcmap_selection_a_offset:
+            # fig = px.imshow(df_aU-df_aU.mean(), zmin=fzmin, zmax=fzmax, title=f"U-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}", aspect='auto')
+            fig = make_static_img(df_aU-df_aU.mean(), zmin=fzmin, zmax=fzmax, title=f"U-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -599,15 +687,16 @@ def attach(app: Dash, engine) -> None:
             ]
 
 
-        df_a_cnr = df_a.copy()
-        df_a_cnr = df_a_cnr-df_a_cnr.mean()
-        for p, p_chans in planes_a.items():
-            for f,f_chans in engine.femb_to_offch.items():
-                chans = list(set(p_chans) & set(f_chans))
-                df_a_cnr[chans] = df_a_cnr[chans].sub(df_a_cnr[chans].mean(axis=1), axis=0)
+        if 'ADC_cnr' in adcmap_selection:
+            df_a_cnr = df_a.copy()
+            df_a_cnr = df_a_cnr-df_a_cnr.mean()
+            for p, p_chans in planes_a.items():
+                for f,f_chans in engine.femb_to_offch.items():
+                    chans = list(set(p_chans) & set(f_chans))
+                    df_a_cnr[chans] = df_a_cnr[chans].sub(df_a_cnr[chans].mean(axis=1), axis=0)
 
-        fzmin, fzmax = tr_color_range
-        if 'Z' in adcmap_selection_a_cnr:
+            fzmin, fzmax = tr_color_range
+        # if 'Z' in adcmap_selection_a_cnr:
             plot_title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}"
             if plot_two_plots:
                 plot_title += f", B: Run {info_b['run_number']}: {info_b['trigger_number']}"
@@ -623,7 +712,7 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        if 'V' in adcmap_selection_a_cnr:
+        # if 'V' in adcmap_selection_a_cnr:
             plot_title = f"V-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}"
             if plot_two_plots:
                 plot_title += f", B: Run {info_b['run_number']}: {info_b['trigger_number']}"
@@ -639,7 +728,7 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-        if 'U' in adcmap_selection_a_cnr:
+        # if 'U' in adcmap_selection_a_cnr:
             plot_title=f"U-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}"
             if plot_two_plots:
                 plot_title += f", B: Run {info_b['run_number']}: {info_b['trigger_number']}"

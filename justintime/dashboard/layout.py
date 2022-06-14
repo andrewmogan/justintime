@@ -92,85 +92,95 @@ def generate_control_card(brain):
             ),
             html.Br(),
             html.P("Trigger Record Display"),
-            html.Div(
-                'TR A planes :',
-                style={'display': 'inline-block'}
-            ),
             dcc.Checklist(
-                id='adcmap-selection-a',
+                id='adcmap_selection',
                 options=[
-                    {'label': 'Z', 'value': 'Z'},
-                    {'label': 'V', 'value': 'V'},
-                    {'label': 'U', 'value': 'U'},
-               ],
-                value=[],
-                labelStyle={'display': 'inline-block'},
-                style={'display': 'inline-block'},
+                    {'label': 'RAW ADC', 'value': 'RAW_ADC'},
+                    {'label': 'ADC-baseline', 'value': 'ADC_baseline'},
+                ],
+                value=[]
             ),
-            html.Br(),
-            html.Div(
-                'TR Reference (R) planes : ',
-                style={'display': 'inline-block'}
-            ),
-            dcc.Checklist(
-                id='adcmap-selection-b',
-                options=[
-                    {'label': 'Z', 'value': 'Z'},
-                    {'label': 'V', 'value': 'V'},
-                    {'label': 'U', 'value': 'U'},
-               ],
-                value=[],
-                labelStyle={'display': 'inline-block'},
-                style={'display': 'inline-block'},
-            ),
-            html.Br(),
-            html.Div(
-                'TR (A-R) planes : ',
-                style={'display': 'inline-block'}
-            ),
-            dcc.Checklist(
-                id='adcmap-selection-ab-diff',
-                options=[
-                    {'label': 'Z', 'value': 'Z'},
-                    {'label': 'V', 'value': 'V'},
-                    {'label': 'U', 'value': 'U'},
-               ],
-                value=[],
-                labelStyle={'display': 'inline-block'},
-                style={'display': 'inline-block'},
-            ),
-            html.Br(),
-            html.Div(
-                'TR A (Offset) planes : ',
-                style={'display': 'inline-block'}
-            ),
-            dcc.Checklist(
-                id='adcmap-selection-a-offset',
-                options=[
-                    {'label': 'Z', 'value': 'Z'},
-                    {'label': 'V', 'value': 'V'},
-                    {'label': 'U', 'value': 'U'},
-               ],
-                value=[],
-                labelStyle={'display': 'inline-block'},
-                style={'display': 'inline-block'},
-            ),
-            html.Br(),
-            html.Div(
-                'TR A (CNR) planes : ',
-                style={'display': 'inline-block'}
-            ),
-            dcc.Checklist(
-                id='adcmap-selection-a-cnr',
-                options=[
-                    {'label': 'Z', 'value': 'Z'},
-                    {'label': 'V', 'value': 'V'},
-                    {'label': 'U', 'value': 'U'},
-               ],
-                value=[],
-                labelStyle={'display': 'inline-block'},
-                style={'display': 'inline-block'},
-            ),
+            # html.Br(),
+            # html.P("Trigger Record Display"),
+            # html.Div(
+            #     'TR A (RAW) planes :',
+            #     style={'display': 'inline-block'}
+            # ),
+            # dcc.Checklist(
+            #     id='adcmap-selection-a',
+            #     options=[
+            #         {'label': 'Z', 'value': 'Z'},
+            #         {'label': 'V', 'value': 'V'},
+            #         {'label': 'U', 'value': 'U'},
+            #    ],
+            #     value=[],
+            #     labelStyle={'display': 'inline-block'},
+            #     style={'display': 'inline-block'},
+            # ),
+            # html.Br(),
+            # # html.Div(
+            # #     'TR Reference (R) planes : ',
+            # #     style={'display': 'inline-block'}
+            # # ),
+            # # dcc.Checklist(
+            # #     id='adcmap-selection-b',
+            # #     options=[
+            # #         {'label': 'Z', 'value': 'Z'},
+            # #         {'label': 'V', 'value': 'V'},
+            # #         {'label': 'U', 'value': 'U'},
+            # #    ],
+            # #     value=[],
+            # #     labelStyle={'display': 'inline-block'},
+            # #     style={'display': 'inline-block'},
+            # # ),
+            # # html.Br(),
+            # # html.Div(
+            # #     'TR (A-R) planes : ',
+            # #     style={'display': 'inline-block'}
+            # # ),
+            # # dcc.Checklist(
+            # #     id='adcmap-selection-ab-diff',
+            # #     options=[
+            # #         {'label': 'Z', 'value': 'Z'},
+            # #         {'label': 'V', 'value': 'V'},
+            # #         {'label': 'U', 'value': 'U'},
+            # #    ],
+            # #     value=[],
+            # #     labelStyle={'display': 'inline-block'},
+            # #     style={'display': 'inline-block'},
+            # # ),
+            # # html.Br(),
+            # html.Div(
+            #     'TR A (Offset) planes : ',
+            #     style={'display': 'inline-block'}
+            # ),
+            # dcc.Checklist(
+            #     id='adcmap-selection-a-offset',
+            #     options=[
+            #         {'label': 'Z', 'value': 'Z'},
+            #         {'label': 'V', 'value': 'V'},
+            #         {'label': 'U', 'value': 'U'},
+            #    ],
+            #     value=[],
+            #     labelStyle={'display': 'inline-block'},
+            #     style={'display': 'inline-block'},
+            # ),
+            # html.Br(),
+            # html.Div(
+            #     'TR A (CNR) planes : ',
+            #     style={'display': 'inline-block'}
+            # ),
+            # dcc.Checklist(
+            #     id='adcmap-selection-a-cnr',
+            #     options=[
+            #         {'label': 'Z', 'value': 'Z'},
+            #         {'label': 'V', 'value': 'V'},
+            #         {'label': 'U', 'value': 'U'},
+            #    ],
+            #     value=[],
+            #     labelStyle={'display': 'inline-block'},
+            #     style={'display': 'inline-block'},
+            # ),
             html.Br(),
             html.P("Color range"),
             dcc.RangeSlider(

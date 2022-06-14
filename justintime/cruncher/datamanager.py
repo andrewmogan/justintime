@@ -89,7 +89,6 @@ class RawDataManager:
         self.ch_map_name = ch_map_id
         self.ch_map = self.make_channel_map(ch_map_id) 
 
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
         self.offch_to_hw_map = self._init_o2h_map()
         self.femb_to_offch = {k: [int(x) for x in d] for k, d in groupby(self.offch_to_hw_map, self.femb_id_from_offch)}
 
@@ -186,6 +185,10 @@ class RawDataManager:
             logging.debug(f"Fragment code : {frag.get_fragment_type_code()}")
             logging.debug(f"Size          : {frag.get_size()}")
 
+            if geoid.system_type !=  daqdataformats.GeoID.kTPC:
+                logging.debug("Non-TPC TR - skipping")
+                continue
+
             n_frames = (frag.get_size()-frag_hdr.sizeof())//detdataformats.wib.WIBFrame.sizeof()
             # rich.print(f"Number of WIB frames: {n_frames}")
             if not n_frames:
@@ -203,7 +206,7 @@ class RawDataManager:
 
             df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(256)]))
             df = df.set_index('ts')
-            rich.print(df)
+            # rich.print(df)
 
             dfs.append(df)
 
@@ -211,11 +214,10 @@ class RawDataManager:
         # Sort columns (channels)
         tr_df = tr_df.reindex(sorted(tr_df.columns), axis=1)
         # Reverse timestamps (rows)
-        tr_df = tr_df[::-1]
+        # tr_df = tr_df[::-1]
         self.cache[uid] = (tr_info, tr_df)
         if len(self.cache) > self.max_cache_size:
             old_uid, _ = self.cache.popitem(False)
             logging.info(f"Removing {old_uid[0]}:{old_uid[1]} from cache")
 
-        print(tr_df)
         return tr_info, tr_df
