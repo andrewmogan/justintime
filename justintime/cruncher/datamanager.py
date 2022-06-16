@@ -8,6 +8,7 @@ import re
 import daqdataformats
 import detdataformats.wib
 import detdataformats.wib2
+import detdataformats.trigger_primitive
 import detchannelmaps
 import hdf5libs
 import rawdatautils.unpack.wib as protowib_unpack
@@ -18,6 +19,7 @@ import numpy as np
 import pandas as pd
 import collections
 import rich
+from rich import print
 from itertools import groupby
 
 """
@@ -129,34 +131,181 @@ class RawDataManager:
 
         return sorted(files, reverse=True, key=lambda f: os.path.getmtime(os.path.join(self.data_path, f)))
 
+    def has_trigger_records(self, file_name: str) -> list:
+        file_path = os.path.join(self.data_path, file_name)
+        rdf = hdf5libs.HDF5RawDataFile(file_path) # number of events = 10000 is not used
+        try:
+            _ = rdf.get_all_trigger_record_ids()
+            return True
+        except RuntimeError:
+            return False
+
+    def has_timeslices(self, file_name: str) -> list:
+        file_path = os.path.join(self.data_path, file_name)
+        rdf = hdf5libs.HDF5RawDataFile(file_path) # number of events = 10000 is not used
+        try:
+            return [ n for n,_ in rdf.get_all_timeslice_ids()]
+        except RuntimeError:
+            return []
 
     def get_trigger_record_list(self, file_name: str) -> list:
         file_path = os.path.join(self.data_path, file_name)
         rdf = hdf5libs.HDF5RawDataFile(file_path) # number of events = 10000 is not used
-        return [ n for n,_ in rdf.get_all_trigger_record_ids()]
-    
+        try:
+            return [ n for n,_ in rdf.get_all_trigger_record_ids()]
+        except RuntimeError:
+            return []
+
+    def get_timeslice_list(self, file_name: str) -> list:
+        file_path = os.path.join(self.data_path, file_name)
+        rdf = hdf5libs.HDF5RawDataFile(file_path) # number of events = 10000 is not used
+        try:
+            return [ n for n,_ in rdf.get_all_timeslice_ids()]
+        except RuntimeError:
+            return []
+
+
+    def get_entry_list(self, file_name: str) -> list:
+        trl = self.get_trigger_record_list(file_name)
+        tsl = self.get_timeslice_list(file_name)
+
+        return trl if trl else tsl
+
+
+    def load_entry(self, file_name: str, entry: int) -> list:
+        uid = (file_name, entry)
+        if uid in self.cache:
+            logging.info(f"{file_name}:{entry} already loaded. returning cached dataframe")
+            e_info, tpc_df, tp_df = self.cache[uid]
+            self.cache.move_to_end(uid, False)
+            return e_info, tpc_df, tp_df
+
+        file_path = os.path.join(self.data_path, file_name)
+        rdf = hdf5libs.HDF5RawDataFile(file_path) # number of events = 10000 is not used
+            
+        # Check if we're dealing with tr ot ts
+        has_trs = False
+        try:
+            _ = rdf.get_all_trigger_record_ids()
+            has_trs = True
+        except:
+            pass
+
+        has_tss = False
+        try:
+            _ = rdf.get_all_timeslice_ids()
+            has_tss = True
+        except:
+            pass
+
+        #----
+
+        if has_trs:
+            logging.debug(f"Trigger Records detected!")
+            get_ehdr = rdf.get_trh
+        elif has_tss:
+            logging.debug(f"TimeSlices detected!")
+            get_ehdr = rdf.get_tsh
+
+        else:
+            raise RuntimeError(f"No TriggerRecords nor TimeSlices found in {file_name}")
+
+        en_hdr = get_ehdr((entry,0))
+        en_geo_ids = rdf.get_geo_ids((entry, 0))
+
+        if has_trs:
+            en_info = {
+                'run_number': en_hdr.get_run_number(),
+                'trigger_number': en_hdr.get_trigger_number(),
+                'trigger_timestamp': en_hdr.get_trigger_timestamp(),
+            }
+            en_ts = en_hdr.get_trigger_timestamp()
+
+        elif has_tss:
+            en_info = {
+                'run_number': en_hdr.run_number,
+                'trigger_number': en_hdr.timeslice_number,
+                'trigger_timestamp': 0,
+            }
+            en_ts = 0
+
+        print(en_info)
+
+        tpc_dfs = []
+        tp_array = []
+        for geoid in en_geo_ids:
+            frag = rdf.get_frag((entry, 0),geoid)
+            frag_hdr = frag.get_header()
+
+            logging.debug(f"Inspecting {geoid.system_type} {geoid.region_id} {geoid.element_id}")
+            logging.debug(f"Run number : {frag.get_run_number()}")
+            logging.debug(f"Trigger number : {frag.get_trigger_number()}")
+            logging.debug(f"Trigger TS    : {frag.get_trigger_timestamp()}")
+            logging.debug(f"Window begin  : {frag.get_window_begin()}")
+            logging.debug(f"Window end    : {frag.get_window_end()}")
+            logging.debug(f"Fragment type : {frag.get_fragment_type()}")
+            logging.debug(f"Fragment code : {frag.get_fragment_type_code()}")
+            logging.debug(f"Size          : {frag.get_size()}")
+
+            if (geoid.system_type == daqdataformats.GeoID.kTPC and frag.get_fragment_type() == daqdataformats.FragmentType.kTPCData):
+                payload_size = (frag.get_size()-frag_hdr.sizeof())
+                if not payload_size:
+                    continue
+                rich.print(f"Number of WIB frames: {payload_size}")
+
+                det_id, crate_no, slot_no, link_no = self.get_hdr_info(frag)
+                logging.debug(f"crate: {crate_no}, slot: {slot_no}, fibre: {link_no}")
+
+                off_chans = [self.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(256)]
+
+                ts = self.frag_unpack.np_array_timestamp(frag)
+                adcs = self.frag_unpack.np_array_adc(frag)
+                ts = (ts - en_ts).astype('int64')
+                logging.debug(f"Unpacking {geoid.system_type} {geoid.region_id} {geoid.element_id} completed")
+
+                df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(256)]))
+                df = df.set_index('ts')
+                # rich.print(df)
+
+                tpc_dfs.append(df)
+
+            elif (geoid.system_type == daqdataformats.GeoID.kDataSelection or geoid.system_type == daqdataformats.GeoID.kTPC) and frag.get_fragment_type() == daqdataformats.FragmentType.kTriggerPrimitives:
+                tp_size = detdataformats.trigger_primitive.TriggerPrimitive.sizeof()
+                n_frames = (frag.get_size()-frag_hdr.sizeof())//tp_size
+                rich.print(f"Number of TPS frames: {n_frames}")
+                for i in range(n_frames):
+                    tp = detdataformats.trigger_primitive.TriggerPrimitive(frag.get_data(i*tp_size))
+                    # tp_array.append( (tp.time_peak-en_ts, tp.channel, tp.adc_peak) )
+                    tp_array.append( (tp.time_start-en_ts, tp.time_peak-en_ts, tp.time_over_threshold, tp.channel, tp.adc_integral, tp.adc_peak, tp.flag) )
+
+        tp_df = pd.DataFrame(tp_array, columns=['time_start', 'time_peak', 'time_over_threshold', 'channel', 'adc_integral', 'adc_peak', 'flag'])
+        
+        if tpc_dfs:
+            tpc_df = pd.concat(tpc_dfs, axis=1)
+            # Sort columns (channels)
+            tpc_df = tpc_df.reindex(sorted(tpc_df.columns), axis=1)
+        else:
+            tpc_df = pd.DataFrame( columns=['ts'])
+            tpc_df = tpc_df.set_index('ts')
+
+        self.cache[uid] = (en_info, tpc_df, tp_df)
+        if len(self.cache) > self.max_cache_size:
+            old_uid, _ = self.cache.popitem(False)
+            logging.info(f"Removing {old_uid[0]}:{old_uid[1]} from cache")
+
+        return en_info, tpc_df, tp_df
 
     def load_trigger_record(self, file_name: str, tr_num: int) -> list:
 
         uid = (file_name, tr_num)
         if uid in self.cache:
             logging.info(f"{file_name}:{tr_num} already loaded. returning cached dataframe")
-            tr_info, tr_df = self.cache[uid]
+            tr_info, tr_df, tp_df = self.cache[uid]
             self.cache.move_to_end(uid, False)
-            return tr_info, tr_df
+            return tr_info, tr_df, tp_df
 
         file_path = os.path.join(self.data_path, file_name)
         rdf = hdf5libs.HDF5RawDataFile(file_path) # number of events = 10000 is not used
-        # datasets = dd.get_datasets()
-
-        # TODO: replace with regex?
-        # frag_datasets = [ d for d in datasets if d.startswith(f'//TriggerRecord{tr_num:05}') and 'TriggerRecordHeader' not in d]
-        # trghdr_datasets = [ d for d in datasets if d.startswith(f'//TriggerRecord{tr_num:05}') and 'TriggerRecordHeader' in d]
-
-        # if len(trghdr_datasets) != 1:
-            # logging.warning(f"Multiple trigger record headers found {trghdr_datasets}")
-
-        # trghdr = dd.get_trh_ptr(trghdr_datasets[0])
 
         tr_hdr = rdf.get_trh((tr_num,0))
         tr_geo_ids = rdf.get_geo_ids((tr_num, 0))
@@ -170,7 +319,9 @@ class RawDataManager:
 
         tr_ts = tr_hdr.get_trigger_timestamp()
 
-        dfs = []
+
+        tpc_dfs = []
+        tp_array = []
         for geoid in tr_geo_ids:
             frag = rdf.get_frag((tr_num, 0),geoid)
             frag_hdr = frag.get_header()
@@ -185,39 +336,50 @@ class RawDataManager:
             logging.debug(f"Fragment code : {frag.get_fragment_type_code()}")
             logging.debug(f"Size          : {frag.get_size()}")
 
-            if geoid.system_type !=  daqdataformats.GeoID.kTPC:
-                logging.debug("Non-TPC TR - skipping")
-                continue
+            # if geoid.system_type !=  daqdataformats.GeoID.kTPC:
+                # logging.debug("Non-TPC TR - skipping")
+                # continue
 
-            n_frames = (frag.get_size()-frag_hdr.sizeof())//detdataformats.wib.WIBFrame.sizeof()
-            # rich.print(f"Number of WIB frames: {n_frames}")
-            if not n_frames:
-                continue
+            if geoid.system_type ==  daqdataformats.GeoID.kTPC:
+                payload_size = (frag.get_size()-frag_hdr.sizeof())
+                if not payload_size:
+                    continue
 
-            det_id, crate_no, slot_no, link_no = self.get_hdr_info(frag)
-            logging.debug(f"crate: {crate_no}, slot: {slot_no}, fibre: {link_no}")
+                det_id, crate_no, slot_no, link_no = self.get_hdr_info(frag)
+                logging.debug(f"crate: {crate_no}, slot: {slot_no}, fibre: {link_no}")
 
-            off_chans = [self.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(256)]
+                off_chans = [self.ch_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(256)]
 
-            ts = self.frag_unpack.np_array_timestamp(frag)
-            adcs = self.frag_unpack.np_array_adc(frag)
-            ts = (ts - tr_ts).astype('int64')
-            logging.debug(f"Unpacking {geoid.system_type} {geoid.region_id} {geoid.element_id} completed")
+                ts = self.frag_unpack.np_array_timestamp(frag)
+                adcs = self.frag_unpack.np_array_adc(frag)
+                ts = (ts - tr_ts).astype('int64')
+                logging.debug(f"Unpacking {geoid.system_type} {geoid.region_id} {geoid.element_id} completed")
 
-            df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(256)]))
-            df = df.set_index('ts')
-            # rich.print(df)
+                df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(256)]))
+                df = df.set_index('ts')
+                # rich.print(df)
 
-            dfs.append(df)
+                tpc_dfs.append(df)
 
-        tr_df = pd.concat(dfs, axis=1)
+            elif geoid.system_type == daqdataformats.GeoID.kDataSelection and frag.get_fragment_type() == daqdataformats.FragmentType.kTriggerPrimitives:
+                tp_size = detdataformats.trigger_primitive.TriggerPrimitive.sizeof()
+                n_frames = (frag.get_size()-frag_hdr.sizeof())//tp_size
+                rich.print(f"Number of TPS frames: {n_frames}")
+                for i in range(n_frames):
+                    tp = detdataformats.trigger_primitive.TriggerPrimitive(frag.get_data(i*tp_size))
+                    tp_array.append( (tp.time_peak-tr_ts, tp.channel, tp.adc_peak) )
+
+
+
+        tp_df = pd.DataFrame(tp_array, columns=['time', 'channel', 'adc_peak'])
+        # rich.print(tp_array)
+        tpc_df = pd.concat(tpc_dfs, axis=1)
         # Sort columns (channels)
-        tr_df = tr_df.reindex(sorted(tr_df.columns), axis=1)
-        # Reverse timestamps (rows)
-        # tr_df = tr_df[::-1]
-        self.cache[uid] = (tr_info, tr_df)
+        tpc_df = tpc_df.reindex(sorted(tpc_df.columns), axis=1)
+
+        self.cache[uid] = (tr_info, tpc_df, tp_df)
         if len(self.cache) > self.max_cache_size:
             old_uid, _ = self.cache.popitem(False)
             logging.info(f"Removing {old_uid[0]}:{old_uid[1]} from cache")
 
-        return tr_info, tr_df
+        return tr_info, tpc_df, tp_df

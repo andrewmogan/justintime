@@ -10,9 +10,10 @@ from pathlib import Path
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
+@click.option('-i', '--interactive', is_flag=True, default=False)
 @click.argument('file_path', type=click.Path(exists=True))
 
-def cli(file_path: str) -> None:
+def cli(interactive: bool, file_path: str) -> None:
 
     dp = Path(file_path)
     print(dp.parent)
@@ -22,21 +23,20 @@ def cli(file_path: str) -> None:
     rdm = RawDataManager(dp.parent, 'ProtoWIB', 'VDColdbox')
     data_files = sorted(rdm.list_files(), reverse=True)
     rich.print(data_files)
-    # for f in data_files[:1]:w
     f = dp.name
     rich.print(f)
-    trl = rdm.get_trigger_record_list(f)
+    trl = rdm.get_entry_list(f)
     rich.print(trl)
 
-    rich.print(f"Reading trigger record {trl[0]}")
-    info, df = rdm.load_trigger_record(f, trl[0])
+    rich.print(f"Reading entry {trl[0]}")
+    info, tpc_df, tp_df = rdm.load_entry(f, trl[0])
     rich.print(info)
+    rich.print(tpc_df)
+    rich.print(tp_df)
+    if interactive:
+        import IPython
+        IPython.embed()
 
-    rich.print(df)
-
-    #     df.reset_index(inplace=True)
-    #     df.to_feather("trigger_record.feather")
-    #     df.from_feather("trigger_record.feather")
 
 
 if __name__ == "__main__":
@@ -49,7 +49,4 @@ if __name__ == "__main__":
         handlers=[RichHandler(rich_tracebacks=True)]
     )
 
-    # if len(sys.argv) != 2:
-    #     rich.print(f"Usage: {sys.argv[0]} <dir>")
-    # main(sys.argv[1])
     cli()

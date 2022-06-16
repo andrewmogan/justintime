@@ -20,7 +20,7 @@ from PIL import Image
 from matplotlib import cm
 from matplotlib.colors import Normalize
 
-# import rich
+import rich
 
 from . layout import generate_tr_card
 
@@ -151,7 +151,7 @@ def attach(app: Dash, engine) -> None:
 
         if not raw_data_file:
             return []
-        tr_nums = [{'label':str(n), 'value':str(n)} for n in engine.get_trigger_record_list(raw_data_file)]
+        tr_nums = [{'label':str(n), 'value':str(n)} for n in engine.get_entry_list(raw_data_file)]
         logging.debug(f'Trigger nums: {tr_nums}')
         return tr_nums
 
@@ -165,7 +165,7 @@ def attach(app: Dash, engine) -> None:
 
         if not raw_data_file:
             return []
-        tr_nums = [{'label':str(n), 'value':str(n)} for n in engine.get_trigger_record_list(raw_data_file)]
+        tr_nums = [{'label':str(n), 'value':str(n)} for n in engine.get_entry_list(raw_data_file)]
         logging.debug(f'Trigger nums: {tr_nums}')
         return tr_nums
 
@@ -207,24 +207,29 @@ def attach(app: Dash, engine) -> None:
 
 
         # Load records
-        info_a, df_a = engine.load_trigger_record(raw_data_file_a, int(trig_rec_num_a))
+        info_a, df_a, tp_df_a = engine.load_entry(raw_data_file_a, int(trig_rec_num_a))
+        print(info_a, df_a, tp_df_a)
         # Timestamp information
         tr_ts_sec_a = info_a['trigger_timestamp']*20/1000000000
         dt_a = datetime.datetime.fromtimestamp(tr_ts_sec_a).strftime('%c')
 
         # #----
         if plot_two_plots:
-            info_b, df_b = engine.load_trigger_record(raw_data_file_b, int(trig_rec_num_b))
+            info_b, df_b, tp_df_b = engine.load_entry(raw_data_file_b, int(trig_rec_num_b))
             # Timestamp information
             ts_b = info_b['trigger_timestamp']*20/1000000000
             dt_b = datetime.datetime.fromtimestamp(ts_b).strftime('%c')
 
 
-        channels = list(set(df_a.columns) | set(df_b.columns)) if plot_two_plots else list(df_a.columns)
+        # channels = list(set(df_a.columns) | set(df_b.columns)) if plot_two_plots else list(df_a.columns)
+        # Watch out, VD specific
+        channels = list(range(0,3392))
+
         
 
         group_planes = groupby(channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
         planes = {k: [x for x in d if x] for k,d in group_planes}
+        # print(planes)
 
         # Splitting by plane
         planes_a = {k:sorted(set(v) & set(df_a.columns)) for k,v in planes.items()}
@@ -240,7 +245,7 @@ def attach(app: Dash, engine) -> None:
 
         if plot_two_plots:
             # Splitting by plane
-            planes_b = {k:list(set(v) & set(df_b.columns)) for k,v in planes.items()}
+            # planes_b = {k:list(set(v) & set(df_b.columns)) for k,v in planes.items()}
             df_bU = df_b[planes_b.get(0, {})]
             df_bV = df_b[planes_b.get(1, {})]
             df_bZ = df_b[planes_b.get(2, {})]
@@ -490,6 +495,135 @@ def attach(app: Dash, engine) -> None:
             ]
 
         #-------------
+        if 'TPs' in adcmap_selection:
+            fzmin, fzmax = tr_color_range
+
+            rich.print(tp_df_a)
+
+            tp_df_tsoff_a = tp_df_a.copy()
+            ts_min = tp_df_tsoff_a['time_start'].min()
+            tp_df_tsoff_a['time_peak'] = tp_df_tsoff_a['time_peak']-ts_min
+            tp_df_tsoff_a['time_start'] = tp_df_tsoff_a['time_start']-ts_min
+
+            tp_df_aU = tp_df_tsoff_a[tp_df_tsoff_a['channel'].isin(planes.get(0, {}))]
+            tp_df_aV = tp_df_tsoff_a[tp_df_tsoff_a['channel'].isin(planes.get(1, {}))]
+            tp_df_aZ = tp_df_tsoff_a[tp_df_tsoff_a['channel'].isin(planes.get(2, {}))]
+            tp_df_aO = tp_df_tsoff_a[tp_df_tsoff_a['channel'].isin(planes.get(9999, {}))]
+            rich.print(tp_df_aU)
+            rich.print(tp_df_aV)
+            rich.print(tp_df_aZ)
+            rich.print(tp_df_aO)
+
+            fig_w, fig_h = 1500, 1000
+
+            xmin_U = min(planes.get(0,{}))
+            xmax_U = max(planes.get(0,{}))
+            xmin_V = min(planes.get(1,{}))
+            xmax_V = max(planes.get(1,{}))
+            xmin_Z = min(planes.get(2,{}))
+            xmax_Z = max(planes.get(2,{}))
+            xmin_O = min(planes.get(9999,{}))
+            xmax_O = max(planes.get(9999,{}))
+
+            def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h):
+                if not df.empty:
+                    # fig=go.Figure()
+                    fig= make_subplots(
+                        rows=2, cols=1, 
+                        subplot_titles=(["TPs"]), 
+                        row_heights=[0.8, 0.2],
+                        vertical_spacing=0.05,
+                    )
+                    fig.add_trace(
+                        go.Scattergl(
+                            x=df['channel'],
+                            y=df['time_peak'],
+                            mode='markers', 
+                            marker=dict(
+                                size=16,
+                                color=df['adc_peak'], #set color equal to a variable
+                                colorscale='Plasma', # one of plotly colorscales
+                                cmin = cmin,
+                                cmax = cmax,
+                                showscale=True
+                                ),
+                            name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"
+                            ),
+                            row=1, col=1
+                        )
+                    rich.print(df['channel'])
+                    fig.add_trace(
+                        go.Histogram(x=df['channel'], name='channel', nbinsx=(xmax-xmin)), 
+                        row=2, col=1
+                    )
+
+
+                    # fig = px.scatter(df, x="channel", y="time", color='adc_peak')
+                    fig.update_xaxes(range=[xmin, xmax])
+
+                else:
+                    fig = go.Figure()
+                    fig.add_trace(
+                        go.Scatter(
+                            x=[xmin, xmax],
+                            mode="markers",
+                        )
+                    )
+                fig.update_layout(
+                    xaxis_title="Offline Channel",
+                    yaxis_title="Time ticks",
+                    width=fig_w,
+                    height=fig_h,
+                    yaxis = dict(autorange="reversed")
+                )
+                return fig
+
+
+            fig = make_tp_plot(tp_df_aZ, xmin_Z, xmax_Z, fzmin, fzmax, fig_w, fig_h)
+            children += [
+                        html.B("TPs: Z-plane"),
+                        html.Hr(),
+                        dcc.Graph(figure=fig),
+            ]
+
+            # fig = px.histogram(tp_df_aZ['channel'], x="channel")
+            # fig.update_layout(
+            #     xaxis=dict(range=[xmin_Z, xmax_Z]),
+            #     xaxis_title="Offline Channel",
+            #     yaxis_title="Counts",
+            #     width=fig_w,
+            # )
+
+            # children += [
+            #             html.B("TPs Occupancy: Z"),
+            #             html.Hr(),
+            #             dcc.Graph(figure=fig),
+            # ]
+
+
+            fig = make_tp_plot(tp_df_aV, xmin_V, xmax_V, fzmin, fzmax, fig_w, fig_h)
+            children += [
+                        html.B("TPs: V-plane"),
+                        html.Hr(),
+                        dcc.Graph(figure=fig),
+            ]
+            
+            fig = make_tp_plot(tp_df_aU, xmin_U, xmax_U, fzmin, fzmax, fig_w, fig_h)
+            children += [
+                        html.B("TPs: U-plane"),
+                        html.Hr(),
+                        dcc.Graph(figure=fig),
+            ]
+
+
+            fig = make_tp_plot(tp_df_aO, xmin_O, xmax_O, fzmin, fzmax, fig_w, fig_h)
+            children += [
+                        html.B("TPs: Others"),
+                        html.Hr(),
+                        dcc.Graph(figure=fig),
+            ]
+
+
         # Trigger Record Displays
         fig_w, fig_h = 1500, 1000
         fzmin, fzmax = tr_color_range
@@ -630,6 +764,8 @@ def attach(app: Dash, engine) -> None:
         childeren_to_return = [generate_tr_card("A", info_a['run_number'], info_a['trigger_number'], dt_a, raw_data_file_a)]
         if plot_two_plots:
             childeren_to_return.append(generate_tr_card("B", info_b['run_number'], info_b['trigger_number'], dt_b, raw_data_file_b))
+
+        logging.debug(f"Update completes")    
         return [
                 html.Div(
                     children= childeren_to_return

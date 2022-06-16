@@ -88,7 +88,7 @@ def generate_control_card(brain):
                     {'label': 'Fourier Transform', 'value': 'FFT'},
                     {'label': 'Fourier Transform Phase (22 kHz)', 'value': 'FFT_phase'},
                 ],
-                value=['Mean_STD', 'FFT']
+                value=['']
             ),
             html.Br(),
             html.P("Trigger Record Display"),
@@ -97,6 +97,7 @@ def generate_control_card(brain):
                 options=[
                     {'label': 'RAW ADC', 'value': 'RAW_ADC'},
                     {'label': 'ADC-baseline', 'value': 'ADC_baseline'},
+                    {'label': 'TPs', 'value': 'TPs'},
                 ],
                 value=[]
             ),
