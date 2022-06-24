@@ -111,6 +111,13 @@ def generate_control_card(brain):
                 value=[-192, 192],
                 marks={ v:f"{v}" for v in range(-1024, 1025, 256) }
             ),
+            html.P("Color Palette"),
+            dcc.Dropdown(
+                id="tr-color-palette-selector",
+                # multi=True,
+                options=[{'label': f, 'value':f} for f in ['Plasma', 'RdBu', 'RdBu_r']],
+                value='Plasma'
+            ),
             html.Br(),
             html.Button('Refresh Files', id='refresh_files', n_clicks=0),
             html.Button('Plot', id='plot_button', n_clicks=0),

@@ -42,8 +42,15 @@ def add_dunedaq_annotation(figure):
                    ))
 
 
-def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
+def make_static_img(df, zmin: int = None, zmax: int = None, palette:str = "Plasma", title: str = ""):
 
+    colorscale_map = {
+        'Plasma': ('Plasma', 'plasma'),
+        'RdBu': ('RdBu', 'RdBu'),
+        'RdBu_r': ('RdBu_r', 'RdBu_r'),
+    }
+
+    cs_pltly, cs_mpl = colorscale_map[palette]
 
     xmin, xmax = min(df.columns), max(df.columns)
     # ymin, ymax = min(df.index), max(df.index)
@@ -61,7 +68,7 @@ def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
 
     # Some normalization from matplotlib
     col_norm = Normalize(vmin=amin, vmax=amax)
-    scalarMap  = cm.ScalarMappable(norm=col_norm, cmap='plasma' )
+    scalarMap  = cm.ScalarMappable(norm=col_norm, cmap=cs_mpl )
     seg_colors = scalarMap.to_rgba(a) 
     img = Image.fromarray(np.uint8(seg_colors*255))
 
@@ -77,7 +84,7 @@ def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
             y=[ymin, ymax],
             mode="markers",
             marker={"color":[amin, amax],
-                    "colorscale":'Plasma',
+                    "colorscale":cs_pltly,
                     "showscale":True,
                     "colorbar":{
                         # "title":"Counts",
@@ -181,6 +188,7 @@ def attach(app: Dash, engine) -> None:
         State('plot_selection', 'value'),
         State('adcmap_selection', 'value'),
         State('tr-color-range-slider', 'value'),
+        State('tr-color-palette-selector', 'value'),
         )
     def update_plots(
         n_clicks,
@@ -191,7 +199,8 @@ def attach(app: Dash, engine) -> None:
         trig_rec_num_b,
         plot_selection,
         adcmap_selection,
-        tr_color_range
+        tr_color_range,
+        tr_color_palette,
         ):
         # ctx = dash.callback_context
         logging.debug(f"===Check is {check}===")
@@ -530,9 +539,12 @@ def attach(app: Dash, engine) -> None:
                     # fig=go.Figure()
                     fig= make_subplots(
                         rows=2, cols=1, 
-                        subplot_titles=(["TPs"]), 
+                        subplot_titles=(["Trigger Primitives"]), 
                         row_heights=[0.8, 0.2],
                         vertical_spacing=0.05,
+                        shared_xaxes=True,
+                        x_title="offline channel",
+                        y_title="time ticks",
                     )
                     fig.add_trace(
                         go.Scattergl(
@@ -547,7 +559,6 @@ def attach(app: Dash, engine) -> None:
                                 cmax = cmax,
                                 showscale=True
                                 ),
-                            name=f"Run {info_a['run_number']}: {info_a['trigger_number']}"
                             ),
                             row=1, col=1
                         )
@@ -570,11 +581,10 @@ def attach(app: Dash, engine) -> None:
                         )
                     )
                 fig.update_layout(
-                    xaxis_title="Offline Channel",
-                    yaxis_title="Time ticks",
                     width=fig_w,
                     height=fig_h,
-                    yaxis = dict(autorange="reversed")
+                    yaxis = dict(autorange="reversed"),
+                    title_text=f"Run {info_a['run_number']}: {info_a['trigger_number']}"
                 )
                 return fig
 
@@ -629,7 +639,7 @@ def attach(app: Dash, engine) -> None:
         fzmin, fzmax = tr_color_range
         # Waveforms A
         if 'RAW_ADC' in adcmap_selection:
-            fig = make_static_img(df_aZ, zmin=fzmin, zmax=fzmax, title=f"Z-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
+            fig = make_static_img(df_aZ, zmin=fzmin, zmax=fzmax, palette=tr_color_palette, title=f"Z-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -641,7 +651,7 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-            fig = make_static_img(df_aV, zmin=fzmin, zmax=fzmax, title=f"V-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
+            fig = make_static_img(df_aV, zmin=fzmin, zmax=fzmax, palette=tr_color_palette, title=f"V-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -653,7 +663,7 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-            fig = make_static_img(df_aU, zmin=fzmin, zmax=fzmax, title=f"U-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
+            fig = make_static_img(df_aU, zmin=fzmin, zmax=fzmax, palette=tr_color_palette, title=f"U-plane, A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -670,7 +680,7 @@ def attach(app: Dash, engine) -> None:
         # Trigger Record Displays
         # Waveforms A
         if 'ADC_baseline' in adcmap_selection:
-            fig = make_static_img(df_aZ-df_aZ.mean(), zmin=fzmin, zmax=fzmax, title=f"Z-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
+            fig = make_static_img(df_aZ-df_aZ.mean(), zmin=fzmin, zmax=fzmax, palette=tr_color_palette, title=f"Z-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -682,7 +692,7 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-            fig = make_static_img(df_aV-df_aV.mean(), zmin=fzmin, zmax=fzmax, title=f"V-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
+            fig = make_static_img(df_aV-df_aV.mean(), zmin=fzmin, zmax=fzmax, palette=tr_color_palette, title=f"V-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -694,7 +704,7 @@ def attach(app: Dash, engine) -> None:
                 dcc.Graph(figure=fig),
             ]
 
-            fig = make_static_img(df_aU-df_aU.mean(), zmin=fzmin, zmax=fzmax, title=f"U-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
+            fig = make_static_img(df_aU-df_aU.mean(), zmin=fzmin, zmax=fzmax, palette=tr_color_palette, title=f"U-plane (offset removal), A - A: Run {info_a['run_number']}: {info_a['trigger_number']}")
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -719,7 +729,7 @@ def attach(app: Dash, engine) -> None:
             plot_title=f"Z-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}"
             if plot_two_plots:
                 plot_title += f", B: Run {info_b['run_number']}: {info_b['trigger_number']}"
-            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, title=plot_title, aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[2]], zmin=fzmin, zmax=fzmax, palette=tr_color_palette, title=plot_title, aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -734,7 +744,7 @@ def attach(app: Dash, engine) -> None:
             plot_title = f"V-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}"
             if plot_two_plots:
                 plot_title += f", B: Run {info_b['run_number']}: {info_b['trigger_number']}"
-            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, title=plot_title, aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[1]], zmin=fzmin, zmax=fzmax, palette=tr_color_palette, title=plot_title, aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
@@ -749,7 +759,7 @@ def attach(app: Dash, engine) -> None:
             plot_title=f"U-plane, A (CNR) - A: Run {info_a['run_number']}: {info_a['trigger_number']}"
             if plot_two_plots:
                 plot_title += f", B: Run {info_b['run_number']}: {info_b['trigger_number']}"
-            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, title=plot_title, aspect='auto')
+            fig = px.imshow(df_a_cnr[planes_a[0]], zmin=fzmin, zmax=fzmax, palette=tr_color_palette, title=plot_title, aspect='auto')
             fig.update_layout(
                 width=fig_w,
                 height=fig_h,
