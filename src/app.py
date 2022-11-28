@@ -1,7 +1,7 @@
 from dash import Dash, html, dcc, callback_context
 from dash.dependencies import Input, Output, State
 import load_all as ld
-from cruncher.datamanager import RawDataManager
+from cruncher.datamanager import DataManager
 from all_data import all_data_storage
 import click
 import rich
@@ -14,6 +14,8 @@ import rich
 @click.argument('frame_type', type=click.Choice(['ProtoWIB', 'WIB']))
 def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str):
 
+	channel_map_id += 'ChannelMap'
+
 	dash_app = Dash(__name__)
 	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id)
 	debug=True
@@ -21,13 +23,13 @@ def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str):
 
 
 def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
-	#engine = RawDataManager("/home/gkokkoro/git/About_time_workarea/sourcecode/data/", "ProtoWIB", 'VDColdbox')
-	engine = RawDataManager(raw_data_path, frame_type, channel_map_id)
+	#engine = DataManager("/home/gkokkoro/git/About_time_workarea/sourcecode/data/", "ProtoWIB", 'VDColdbox')
+	engine = DataManager(raw_data_path, frame_type, channel_map_id)
 
 
 	data_files = engine.list_files()
 	rich.print(data_files)
-	#engine = RawDataManager("/tmp/", 'VDColdboxChannelMap')
+	#engine = DataManager("/tmp/", 'VDColdboxChannelMap')
 	all_storage = all_data_storage(engine)
 	pages, plots, ctrls = ld.get_elements(dash_app = dash_app, engine = engine, storage = all_storage)
 	

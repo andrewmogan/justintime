@@ -1,6 +1,7 @@
 from itertools import groupby
 import datetime
 from cruncher import signal
+import rich
 
 class all_data_storage:
 	def __init__(self, engine):
@@ -30,8 +31,10 @@ class all_data_storage:
 class trigger_record_data:
 	def __init__(self, engine, trigger_record, raw_data_file):
 		self.engine = engine
-		self.info, self.df, self.tp_df = engine.load_entry(raw_data_file, int(trigger_record))
-		self.tr_ts_sec = self.info['trigger_timestamp']*20/1000000000
+		self.info, self.df, self.tp_df, self.fwtp_df = engine.load_entry(raw_data_file, int(trigger_record))
+		self.tr_ts_sec = self.info['trigger_timestamp']*20/1000000000 # Move to 63.5 MHz
+		rich.print(self.tr_ts_sec)
+		rich.print(self.info)
 		self.dt = datetime.datetime.fromtimestamp(self.tr_ts_sec).strftime('%c')
 		self.channels = list(self.df.columns)
 		self.group_planes = groupby(self.channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
@@ -74,15 +77,16 @@ class trigger_record_data:
 			self.fft_phase[f"{fmin}-{fmax}"]['plane'] = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.find_plane)
 	
 	def init_tp(self):
+		rich.print(self.tp_df)
 		self.tp_df_tsoff = self.tp_df.copy()
-		self.ts_min = self.tp_df_tsoff['time_start'].min()
-		self.tp_df_tsoff['time_peak'] = self.tp_df_tsoff['time_peak']-self.ts_min
-		self.tp_df_tsoff['time_start'] = self.tp_df_tsoff['time_start']-self.ts_min
+		self.ts_min = self.tp_df_tsoff['start_time'].min()
+		self.tp_df_tsoff['peak_time'] = self.tp_df_tsoff['peak_time']-self.ts_min
+		self.tp_df_tsoff['start_time'] = self.tp_df_tsoff['start_time']-self.ts_min
 
-		self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(0, {}))]
-		self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(1, {}))]
-		self.tp_df_Z = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(2, {}))]
-		self.tp_df_O = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(9999, {}))]
+		self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(0, {}))]
+		self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(1, {}))]
+		self.tp_df_Z = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(2, {}))]
+		self.tp_df_O = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(9999, {}))]
 
 		self.xmin_U = min(self.planes.get(0,{}))
 		self.xmax_U = max(self.planes.get(0,{}))

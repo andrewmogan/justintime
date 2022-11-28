@@ -118,7 +118,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 		fig.add_trace(
 			go.Scattergl(
 				x=df['channel'],
-				y=df['time_peak'],
+				y=df['peak_time'],
 				mode='markers', 
 				marker=dict(
 					size=16,
