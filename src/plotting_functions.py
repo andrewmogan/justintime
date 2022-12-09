@@ -34,10 +34,8 @@ def selection_line(raw_data_file, trigger_record):
 def make_static_img(df, t0_min,zmin: int = None, zmax: int = None, title: str = ""):
 
 	xmin, xmax = min(df.columns), max(df.columns)
-	rich.print(xmin,xmax)
 	#ymin, ymax = min(df.index), max(df.index)
 	ymin, ymax = max(df.index), min(df.index)
-	rich.print(ymin,ymax)
 	col_range = list(range(ymax, ymin))
 	
 	df = df.reindex(index=col_range, fill_value=0)
