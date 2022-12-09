@@ -2,6 +2,7 @@ from itertools import groupby
 import datetime
 from cruncher import signal
 import rich
+from dash import Dash, html
 
 class all_data_storage:
 	def __init__(self, engine):
@@ -27,11 +28,19 @@ class all_data_storage:
 		self.raw_data_files[raw_data_file] = {}
 		return(self.add_trigger_record_to_file(trigger_record, raw_data_file))
 
-
+_cache=None
 class trigger_record_data:
+	
 	def __init__(self, engine, trigger_record, raw_data_file):
 		self.engine = engine
 		self.info, self.df, self.tp_df, self.fwtp_df = engine.load_entry(raw_data_file, int(trigger_record))
+
+		global _cache 
+		if _cache is None:
+			_cache = self.df.index.min()
+		self.t0_min=_cache
+		self.df.index=self.df.index-self.df.index.min()
+
 		self.tr_ts_sec = self.info['trigger_timestamp']*20/1000000000 # Move to 63.5 MHz
 		rich.print(self.tr_ts_sec)
 		rich.print(self.info)
@@ -47,6 +56,7 @@ class trigger_record_data:
 		self.df_V_mean, self.df_V_std = self.df_V.mean(), self.df_V.std()
 		self.df_Z_mean, self.df_Z_std = self.df_Z.mean(), self.df_Z.std()
 		self.fft_phase = {}
+
 
 	def find_plane(self, offch):
 		m={0:'U', 1:'V', 2:'Z'}
@@ -72,10 +82,13 @@ class trigger_record_data:
 		except AttributeError: self.df_fft = signal.calc_fft(self.df)
 		try: self.fft_phase[f"{fmin}-{fmax}"]
 		except KeyError:
-			self.fft_phase[f"{fmin}-{fmax}"] = signal.calc_fft_phase(self.df_fft, fmin, fmax)
-			self.fft_phase[f"{fmin}-{fmax}"]['femb']  = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.engine.femb_id_from_offch)
-			self.fft_phase[f"{fmin}-{fmax}"]['plane'] = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.find_plane)
-	
+			try:
+				self.fft_phase[f"{fmin}-{fmax}"] = signal.calc_fft_phase(self.df_fft, fmin, fmax)
+				self.fft_phase[f"{fmin}-{fmax}"]['femb']  = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.engine.femb_id_from_offch)
+				self.fft_phase[f"{fmin}-{fmax}"]['plane'] = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.find_plane)
+			except (KeyError,ValueError):
+				pass # some code here that communicates to the user that there is nothing within that range.
+
 	def init_tp(self):
 		rich.print(self.tp_df)
 		self.tp_df_tsoff = self.tp_df.copy()
@@ -87,15 +100,15 @@ class trigger_record_data:
 		self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(1, {}))]
 		self.tp_df_Z = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(2, {}))]
 		self.tp_df_O = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(9999, {}))]
-
-		self.xmin_U = min(self.planes.get(0,{}))
-		self.xmax_U = max(self.planes.get(0,{}))
-		self.xmin_V = min(self.planes.get(1,{}))
-		self.xmax_V = max(self.planes.get(1,{}))
-		self.xmin_Z = min(self.planes.get(2,{}))
-		self.xmax_Z = max(self.planes.get(2,{}))
-		self.xmin_O = min(self.planes.get(9999,{}))
-		self.xmax_O = max(self.planes.get(9999,{}))
+		
+		self.xmin_U = min(self.planes.get(0,{}),default=0)
+		self.xmax_U = max(self.planes.get(0,{}),default=0)
+		self.xmin_V = min(self.planes.get(1,{}),default=0)
+		self.xmax_V = max(self.planes.get(1,{}),default=0)
+		self.xmin_Z = min(self.planes.get(2,{}),default=0)
+		self.xmax_Z = max(self.planes.get(2,{}),default=0)
+		self.xmin_O = min(self.planes.get(9999,{}),default=0)
+		self.xmax_O = max(self.planes.get(9999,{}),default=0)
 
 
 	# def init_fft_phase_22(self):

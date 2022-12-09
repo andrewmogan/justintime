@@ -2,7 +2,9 @@ from dash import Dash, html, dcc, callback_context
 from dash.dependencies import Input, Output, State
 import load_all as ld
 from cruncher.datamanager import DataManager
+from navbar import create_navbar
 from all_data import all_data_storage
+import dash_bootstrap_components as dbc
 import click
 import rich
 
@@ -16,7 +18,7 @@ def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str):
 
 	channel_map_id += 'ChannelMap'
 
-	dash_app = Dash(__name__)
+	dash_app = Dash(__name__,external_stylesheets=[dbc.themes.COSMO])
 	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id)
 	debug=True
 	dash_app.run_server(debug=debug, host='0.0.0.0', port=port)
@@ -34,29 +36,36 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
 	pages, plots, ctrls = ld.get_elements(dash_app = dash_app, engine = engine, storage = all_storage)
 	
 	layout = []
-	layout.append(html.Div(id="description-card",children=[html.H5("Just-in-Time"), html.H4("(Proto)DUNE"), html.H4("Prompt-Feedback")]))
-	layout.append(html.Div([html.Button(page.name, id = page.id, n_clicks=0) for page in pages], id = "page_button_div"))
+	layout.append(create_navbar(pages)) #TEMPORARY
+	layout.append(html.Div([dcc.Location(id='url', refresh=False),html.Div(id='page-content')])) #TEMPORARY
+	layout.append(html.Div(id="description-card",children=[html.H1("Just-in-Time"), html.H4("(Proto)DUNE: Prompt-Feedback")]))
+	#layout.append(html.Div(dcc.Dropdown(options=[{'label':page.name,'value':page.id} for page in pages],id='demo-dropdown')))
 	layout.append(html.Div([ctrl.div for ctrl in ctrls], id = "ctrls_div"))
 	layout.append(html.Div([plot.div for plot in plots], id = "plots_div"))
 	init_page_callback(dash_app, all_storage)
+	#sec_callback(dash_app,all_storage)
 
 	dash_app.layout = html.Div(layout)
 
+
 def init_page_callback(dash_app, all_storage):
 	pages, plots, ctrls = ld.get_elements()
-	page_inputs = [Input(page.id, "n_clicks") for page in pages]
+	
 	plot_outputs = [Output(plot.id, "style") for plot in plots]
 	ctrl_outputs = [Output(ctrl.id, "style") for ctrl in ctrls]
+	
+	@dash_app.callback(*ctrl_outputs,*plot_outputs,[Input('url', 'pathname')])
 
-	@dash_app.callback(*ctrl_outputs,*plot_outputs, *page_inputs)
-	def page_button_callback(*buttons):
+	def page_button_callback(pathname):
 		pages, plots, ctrls = ld.get_elements()
 		style_list = [{"display":"none"} for _ in range(len(plots)+len(ctrls))]
-		changed_id = [p['prop_id'] for p in callback_context.triggered][0]
 		for page in pages:
-			if page.id in changed_id:
-				return(calculate_page_style_list(page, plots, ctrls, style_list, all_storage))
+			if pathname:
+				if f"/{page.id}" in pathname:
+			
+					return(calculate_page_style_list(page, plots, ctrls, style_list, all_storage))
 		return(style_list)
+
 
 def calculate_page_style_list(page, plots, ctrls, style_list, all_storage):
 	needed_plots = []

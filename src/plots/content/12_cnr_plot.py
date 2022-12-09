@@ -4,15 +4,17 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 from dash.dependencies import Input, Output, State
+from dash_bootstrap_templates import load_figure_template
 import numpy as np
 import pandas as pd
-from plotting_functions import add_dunedaq_annotation, selection_line, make_static_img
+from all_data import trigger_record_data
+from plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot
 
 
 def return_obj(dash_app, engine, storage):
 	plot_id = "12_cnr_plot"
 	plot_div = html.Div(id = plot_id)
-
+	load_figure_template("COSMO")
 	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage)
 	plot.add_ctrl("04_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
@@ -39,69 +41,72 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
-				data.init_cnr()
-				fig_w, fig_h = 1500, 1000
-				fzmin, fzmax = tr_color_range
-				children = []
+				if len(data.df)!=0:
+					data.init_cnr()
+					fig_w, fig_h = 1500, 1000
+					fzmin, fzmax = tr_color_range
+					children = []
 
-				if 'Z' in adcmap_selection:
-					title = f"Z-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}"
-					if "make_static_image" in static_image:
-						fig = make_static_img(data.df_cnr[data.planes.get(2, {})], zmin = fzmin, zmax = fzmax, title = title)
+					if 'Z' in adcmap_selection:
+						title = f"Z-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+						if "make_static_image" in static_image:
+							fig = make_static_img(data.df_cnr[data.planes.get(2, {})].T,trigger_record_data(engine,trigger_record,raw_data_file).t0_min, zmin = fzmin, zmax = fzmax, title = title)
+						else:
+							fig = px.imshow(data.df_cnr[data.planes.get(2, {})].T, zmin=fzmin, zmax=fzmax, title=title, aspect='auto')
+							fig.update_layout(
+								width=fig_w,
+								height=fig_h,
+							)
+						add_dunedaq_annotation(fig)
+						children += [
+							html.B("ADC Counts: Z-plane (CNR)"),
+							html.Hr(),
+							dcc.Graph(figure=fig),
+						]
+
+					if 'V' in adcmap_selection:
+						title = f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+						if "make_static_image" in static_image:
+							fig = make_static_img(data.df_cnr[data.planes.get(1, {})].T, trigger_record_data(engine,trigger_record,raw_data_file).t0_min,zmin = fzmin, zmax = fzmax, title = title)
+						else:
+							fig = px.imshow(data.df_cnr[data.planes.get(1, {})].T,trigger_record_data(engine,trigger_record,raw_data_file).t0_min, zmin=fzmin, zmax=fzmax, title=f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
+							fig.update_layout(
+								width=fig_w,
+								height=fig_h,
+							)
+						add_dunedaq_annotation(fig)
+						children += [
+							html.B("ADC Counts: V-plane (CNR)"),
+							html.Hr(),
+							dcc.Graph(figure=fig),
+						]
+
+					if 'U' in adcmap_selection:
+						title = f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+						if "make_static_image" in static_image:
+							fig = make_static_img(data.df_cnr[data.planes.get(0, {})].T,trigger_record_data(engine,trigger_record,raw_data_file).t0_min, zmin = fzmin, zmax = fzmax, title = title)
+						else:
+							fig = px.imshow(data.df_cnr[data.planes.get(0, {})].T, trigger_record_data(engine,trigger_record,raw_data_file).t0_min,zmin=fzmin, zmax=fzmax, title=f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
+							fig.update_layout(
+								width=fig_w,
+								height=fig_h,
+							)
+						add_dunedaq_annotation(fig)
+						children += [
+							html.B("ADC Counts: U-plane (CNR)"),
+							html.Hr(),
+							dcc.Graph(figure=fig),
+						]
+
+					
+					if adcmap_selection:
+						return(html.Div([
+							selection_line(raw_data_file, trigger_record),
+							html.Hr(),
+							html.Div(children)]))
 					else:
-						fig = px.imshow(data.df_cnr[data.planes.get(2, {})], zmin=fzmin, zmax=fzmax, title=title, aspect='auto')
-						fig.update_layout(
-							width=fig_w,
-							height=fig_h,
-						)
-					add_dunedaq_annotation(fig)
-					children += [
-						html.B("ADC Counts: Z-plane (CNR)"),
-						html.Hr(),
-						dcc.Graph(figure=fig),
-					]
-
-				if 'V' in adcmap_selection:
-					title = f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}"
-					if "make_static_image" in static_image:
-						fig = make_static_img(data.df_cnr[data.planes.get(1, {})], zmin = fzmin, zmax = fzmax, title = title)
-					else:
-						fig = px.imshow(data.df_cnr[data.planes.get(1, {})], zmin=fzmin, zmax=fzmax, title=f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
-						fig.update_layout(
-							width=fig_w,
-							height=fig_h,
-						)
-					add_dunedaq_annotation(fig)
-					children += [
-						html.B("ADC Counts: V-plane (CNR)"),
-						html.Hr(),
-						dcc.Graph(figure=fig),
-					]
-
-				if 'U' in adcmap_selection:
-					title = f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}"
-					if "make_static_image" in static_image:
-						fig = make_static_img(data.df_cnr[data.planes.get(0, {})], zmin = fzmin, zmax = fzmax, title = title)
-					else:
-						fig = px.imshow(data.df_cnr[data.planes.get(0, {})], zmin=fzmin, zmax=fzmax, title=f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
-						fig.update_layout(
-							width=fig_w,
-							height=fig_h,
-						)
-					add_dunedaq_annotation(fig)
-					children += [
-						html.B("ADC Counts: U-plane (CNR)"),
-						html.Hr(),
-						dcc.Graph(figure=fig),
-					]
-
-				
-				if adcmap_selection:
-					return(html.Div([
-						selection_line(raw_data_file, trigger_record),
-						html.Hr(),
-						html.Div(children)]))
+						return(html.Div("No adc map selected"))
 				else:
-					return(html.Div("No adc map selected"))
+					return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)
 		return(html.Div())

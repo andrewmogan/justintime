@@ -214,9 +214,9 @@ class DataManager:
         uid = (file_name, entry)
         if uid in self.cache:
             logging.info(f"{file_name}:{entry} already loaded. returning cached dataframe")
-            e_info, tpc_df, tp_df = self.cache[uid]
+            en_info, tpc_df, tp_df, fwtp_df = self.cache[uid]
             self.cache.move_to_end(uid, False)
-            return e_info, tpc_df, tp_df
+            return en_info, tpc_df, tp_df, fwtp_df
 
         file_path = os.path.join(self.data_path, file_name)
         rdf = hdf5libs.HDF5RawDataFile(file_path) # number of events = 10000 is not used

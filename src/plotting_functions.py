@@ -4,9 +4,10 @@ from PIL import Image
 from matplotlib import cm
 from matplotlib.colors import Normalize
 import numpy as np
+import rich
+from all_data import trigger_record_data
 from plotly.subplots import make_subplots
-
-
+from all_data import trigger_record_data
 
 def add_dunedaq_annotation(figure):
 	figure.add_annotation(dict(font=dict(color="black",size=12),
@@ -30,14 +31,16 @@ def selection_line(raw_data_file, trigger_record):
 		html.Br(),html.B("selected trigger record:"),
 		html.Br(),html.Div(trigger_record),html.Hr()]))
 
-def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
+def make_static_img(df, t0_min,zmin: int = None, zmax: int = None, title: str = ""):
 
 	xmin, xmax = min(df.columns), max(df.columns)
-	# ymin, ymax = min(df.index), max(df.index)
+	rich.print(xmin,xmax)
+	#ymin, ymax = min(df.index), max(df.index)
 	ymin, ymax = max(df.index), min(df.index)
-	col_range = list(range(xmin, xmax))
-
-	df = df.reindex(columns=col_range, fill_value=0)
+	rich.print(ymin,ymax)
+	col_range = list(range(ymax, ymin))
+	
+	df = df.reindex(index=col_range, fill_value=0)
 
 	img_width = df.columns.size
 	img_height = df.index.size
@@ -76,6 +79,8 @@ def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
 	)
 
 	# Add image
+
+
 	fig.update_layout(
 		images=[go.layout.Image(
 			x=xmin,
@@ -95,8 +100,8 @@ def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
 		title=title,
 		xaxis=dict(showgrid=False, zeroline=False, range=[xmin, xmax]),
 		yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
-		xaxis_title="Offline Channel",
-		yaxis_title="Time ticks",
+		yaxis_title="Offline Channel",
+		xaxis_title="Time ticks",
 	)
 
 	# fig.show(config={'doubleClick': 'reset'})
@@ -117,12 +122,12 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 		)
 		fig.add_trace(
 			go.Scattergl(
-				x=df['channel'],
+				x=df['offline_ch'],
 				y=df['peak_time'],
 				mode='markers', 
 				marker=dict(
 					size=16,
-					color=df['adc_peak'], #set color equal to a variable
+					color=df['peak_adc'], #set color equal to a variable
 					colorscale='Plasma', # one of plotly colorscales
 					cmin = cmin,
 					cmax = cmax,
@@ -132,7 +137,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 				row=1, col=1
 			)
 		fig.add_trace(
-			go.Histogram(x=df['channel'], name='channel', nbinsx=(xmax-xmin)), 
+			go.Histogram(x=df["offline_ch"], name='channel', nbinsx=(xmax-xmin)), 
 			row=2, col=1
 		)
 
@@ -152,6 +157,10 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 		width=fig_w,
 		height=fig_h,
 		yaxis = dict(autorange="reversed"),
-		title_text=f"Run {info['run_number']}: {info['trigger_number']}"
-	)
+		title_text=f"Run {info['run_number']}: {info['trigger_number']}")
+	
+
 	return fig
+
+def nothing_to_plot():
+	return "Nothing to plot"
