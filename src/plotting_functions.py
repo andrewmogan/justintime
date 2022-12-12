@@ -31,7 +31,7 @@ def selection_line(raw_data_file, trigger_record):
 		html.Br(),html.B("selected trigger record:"),
 		html.Br(),html.Div(trigger_record),html.Hr()]))
 
-def make_static_img(df, t0_min,zmin: int = None, zmax: int = None, title: str = ""):
+def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
 
 	xmin, xmax = min(df.columns), max(df.columns)
 	#ymin, ymax = min(df.index), max(df.index)

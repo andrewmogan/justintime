@@ -56,7 +56,7 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 						if "offset_removal" in offset:
 							title = "Z-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_Z - data.df_Z_mean).T, trigger_record_data(engine,trigger_record,raw_data_file).t0_min,zmin = fzmin, zmax = fzmax,title=title)
+								fig = make_static_img((data.df_Z - data.df_Z_mean).T, zmin = fzmin, zmax = fzmax,title=title)
 							else:
 								fig = px.imshow((data.df_Z - data.df_Z_mean).T, zmin=fzmin, zmax=fzmax, title=title,aspect="auto")
 								fig.update_layout(
@@ -68,8 +68,7 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 							title = f"Z-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 						
 							if "make_static_image" in static_image:
-								fig = make_static_img(data.df_Z.T, trigger_record_data(engine,trigger_record,raw_data_file).t0_min,zmin = fzmin, zmax = fzmax, title = title)
-								
+								fig = make_static_img(data.df_Z.T, zmin = fzmin, zmax = fzmax, title = title)
 							else:
 								fig = px.imshow(data.df_Z.T, title=title, aspect='auto')
 								fig.update_layout(
@@ -88,7 +87,7 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 						if "offset_removal" in offset:
 							title = "V-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_V - data.df_V_mean).T, trigger_record_data(engine,trigger_record,raw_data_file).t0_min,zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img((data.df_V - data.df_V_mean).T, zmin = fzmin, zmax = fzmax, title = title)
 							else:
 								fig = px.imshow((data.df_V - data.df_V_mean).T, zmin=fzmin, title=title, aspect='auto')
 								fig.update_layout(
@@ -98,7 +97,7 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 						else:
 							title = f"V-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img(data.df_V.T,trigger_record_data(engine,trigger_record,raw_data_file).t0_min, zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img(data.df_V.T, zmin = fzmin, zmax = fzmax, title = title)
 							else:
 								fig = px.imshow(data.df_V.T, title=title, aspect='auto')
 								fig.update_layout(
@@ -117,7 +116,7 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 						if "offset_removal" in offset:
 							title ="U-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_U - data.df_U_mean).T, trigger_record_data(engine,trigger_record,raw_data_file).t0_min,zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img((data.df_U - data.df_U_mean).T, zmin = fzmin, zmax = fzmax, title = title)
 							else:
 								fig = px.imshow((data.df_U - data.df_U_mean).T, zmin=fzmin, title=title, aspect="auto")
 								
@@ -128,7 +127,7 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 						else:
 							title = f"U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img(data.df_U.T, trigger_record_data(engine,trigger_record,raw_data_file).t0_min, zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img(data.df_U.T,  zmin = fzmin, zmax = fzmax, title = title)
 							else:
 								fig = px.imshow(data.df_U.T, title=title, aspect='auto')
 								fig.update_layout(

@@ -50,7 +50,7 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 					if 'Z' in adcmap_selection:
 						title = f"Z-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 						if "make_static_image" in static_image:
-							fig = make_static_img(data.df_cnr[data.planes.get(2, {})].T,trigger_record_data(engine,trigger_record,raw_data_file).t0_min, zmin = fzmin, zmax = fzmax, title = title)
+							fig = make_static_img(data.df_cnr[data.planes.get(2, {})].T, zmin = fzmin, zmax = fzmax, title = title)
 						else:
 							fig = px.imshow(data.df_cnr[data.planes.get(2, {})].T, zmin=fzmin, zmax=fzmax, title=title, aspect='auto')
 							fig.update_layout(
@@ -67,9 +67,9 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 					if 'V' in adcmap_selection:
 						title = f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 						if "make_static_image" in static_image:
-							fig = make_static_img(data.df_cnr[data.planes.get(1, {})].T, trigger_record_data(engine,trigger_record,raw_data_file).t0_min,zmin = fzmin, zmax = fzmax, title = title)
+							fig = make_static_img(data.df_cnr[data.planes.get(1, {})].T, zmin = fzmin, zmax = fzmax, title = title)
 						else:
-							fig = px.imshow(data.df_cnr[data.planes.get(1, {})].T,trigger_record_data(engine,trigger_record,raw_data_file).t0_min, zmin=fzmin, zmax=fzmax, title=f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
+							fig = px.imshow(data.df_cnr[data.planes.get(1, {})].T, zmin=fzmin, zmax=fzmax, title=f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
 							fig.update_layout(
 								width=fig_w,
 								height=fig_h,
@@ -84,9 +84,9 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 					if 'U' in adcmap_selection:
 						title = f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 						if "make_static_image" in static_image:
-							fig = make_static_img(data.df_cnr[data.planes.get(0, {})].T,trigger_record_data(engine,trigger_record,raw_data_file).t0_min, zmin = fzmin, zmax = fzmax, title = title)
+							fig = make_static_img(data.df_cnr[data.planes.get(0, {})].T, zmin = fzmin, zmax = fzmax, title = title)
 						else:
-							fig = px.imshow(data.df_cnr[data.planes.get(0, {})].T, trigger_record_data(engine,trigger_record,raw_data_file).t0_min,zmin=fzmin, zmax=fzmax, title=f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
+							fig = px.imshow(data.df_cnr[data.planes.get(0, {})].T, zmin=fzmin, zmax=fzmax, title=f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
 							fig.update_layout(
 								width=fig_w,
 								height=fig_h,
