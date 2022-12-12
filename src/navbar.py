@@ -24,8 +24,7 @@ def create_navbar(pages):
                     # is the URL extension.
                     dbc.DropdownMenuItem("Home", href='/'), # Hyperlink item that appears in the dropdown menu
                     html.Div([dbc.DropdownMenuItem(page.name, href=f"/{page.id}") for page in pages]),
-
-                
+   
         ] 
             ),
         ],

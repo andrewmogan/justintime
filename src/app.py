@@ -4,6 +4,9 @@ import load_all as ld
 from cruncher.datamanager import DataManager
 from navbar import create_navbar
 from all_data import all_data_storage
+
+from dash_bootstrap_templates import ThemeSwitchAIO
+from dash_bootstrap_templates import load_figure_template
 import dash_bootstrap_components as dbc
 import click
 import rich
@@ -17,14 +20,20 @@ import rich
 def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str):
 
 	channel_map_id += 'ChannelMap'
-
 	dash_app = Dash(__name__,external_stylesheets=[dbc.themes.COSMO])
-	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id)
+	theme_switch = ThemeSwitchAIO(
+    aio_id="theme", themes=[dbc.themes.COSMO, dbc.themes.SUPERHERO]
+	)
+	#templates=[dbc.themes.COSMO, dbc.themes.SUPERHERO]
+	#load_figure_template(templates)
+	rich.print(theme_switch)
+
+	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,theme_switch)
 	debug=True
 	dash_app.run_server(debug=debug, host='0.0.0.0', port=port)
 
 
-def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
+def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,theme):
 	#engine = DataManager("/home/gkokkoro/git/About_time_workarea/sourcecode/data/", "ProtoWIB", 'VDColdbox')
 	engine = DataManager(raw_data_path, frame_type, channel_map_id)
 
@@ -33,30 +42,33 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
 	rich.print(data_files)
 	#engine = DataManager("/tmp/", 'VDColdboxChannelMap')
 	all_storage = all_data_storage(engine)
-	pages, plots, ctrls = ld.get_elements(dash_app = dash_app, engine = engine, storage = all_storage)
+	pages, plots, ctrls = ld.get_elements(dash_app = dash_app, engine = engine, storage = all_storage,theme=theme)
 	
 	layout = []
-	layout.append(create_navbar(pages)) #TEMPORARY
-	layout.append(html.Div([dcc.Location(id='url', refresh=False),html.Div(id='page-content')])) #TEMPORARY
+	layout.append(create_navbar(pages))
+	layout.append(dbc.Container([theme], className="m-4 dbc"))
+	
+	layout.append(html.Div([dcc.Location(id='url', refresh=False),html.Div(id='page-content')])) 
 	layout.append(html.Div(id="description-card",children=[html.H1("Just-in-Time"), html.H4("(Proto)DUNE: Prompt-Feedback")]))
-	#layout.append(html.Div(dcc.Dropdown(options=[{'label':page.name,'value':page.id} for page in pages],id='demo-dropdown')))
 	layout.append(html.Div([ctrl.div for ctrl in ctrls], id = "ctrls_div"))
 	layout.append(html.Div([plot.div for plot in plots], id = "plots_div"))
-	init_page_callback(dash_app, all_storage)
-	#sec_callback(dash_app,all_storage)
+	layout.append(load_figure_template(ThemeSwitchAIO))
+	init_page_callback(dash_app, all_storage,theme)
 
 	dash_app.layout = html.Div(layout)
 
 
-def init_page_callback(dash_app, all_storage):
+def init_page_callback(dash_app, all_storage,theme):
 	pages, plots, ctrls = ld.get_elements()
 	
 	plot_outputs = [Output(plot.id, "style") for plot in plots]
 	ctrl_outputs = [Output(ctrl.id, "style") for ctrl in ctrls]
-	
+
+
 	@dash_app.callback(*ctrl_outputs,*plot_outputs,[Input('url', 'pathname')])
 
 	def page_button_callback(pathname):
+		
 		pages, plots, ctrls = ld.get_elements()
 		style_list = [{"display":"none"} for _ in range(len(plots)+len(ctrls))]
 		for page in pages:

@@ -8,6 +8,7 @@ import rich
 from all_data import trigger_record_data
 from plotly.subplots import make_subplots
 from all_data import trigger_record_data
+from dash_bootstrap_templates import load_figure_template
 
 def add_dunedaq_annotation(figure):
 	figure.add_annotation(dict(font=dict(color="black",size=12),
@@ -31,7 +32,7 @@ def selection_line(raw_data_file, trigger_record):
 		html.Br(),html.B("selected trigger record:"),
 		html.Br(),html.Div(trigger_record),html.Hr()]))
 
-def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
+def make_static_img(df, theme,zmin: int = None, zmax: int = None, title: str = ""):
 
 	xmin, xmax = min(df.columns), max(df.columns)
 	#ymin, ymax = min(df.index), max(df.index)
@@ -99,14 +100,14 @@ def make_static_img(df, zmin: int = None, zmax: int = None, title: str = ""):
 		xaxis=dict(showgrid=False, zeroline=False, range=[xmin, xmax]),
 		yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
 		yaxis_title="Offline Channel",
-		xaxis_title="Time ticks",
-	)
+		xaxis_title="Time ticks", template=theme)
+
 
 	# fig.show(config={'doubleClick': 'reset'})
 	return fig
 
 
-def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
+def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info,theme):
 	if not df.empty:
 		# fig=go.Figure()
 		fig= make_subplots(
@@ -155,8 +156,10 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 		width=fig_w,
 		height=fig_h,
 		yaxis = dict(autorange="reversed"),
-		title_text=f"Run {info['run_number']}: {info['trigger_number']}")
-	
+		title_text=f"Run {info['run_number']}: {info['trigger_number']}",
+		template=theme)
+	rich.print(theme)
+	#load_figure_template(theme)
 
 	return fig
 

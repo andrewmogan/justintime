@@ -6,27 +6,28 @@ from dash_bootstrap_templates import load_figure_template
 from plotly.subplots import make_subplots
 from dash.dependencies import Input, Output, State
 import numpy as np
+from dash_bootstrap_templates import ThemeSwitchAIO
 import pandas as pd
 import rich
 from plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
 
 
-def return_obj(dash_app, engine, storage):
+def return_obj(dash_app, engine, storage,theme):
 	plot_id = "07_fft_phase_plot"
 	plot_div = html.Div(id = plot_id)
-	load_figure_template("COSMO")
-	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage)
+	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
 	plot.add_ctrl("04_trigger_record_select_ctrl")
 	plot.add_ctrl("09_fft_phase_fmin_fmax_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
-	init_callbacks(dash_app, storage, plot_id, engine)
+	init_callbacks(dash_app, storage, plot_id, engine,theme)
 	return(plot)
 
-def init_callbacks(dash_app, storage, plot_id, engine):
+def init_callbacks(dash_app, storage, plot_id, engine,theme):
 
 	@dash_app.callback(
 		Output(plot_id, "children"),
+		Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('04_trigger_record_select_ctrl', "value"),
 		State('03_file_select_ctrl', "value"),
@@ -34,7 +35,8 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 		State('09_fft_phase_fmax_comp', "value"),
 		State(plot_id, "children"),
 	)
-	def plot_fft_phase_graph(n_clicks, trigger_record, raw_data_file, fmin, fmax, original_state):
+	def plot_fft_phase_graph(theme,n_clicks, trigger_record, raw_data_file, fmin, fmax, original_state):
+		theme = "cosmo" if  theme else "superhero"
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
@@ -47,6 +49,7 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 					fig.update_xaxes(matches=None, showticklabels=True)
 					fig.update_yaxes(matches=None, showticklabels=True)
 					fig.update_layout(height=900)
+					fig.update_layout(template=theme)
 					add_dunedaq_annotation(fig)
 					return(html.Div([
 						selection_line(raw_data_file, trigger_record),

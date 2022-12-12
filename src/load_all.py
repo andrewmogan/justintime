@@ -16,11 +16,11 @@ def loader(path, *args, ignore = []):
 	objects.sort(key=lambda obj: obj.id)
 	return(objects)
 
-def get_elements(dash_app = [], engine = [], storage = []):
+def get_elements(dash_app = [], engine = [], storage = [],theme=[]):
 	global pages, plots, ctrls, run_new
 	if run_new:
 		pages = loader("pages")
-		plots = loader("plots", dash_app, engine, storage)
+		plots = loader("plots", dash_app, engine, storage,theme)
 		ctrls = loader("controls", dash_app, engine)
 		run_new = False
 	return(pages, plots, ctrls)
