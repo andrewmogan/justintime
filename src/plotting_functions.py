@@ -111,19 +111,20 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info,theme):
 	if not df.empty:
 		# fig=go.Figure()
 		fig= make_subplots(
-			rows=2, cols=1, 
-			subplot_titles=(["Trigger Primitives"]), 
-			row_heights=[0.8, 0.2],
-			vertical_spacing=0.05,
-			shared_xaxes=True,
-			x_title="offline channel",
-			y_title="time ticks",
+			rows=1, cols=2, 
+			#subplot_titles=(["Trigger Primitives"]), 
+			column_widths=[0.2,0.9],
+			horizontal_spacing=0.05,
+			shared_yaxes=True,
+			y_title="offline channel",
+			x_title="time ticks",
+		
 		)
 		fig.add_trace(
 			go.Scattergl(
-				x=df['offline_ch'],
-				y=df['peak_time'],
-				mode='markers', 
+				y=df['offline_ch'],
+				x=df['peak_time'],
+				mode='markers',name="TP Trace",
 				marker=dict(
 					size=16,
 					color=df['peak_adc'], #set color equal to a variable
@@ -133,22 +134,20 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info,theme):
 					showscale=True
 					),
 				),
-				row=1, col=1
+				row=1, col=2
 			)
 		fig.add_trace(
-			go.Histogram(x=df["offline_ch"], name='channel', nbinsx=(xmax-xmin)), 
-			row=2, col=1
+		go.Histogram(y=df["offline_ch"],name='channel', nbinsy=(xmax-xmin)), 
+		row=1, col=1,
 		)
-
-
-		# fig = px.scatter(df, x="channel", y="time", color='adc_peak')
-		fig.update_xaxes(range=[xmin, xmax])
+		
+		fig.update_yaxes(range=[xmin,xmax])
 
 	else:
 		fig = go.Figure()
 		fig.add_trace(
 			go.Scatter(
-				x=[xmin, xmax],
+				y=[xmin, xmax],
 				mode="markers",
 			)
 		)
@@ -157,10 +156,8 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info,theme):
 		height=fig_h,
 		yaxis = dict(autorange="reversed"),
 		title_text=f"Run {info['run_number']}: {info['trigger_number']}",
-		template=theme)
-	rich.print(theme)
-	#load_figure_template(theme)
-
+		template=theme,legend=dict(x=0,y=1))
+	
 	return fig
 
 def nothing_to_plot():

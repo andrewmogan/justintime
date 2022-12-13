@@ -43,12 +43,14 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				rich.print(data.df)
+				
 				if len(data.df)!=0:
 					data.init_tp()
 					fzmin, fzmax = tr_color_range
 					fig_w, fig_h = 1500, 1000
 					children = []
 					fig = make_tp_plot(data.tp_df_Z, data.xmin_Z, data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info,theme)
+					rich.print(data.tp_df_Z)
 					children += [
 						html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 						html.Hr(),
