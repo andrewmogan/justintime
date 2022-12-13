@@ -42,6 +42,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 	)
 	def plot_trd_graph(theme,n_clicks, trigger_record, raw_data_file, adcmap_selection, tr_color_range, static_image, offset,original_state):
 		theme = "cosmo" if  theme else "superhero"
+		load_figure_template(theme)
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
@@ -55,12 +56,12 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						if "offset_removal" in offset:
 							title = "Z-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_Z - data.df_Z_mean).T, theme,zmin = fzmin, zmax = fzmax,title=title)
+								fig = make_static_img((data.df_Z - data.df_Z_mean).T, zmin = fzmin, zmax = fzmax,title=title)
 							else:
 								fig = px.imshow((data.df_Z - data.df_Z_mean).T, zmin=fzmin, zmax=fzmax, title=title,aspect="auto")
 								fig.update_layout(
 									width=fig_w,
-									height=fig_h,template=theme
+									height=fig_h
 								)
 								
 							
@@ -68,13 +69,13 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 							title = f"Z-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 						
 							if "make_static_image" in static_image:
-								fig = make_static_img(data.df_Z.T, theme,zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img(data.df_Z.T,zmin = fzmin, zmax = fzmax, title = title)
 								
 							else:
 								fig = px.imshow(data.df_Z.T, title=title, aspect='auto')
 								fig.update_layout(
 									width=fig_w,
-									height=fig_h,template=theme
+									height=fig_h
 								)
 						add_dunedaq_annotation(fig)
 						children += [
@@ -87,22 +88,22 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						if "offset_removal" in offset:
 							title = "V-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_V - data.df_V_mean).T, theme,zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img((data.df_V - data.df_V_mean).T,zmin = fzmin, zmax = fzmax, title = title)
 							else:
 								fig = px.imshow((data.df_V - data.df_V_mean).T, zmin=fzmin, title=title, aspect='auto')
 								fig.update_layout(
 									width=fig_w,
-									height=fig_h,template=theme
+									height=fig_h
 								)
 						else:
 							title = f"V-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img(data.df_V.T,theme, zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img(data.df_V.T, zmin = fzmin, zmax = fzmax, title = title)
 							else:
 								fig = px.imshow(data.df_V.T, title=title, aspect='auto')
 								fig.update_layout(
 									width=fig_w,
-									height=fig_h,template=theme
+									height=fig_h
 								)
 				
 						add_dunedaq_annotation(fig)
@@ -116,23 +117,23 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						if "offset_removal" in offset:
 							title ="U-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_U - data.df_U_mean).T, theme,zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img((data.df_U - data.df_U_mean).T,zmin = fzmin, zmax = fzmax, title = title)
 							else:
 								fig = px.imshow((data.df_U - data.df_U_mean).T, zmin=fzmin, title=title, aspect="auto")
 								
 								fig.update_layout(
 									width=fig_w,
-									height=fig_h,template=theme
+									height=fig_h
 								)
 						else:
 							title = f"U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
-								fig = make_static_img(data.df_U.T, theme, zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img(data.df_U.T, zmin = fzmin, zmax = fzmax, title = title)
 							else:
 								fig = px.imshow(data.df_U.T, title=title, aspect='auto')
 								fig.update_layout(
 									width=fig_w,
-									height=fig_h,template=theme
+									height=fig_h
 								)
 						add_dunedaq_annotation(fig)
 						children += [

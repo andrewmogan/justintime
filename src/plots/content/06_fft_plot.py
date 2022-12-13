@@ -33,6 +33,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 	)
 	def plot_fft_graph(theme,n_clicks, trigger_record, raw_data_file, original_state):
 		theme = "cosmo" if  theme else "superhero"
+		load_figure_template(theme)
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
@@ -49,9 +50,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					add_dunedaq_annotation(fig_V)
 					fig_Z = px.line(data.df_Z_plane, log_y=True, title=title_Z)
 					add_dunedaq_annotation(fig_Z)
-					fig_U.update_layout(template=theme)
-					fig_V.update_layout(template=theme)
-					fig_Z.update_layout(template=theme)
+
 					return(html.Div([
 						selection_line(raw_data_file, trigger_record),
 						html.B("FFT U-Plane"),

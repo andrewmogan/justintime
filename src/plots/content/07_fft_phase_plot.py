@@ -37,6 +37,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 	)
 	def plot_fft_phase_graph(theme,n_clicks, trigger_record, raw_data_file, fmin, fmax, original_state):
 		theme = "cosmo" if  theme else "superhero"
+		load_figure_template(theme)
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
@@ -49,7 +50,6 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 					fig.update_xaxes(matches=None, showticklabels=True)
 					fig.update_yaxes(matches=None, showticklabels=True)
 					fig.update_layout(height=900)
-					fig.update_layout(template=theme)
 					add_dunedaq_annotation(fig)
 					return(html.Div([
 						selection_line(raw_data_file, trigger_record),

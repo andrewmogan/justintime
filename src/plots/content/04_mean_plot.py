@@ -34,6 +34,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 	)
 	def plot_mean_graph(theme,n_clicks, trigger_record, raw_data_file, original_state):
 		theme = "cosmo" if  theme else "superhero"
+		load_figure_template(theme)
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 
@@ -64,7 +65,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 							b=100,
 							t=100,
 							pad=4
-						),template=theme
+						)
 						# showlegend=False
 					)
 					add_dunedaq_annotation(fig_mean)

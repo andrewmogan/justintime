@@ -21,7 +21,6 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("06_adc_map_selection_ctrl")
 	plot.add_ctrl("07_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("08_static_image_ctrl")
-
 	init_callbacks(dash_app, storage, plot_id, engine,theme)
 	return(plot)
 
@@ -40,7 +39,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 	)
 	def plot_cnr_graph(theme,n_clicks, trigger_record, raw_data_file, adcmap_selection, tr_color_range, static_image, original_state):
 		theme = "cosmo" if  theme else "superhero"
-
+		load_figure_template(theme)
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
@@ -53,12 +52,12 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 					if 'Z' in adcmap_selection:
 						title = f"Z-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 						if "make_static_image" in static_image:
-							fig = make_static_img(data.df_cnr[data.planes.get(2, {})].T,theme, zmin = fzmin, zmax = fzmax, title = title)
+							fig = make_static_img(data.df_cnr[data.planes.get(2, {})].T, zmin = fzmin, zmax = fzmax, title = title)
 						else:
 							fig = px.imshow(data.df_cnr[data.planes.get(2, {})].T, zmin=fzmin, zmax=fzmax, title=title, aspect='auto')
 							fig.update_layout(
 								width=fig_w,
-								height=fig_h,template=theme
+								height=fig_h
 							)
 							
 						add_dunedaq_annotation(fig)
@@ -71,12 +70,12 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 					if 'V' in adcmap_selection:
 						title = f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 						if "make_static_image" in static_image:
-							fig = make_static_img(data.df_cnr[data.planes.get(1, {})].T, theme,zmin = fzmin, zmax = fzmax, title = title)
+							fig = make_static_img(data.df_cnr[data.planes.get(1, {})].T,zmin = fzmin, zmax = fzmax, title = title)
 						else:
 							fig = px.imshow(data.df_cnr[data.planes.get(1, {})].T, zmin=fzmin, zmax=fzmax, title=f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
 							fig.update_layout(
 								width=fig_w,
-								height=fig_h,template=theme
+								height=fig_h
 							)
 						add_dunedaq_annotation(fig)
 						children += [
@@ -88,12 +87,12 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 					if 'U' in adcmap_selection:
 						title = f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 						if "make_static_image" in static_image:
-							fig = make_static_img(data.df_cnr[data.planes.get(0, {})].T,theme, zmin = fzmin, zmax = fzmax, title = title)
+							fig = make_static_img(data.df_cnr[data.planes.get(0, {})].T, zmin = fzmin, zmax = fzmax, title = title)
 						else:
 							fig = px.imshow(data.df_cnr[data.planes.get(0, {})].T, zmin=fzmin, zmax=fzmax, title=f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}", aspect='auto')
 							fig.update_layout(
 								width=fig_w,
-								height=fig_h,template=theme
+								height=fig_h
 							)
 						add_dunedaq_annotation(fig)
 						children += [

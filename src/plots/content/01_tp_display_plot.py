@@ -39,6 +39,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 	)
 	def plot_tp_graph(theme,n_clicks, trigger_record, raw_data_file, tr_color_range, original_state):
 		theme = "cosmo" if  theme else "superhero"
+		load_figure_template(theme)
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
@@ -49,25 +50,24 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 					fzmin, fzmax = tr_color_range
 					fig_w, fig_h = 1500, 1000
 					children = []
-					fig = make_tp_plot(data.tp_df_Z, data.xmin_Z, data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info,theme)
-					rich.print(data.tp_df_Z)
+					fig = make_tp_plot(data.tp_df_Z, data.xmin_Z, data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info)
 					children += [
 						html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 						html.Hr(),
 						dcc.Graph(figure=fig)]
-					fig = make_tp_plot(data.tp_df_V, data.xmin_V, data.xmax_V, fzmin, fzmax, fig_w, fig_h, data.info,theme)
+					fig = make_tp_plot(data.tp_df_V, data.xmin_V, data.xmax_V, fzmin, fzmax, fig_w, fig_h, data.info)
 					children += [
 						html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 						html.Hr(),
 						dcc.Graph(figure=fig)]
 					#	fig.update_layout(load_figure_template("plotly_dark"))
-					fig = make_tp_plot(data.tp_df_U, data.xmin_U, data.xmax_U, fzmin, fzmax, fig_w, fig_h, data.info,theme)
+					fig = make_tp_plot(data.tp_df_U, data.xmin_U, data.xmax_U, fzmin, fzmax, fig_w, fig_h, data.info)
 					children += [
 						html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 						html.Hr(),
 						dcc.Graph(figure=fig)]
 
-					fig = make_tp_plot(data.tp_df_O, data.xmin_O, data.xmax_O, fzmin, fzmax, fig_w, fig_h, data.info,theme)
+					fig = make_tp_plot(data.tp_df_O, data.xmin_O, data.xmax_O, fzmin, fzmax, fig_w, fig_h, data.info)
 					children += [
 						html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 						html.Hr(),

@@ -27,7 +27,6 @@ def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str):
 	#templates=[dbc.themes.COSMO, dbc.themes.SUPERHERO]
 	#load_figure_template(templates)
 	rich.print(theme_switch)
-
 	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,theme_switch)
 	debug=True
 	dash_app.run_server(debug=debug, host='0.0.0.0', port=port)
@@ -36,7 +35,6 @@ def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str):
 def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,theme):
 	#engine = DataManager("/home/gkokkoro/git/About_time_workarea/sourcecode/data/", "ProtoWIB", 'VDColdbox')
 	engine = DataManager(raw_data_path, frame_type, channel_map_id)
-
 
 	data_files = engine.list_files()
 	rich.print(data_files)
