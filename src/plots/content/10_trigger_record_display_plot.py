@@ -12,10 +12,10 @@ import pandas as pd
 from all_data import trigger_record_data
 from plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot
 
-def return_obj(dash_app, engine, storage,theme):
+def return_obj(dash_app, engine, storage):
 	plot_id = "10_trigger_record_display_plot"
 	plot_div = html.Div(id = plot_id)
-	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
+	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage)
 	plot.add_ctrl("04_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 	plot.add_ctrl("06_adc_map_selection_ctrl")
@@ -23,14 +23,14 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("08_static_image_ctrl")
 	plot.add_ctrl("10_offset_ctrl")
 
-	init_callbacks(dash_app, storage, plot_id, engine,theme)
+	init_callbacks(dash_app, storage, plot_id, engine)
 	return(plot)
 
-def init_callbacks(dash_app, storage, plot_id, engine,theme):
+def init_callbacks(dash_app, storage, plot_id, engine):
 
 	@dash_app.callback(
 		Output(plot_id, "children"),
-		Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
+		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('04_trigger_record_select_ctrl', "value"),
 		State('03_file_select_ctrl', "value"),
@@ -40,9 +40,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		State("10_offset_ctrl", "value"),
 		State(plot_id, "children"),
 	)
-	def plot_trd_graph(theme,n_clicks, trigger_record, raw_data_file, adcmap_selection, tr_color_range, static_image, offset,original_state):
-		theme = "cosmo" if  theme else "superhero"
-		load_figure_template(theme)
+	def plot_trd_graph(n_clicks, trigger_record, raw_data_file, adcmap_selection, tr_color_range, static_image, offset,original_state):
+		##theme = "darkly" if  theme else "superhero"
+		load_figure_template("darkly")
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)

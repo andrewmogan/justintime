@@ -12,28 +12,28 @@ import pandas as pd
 from plotting_functions import add_dunedaq_annotation, selection_line, nothing_to_plot
 
 
-def return_obj(dash_app, engine, storage,theme):
+def return_obj(dash_app, engine, storage):
 	plot_id = "06_fft_plot"
 	plot_div = html.Div(id = plot_id)
-	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
+	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage)
 	plot.add_ctrl("04_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
-	init_callbacks(dash_app, storage, plot_id,theme)
+	init_callbacks(dash_app, storage, plot_id)
 	return(plot)
 
-def init_callbacks(dash_app, storage, plot_id,theme):
+def init_callbacks(dash_app, storage, plot_id):
 	@dash_app.callback(
 		Output(plot_id, "children"),
-		Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
+		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('04_trigger_record_select_ctrl', "value"),
 		State('03_file_select_ctrl', "value"),
 		State(plot_id, "children"),
 	)
-	def plot_fft_graph(theme,n_clicks, trigger_record, raw_data_file, original_state):
-		theme = "cosmo" if  theme else "superhero"
-		load_figure_template(theme)
+	def plot_fft_graph(n_clicks, trigger_record, raw_data_file, original_state):
+		#theme = "darkly" if  theme else "superhero"
+		load_figure_template("darkly")
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)

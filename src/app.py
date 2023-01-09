@@ -3,13 +3,13 @@ from dash.dependencies import Input, Output, State
 import load_all as ld
 from cruncher.datamanager import DataManager
 from navbar import create_navbar
+#from header import create_header
 from all_data import all_data_storage
-
-from dash_bootstrap_templates import ThemeSwitchAIO
-from dash_bootstrap_templates import load_figure_template
+from dash_bootstrap_templates import ThemeSwitchAIO,load_figure_template
 import dash_bootstrap_components as dbc
 import click
 import rich
+from PIL import Image
 
 
 @click.command()
@@ -20,19 +20,21 @@ import rich
 def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str):
 
 	channel_map_id += 'ChannelMap'
-	dash_app = Dash(__name__,external_stylesheets=[dbc.themes.COSMO])
-	theme_switch = ThemeSwitchAIO(
-    aio_id="theme", themes=[dbc.themes.COSMO, dbc.themes.SUPERHERO]
-	)
+	dash_app = Dash(__name__,external_stylesheets=[dbc.themes.DARKLY])
+	##theme_switch = ThemeSwitchAIO(
+    ##aio_id="theme", themes=[dbc.themes.DARKLY, dbc.themes.SUPERHERO]
+	##)
 	#templates=[dbc.themes.COSMO, dbc.themes.SUPERHERO]
 	#load_figure_template(templates)
-	rich.print(theme_switch)
-	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,theme_switch)
+	##rich.print(theme_switch)
+	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id)
 	debug=True
 	dash_app.run_server(debug=debug, host='0.0.0.0', port=port)
 
 
-def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,theme):
+def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
+	
+	pil_image = Image.open("assets/image3.png")
 	#engine = DataManager("/home/gkokkoro/git/About_time_workarea/sourcecode/data/", "ProtoWIB", 'VDColdbox')
 	engine = DataManager(raw_data_path, frame_type, channel_map_id)
 
@@ -40,23 +42,109 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,theme):
 	rich.print(data_files)
 	#engine = DataManager("/tmp/", 'VDColdboxChannelMap')
 	all_storage = all_data_storage(engine)
-	pages, plots, ctrls = ld.get_elements(dash_app = dash_app, engine = engine, storage = all_storage,theme=theme)
+	pages, plots, ctrls = ld.get_elements(dash_app = dash_app, engine = engine, storage = all_storage)
 	
 	layout = []
 	layout.append(create_navbar(pages))
-	layout.append(dbc.Container([theme], className="m-4 dbc"))
+	#layout.append(dbc.Container([theme], className="m-4 dbc"))
+	layout.append(html.Div(
+    children=[
+        html.Div(
+            className="row",
+            children=[
+                # Column for user controls
+                html.Div(
+                    className="four columns div-user-controls",
+                    children=[
+					    html.A(html.Img(src=pil_image)                          
+                            
+                        ),
+                        html.H1("Just-in-Time"),
+						html.H4("(Proto)DUNE: Prompt-Feedback"),
+                        html.P(
+                            """Select a plot to portray from the navbar above."""
+                        ),
+						html.Div([ctrl.div for ctrl in ctrls], id = "ctrls_div",style={'fontSize': '12px '}),
+                        
+                        # Change to side-by-side for mobile layout
+                        html.Div(
+                            className="row",
+                            children=[
+                                html.Div(
+                                    className="div-for-dropdown",
+                                    children=[
+                                        
+                                    ],
+                                ),
+                                html.Div(
+                                    className="div-for-dropdown",
+                                    children=[
+                                    ],
+                                ),
+                            ],
+                        ),
+                        html.P(id="total-rides"),
+                        html.P(id="total-rides-selection"),
+                        html.P(id="date-value"),
+                        dcc.Markdown(
+                            """
+                            Source: [FiveThirtyEight](https://github.com/fivethirtyeight/uber-tlc-foil-response/tree/master/uber-trip-data)
+                            Links: [Source Code](https://github.com/plotly/dash-sample-apps/tree/main/apps/dash-uber-rides-demo) | [Enterprise Demo](https://plotly.com/get-demo/)
+                            """
+                        ),
+                    ],
+                ),
+                # Column for app graphs and plots
+                html.Div(
+                    className="eight columns div-for-charts bg-grey",
+                    children=[
+                        
+                        html.Div(
+                            className="text-padding",
+                            children=[
+                                
+                            ],
+                        ),
+                        html.Div([plot.div for plot in plots], id = "plots_div",style={'fontSize': '12px '})],
+                
+                ),
+            ],
+        )
+    ]
+))
+		
+		
+		
+		
+		#html.Div(children=[
+       
+         #             html.Div(className='row',  # Define the row element
+          #                    children=[
+           #                      html.Div(className='four columns div-user-controls',children=[html.Div(id="description-card",children=[html.H1("Just-in-Time"), html.H4("(Proto)DUNE: Prompt-Feedback")]),html.Div([ctrl.div for ctrl in ctrls], id = "ctrls_div"),]),
+      #Define the left element
+            #                      html.Div(className='eight columns div-for-charts bg-grey',children=[html.Div([plot.div for plot in plots], id = "plots_div")])
+	  # Define the right element
+             #                     ])
+              #                  ]))       
 	
+	
+		
+		
+		
 	layout.append(html.Div([dcc.Location(id='url', refresh=False),html.Div(id='page-content')])) 
-	layout.append(html.Div(id="description-card",children=[html.H1("Just-in-Time"), html.H4("(Proto)DUNE: Prompt-Feedback")]))
-	layout.append(html.Div([ctrl.div for ctrl in ctrls], id = "ctrls_div"))
-	layout.append(html.Div([plot.div for plot in plots], id = "plots_div"))
-	layout.append(load_figure_template(ThemeSwitchAIO))
-	init_page_callback(dash_app, all_storage,theme)
+
+
+	#layout.append(dbc.Container([theme], className="m-4 dbc"))
+	
+	
+
+	#layout.append(load_figure_template(ThemeSwitchAIO))
+	init_page_callback(dash_app, all_storage)
 
 	dash_app.layout = html.Div(layout)
 
 
-def init_page_callback(dash_app, all_storage,theme):
+def init_page_callback(dash_app, all_storage):
 	pages, plots, ctrls = ld.get_elements()
 	
 	plot_outputs = [Output(plot.id, "style") for plot in plots]
@@ -72,7 +160,7 @@ def init_page_callback(dash_app, all_storage,theme):
 		for page in pages:
 			if pathname:
 				if f"/{page.id}" in pathname:
-			
+					
 					return(calculate_page_style_list(page, plots, ctrls, style_list, all_storage))
 		return(style_list)
 

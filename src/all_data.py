@@ -3,7 +3,6 @@ import datetime
 from cruncher import signal
 import rich
 from dash import Dash, html
-
 class all_data_storage:
 	def __init__(self, engine):
 		self.engine = engine
