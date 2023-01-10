@@ -61,9 +61,8 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
                         ),
                         html.H1("Just-in-Time"),
 						html.H4("(Proto)DUNE: Prompt-Feedback"),
-                        html.P(
-                            """Select a plot to portray from the navbar above."""
-                        ),
+						html.P(id="text_page",style={'fontSize': '14px '}),
+						# html.P( id = "pages_div",style={'fontSize': '12px '}),
 						html.Div([ctrl.div for ctrl in ctrls], id = "ctrls_div",style={'fontSize': '12px '}),
                         
                         # Change to side-by-side for mobile layout
@@ -111,33 +110,11 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
             ],
         )
     ]
-))
-		
-		
-		
-		
-		#html.Div(children=[
-       
-         #             html.Div(className='row',  # Define the row element
-          #                    children=[
-           #                      html.Div(className='four columns div-user-controls',children=[html.Div(id="description-card",children=[html.H1("Just-in-Time"), html.H4("(Proto)DUNE: Prompt-Feedback")]),html.Div([ctrl.div for ctrl in ctrls], id = "ctrls_div"),]),
-      #Define the left element
-            #                      html.Div(className='eight columns div-for-charts bg-grey',children=[html.Div([plot.div for plot in plots], id = "plots_div")])
-	  # Define the right element
-             #                     ])
-              #                  ]))       
-	
-	
-		
-		
+))    		
 		
 	layout.append(html.Div([dcc.Location(id='url', refresh=False),html.Div(id='page-content')])) 
 
-
 	#layout.append(dbc.Container([theme], className="m-4 dbc"))
-	
-	
-
 	#layout.append(load_figure_template(ThemeSwitchAIO))
 	init_page_callback(dash_app, all_storage)
 
@@ -147,24 +124,45 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
 def init_page_callback(dash_app, all_storage):
 	pages, plots, ctrls = ld.get_elements()
 	
+	page_output=[Output("text_page","children")]
 	plot_outputs = [Output(plot.id, "style") for plot in plots]
 	ctrl_outputs = [Output(ctrl.id, "style") for ctrl in ctrls]
 
+	@dash_app.callback(page_output,[Input('url', 'pathname')])
 
-	@dash_app.callback(*ctrl_outputs,*plot_outputs,[Input('url', 'pathname')])
-
-	def page_button_callback(pathname):
-		
+	def show_page(pathname):
 		pages, plots, ctrls = ld.get_elements()
-		style_list = [{"display":"none"} for _ in range(len(plots)+len(ctrls))]
 		for page in pages:
+			
 			if pathname:
+				
 				if f"/{page.id}" in pathname:
 					
+					return([page.name])
+			if pathname=='/':
+				return(["Select a plot from the menu above"])
+				
+					
+		
+	@dash_app.callback(*ctrl_outputs,*plot_outputs,[Input('url', 'pathname')])
+	
+	def page_button_callback(pathname):
+
+		pages, plots, ctrls = ld.get_elements()
+		style_list = [{"display":"none"} for _ in range(len(plots)+len(ctrls))]
+
+
+		for page in pages:
+			
+			if pathname:
+				
+				if f"/{page.id}" in pathname:
+					page_output=page.name
 					return(calculate_page_style_list(page, plots, ctrls, style_list, all_storage))
-		return(style_list)
-
-
+				
+					
+		return(style_list)	
+	
 def calculate_page_style_list(page, plots, ctrls, style_list, all_storage):
 	needed_plots = []
 	needed_ctrls = []
