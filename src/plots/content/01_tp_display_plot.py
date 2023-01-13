@@ -54,7 +54,7 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 					children += [
 						html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 						html.Hr(),
-						dcc.Graph(figure=fig)]
+						dcc.Graph(figure=fig),]
 					fig = make_tp_plot(data.tp_df_V, data.xmin_V, data.xmax_V, fzmin, fzmax, fig_w, fig_h, data.info)
 					children += [
 						html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),

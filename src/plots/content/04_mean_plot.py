@@ -8,6 +8,7 @@ from plotly.subplots import make_subplots
 from dash.dependencies import Input, Output, State
 from dash_bootstrap_templates import ThemeSwitchAIO
 import numpy as np
+import rich
 from all_data import trigger_record_data
 from plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
 
@@ -39,6 +40,7 @@ def init_callbacks(dash_app, storage, plot_id):
 			if plot_id in storage.shown_plots:
 
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				rich.print(data.df_U_mean)
 				if len(data.df)!=0:
 					fig_mean = make_subplots(rows=1, cols=3,
 						subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))

@@ -12,7 +12,7 @@ import rich
 def create_navbar(pages):
 
     # Create the Navbar using Dash Bootstrap Components
-    navbar = dbc.NavbarSimple(style={'fontSize': '20px '},
+    navbar = dbc.NavbarSimple(style={'fontSize': '20px ',},
         children=[
             dbc.DropdownMenu(
                 nav=True,
@@ -25,7 +25,7 @@ def create_navbar(pages):
                     # side of the Navbar.  The first parameter is the text that appears and the second parameter 
                     # is the URL extension.
                     dbc.DropdownMenuItem("Home", href='/',style={'fontSize': '14px '}), # Hyperlink item that appears in the dropdown menu
-                    html.Div([dbc.DropdownMenuItem(page.name, href=f"/{page.id}") for page in pages],style={'fontSize': '14px '}),
+                    html.Div([dbc.DropdownMenuItem(page.name, href=f"/{page.id}") for page in pages],style={'fontSize': '14px ',"border":"2px black solid"}),
    
         ] 
             ),
@@ -35,5 +35,6 @@ def create_navbar(pages):
         sticky="top",  # Stick it to the top... like Spider Man crawling on the ceiling?
         color="secondary",  # Change this to change color of the navbar e.g. "primary", "secondary" etc.
         dark=True,  # Change this to change color of text within the navbar (False for light text)
+        
     )
     return navbar

@@ -10,10 +10,10 @@ import rich
 from dash_bootstrap_templates import ThemeSwitchAIO
 import pandas as pd
 from all_data import trigger_record_data
-from plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot
+from plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot,make_tp_plot,tp_for_adc
 
 def return_obj(dash_app, engine, storage):
-	plot_id = "10_trigger_record_display_plot"
+	plot_id = "13_adc_tp_plot"
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage)
 	plot.add_ctrl("04_trigger_record_select_ctrl")
@@ -46,7 +46,9 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				
 				if len(data.df)!=0:
+					data.init_tp()
 					fig_w, fig_h = 1500, 1000
 					children = []
 					fzmin, fzmax = tr_color_range
@@ -57,25 +59,29 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 							title = "Z-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
 								fig = make_static_img((data.df_Z - data.df_Z_mean).T, zmin = fzmin, zmax = fzmax,title=title)
+								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
+			
 							else:
 								fig = px.imshow((data.df_Z - data.df_Z_mean).T, zmin=fzmin, zmax=fzmax, title=title,aspect="auto")
+								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 								fig.update_layout(
-									width=fig_w,
-									height=fig_h
-								)
+									width=900,
+									height=800,showlegend=True
+								)	
 								
-							
 						else:
 							title = f"Z-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 						
 							if "make_static_image" in static_image:
 								fig = make_static_img(data.df_Z.T,zmin = fzmin, zmax = fzmax, title = title)
+								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 								
 							else:
 								fig = px.imshow(data.df_Z.T, title=title, aspect='auto')
+								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 								fig.update_layout(
-									width=fig_w,
-									height=fig_h
+									width=900,
+									height=800,showlegend=True
 								)
 						add_dunedaq_annotation(fig)
 						children += [
@@ -83,27 +89,32 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 							html.Hr(),
 							dcc.Graph(figure=fig),
 						]
-
+						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
+					
 					if 'V' in adcmap_selection:
 						if "offset_removal" in offset:
 							title = "V-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
 								fig = make_static_img((data.df_V - data.df_V_mean).T,zmin = fzmin, zmax = fzmax, title = title)
+								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 							else:
-								fig = px.imshow((data.df_V - data.df_V_mean).T, zmin=fzmin, title=title, aspect='auto')
+								fig = px.imshow((data.df_V - data.df_V_mean).T, zmin=fzmin,zmax=fzmax, title=title, aspect='auto')
+								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 								fig.update_layout(
-									width=fig_w,
-									height=fig_h
+									width=900,
+									height=800,showlegend=True
 								)
 						else:
 							title = f"V-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
 								fig = make_static_img(data.df_V.T, zmin = fzmin, zmax = fzmax, title = title)
+								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 							else:
 								fig = px.imshow(data.df_V.T, title=title, aspect='auto')
+								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 								fig.update_layout(
-									width=fig_w,
-									height=fig_h
+									width=900,
+									height=800,showlegend=True
 								)
 				
 						add_dunedaq_annotation(fig)
@@ -112,28 +123,32 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 							html.Hr(),
 							dcc.Graph(figure=fig),
 						]
-
+						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					if 'U' in adcmap_selection:
 						if "offset_removal" in offset:
 							title ="U-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
 								fig = make_static_img((data.df_U - data.df_U_mean).T,zmin = fzmin, zmax = fzmax, title = title)
+								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 							else:
-								fig = px.imshow((data.df_U - data.df_U_mean).T, zmin=fzmin, title=title, aspect="auto")
+								fig = px.imshow((data.df_U - data.df_U_mean).T, zmin=fzmin,zmax=fzmax, title=title, aspect="auto")
+								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 								
 								fig.update_layout(
-									width=fig_w,
-									height=fig_h
+									width=900,
+									height=800,showlegend=True
 								)
 						else:
 							title = f"U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
 							if "make_static_image" in static_image:
 								fig = make_static_img(data.df_U.T, zmin = fzmin, zmax = fzmax, title = title)
+								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 							else:
 								fig = px.imshow(data.df_U.T, title=title, aspect='auto')
+								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 								fig.update_layout(
-									width=fig_w,
-									height=fig_h
+									width=900,
+									height=800,showlegend=True
 								)
 						add_dunedaq_annotation(fig)
 						children += [
@@ -141,14 +156,15 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 							html.Hr(),
 							dcc.Graph(figure=fig),
 						]
-
+						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					if adcmap_selection:
 						return(html.Div([
 							selection_line(raw_data_file, trigger_record),
 							html.Hr(),
 							html.Div(children)]))
 					else:
-						return(html.Div("No adc map selected"))
+						return(html.Div("No ADC map selected"))
+					
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)

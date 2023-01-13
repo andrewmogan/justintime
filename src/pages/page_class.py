@@ -1,7 +1,8 @@
 class page:
-	def __init__(self, name, id):
+	def __init__(self, name, id,text):
 		self.name = name
 		self.id = id
+		self.text=text
 		self.plots =[]
 	
 	def add_plot(self, plot):

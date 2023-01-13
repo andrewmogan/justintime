@@ -17,6 +17,7 @@ from PIL import Image
 @click.argument('raw_data_path', type=click.Path(exists=True, file_okay=False))
 @click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST']))
 @click.argument('frame_type', type=click.Choice(['ProtoWIB', 'WIB']))
+
 def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str):
 
 	channel_map_id += 'ChannelMap'
@@ -59,6 +60,8 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
 					    html.A(html.Img(src=pil_image)                          
                             
                         ),
+						html.P(""),
+						html.P(""),
                         html.H1("Just-in-Time"),
 						html.H4("(Proto)DUNE: Prompt-Feedback"),
 						html.P(id="text_page",style={'fontSize': '14px '}),
@@ -93,9 +96,10 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
                         ),
                     ],
                 ),
+	
                 # Column for app graphs and plots
                 html.Div(
-                    className="eight columns div-for-charts bg-grey",
+                    className="eight columns div-for-charts",
                     children=[
                         
                         html.Div(
@@ -104,7 +108,23 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
                                 
                             ],
                         ),
-                        html.Div([plot.div for plot in plots], id = "plots_div",style={'fontSize': '12px '})],
+                        html.Div([plot.div for plot in plots], id = "plots_div",style={'fontSize': '14px '})],
+                
+                ),
+			# Column for app graphs and plots
+                html.Div(
+                    className="five columns div-for-charts",
+                    children=[
+                        
+                        html.Div(
+                            className="text-padding",
+                            children=[
+                                
+                            ],
+                        ),
+						html.H2(id="title"),
+						html.P(""),
+                        html.P(id="description",style={'fontSize': '14px '})],
                 
                 ),
             ],
@@ -141,9 +161,8 @@ def init_page_callback(dash_app, all_storage):
 					return([page.name])
 			if pathname=='/':
 				return(["Select a plot from the menu above"])
+
 				
-					
-		
 	@dash_app.callback(*ctrl_outputs,*plot_outputs,[Input('url', 'pathname')])
 	
 	def page_button_callback(pathname):
@@ -162,6 +181,20 @@ def init_page_callback(dash_app, all_storage):
 				
 					
 		return(style_list)	
+
+	@dash_app.callback([Output("title","children")],[Output("description","children")],[Input('url', 'pathname')])
+
+	def show_page(pathname):
+		pages, plots, ctrls = ld.get_elements()
+		for page in pages:
+			
+			if pathname:
+				
+				if f"/{page.id}" in pathname:
+					
+					return(["Plot Description"],[page.text])
+			if pathname=='/':
+				return([""],[""])
 	
 def calculate_page_style_list(page, plots, ctrls, style_list, all_storage):
 	needed_plots = []

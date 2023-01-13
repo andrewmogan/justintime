@@ -152,11 +152,45 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 			)
 		)
 	fig.update_layout(
-		width=fig_w,
+		#width=fig_w,
 		height=fig_h,
 		yaxis = dict(autorange="reversed"),
 		title_text=f"Run {info['run_number']}: {info['trigger_number']}",
-		legend=dict(x=0,y=1))
+		legend=dict(x=0,y=1),
+		width=950,
+
+		)
+	
+	return fig
+
+def tp_for_adc(df, cmin, cmax):
+	if not df.empty:
+		# fig=go.Figure()
+		fig=go.Scattergl(
+				y=df['offline_ch'],
+				x=df['peak_time'],
+				mode='markers',name="TP Trace",
+				marker=dict(
+					size=3,
+					color=df['peak_adc'], #set color equal to a variable
+					colorscale='Plasma', # one of plotly colorscales
+					cmin = cmin,
+					cmax = cmax,
+					showscale=True,
+					
+					
+					),
+				)
+				
+	
+
+	else:
+		fig = go.Figure()
+		fig.add_trace(
+			go.Scatter(
+			
+			)
+		)
 	
 	return fig
 
