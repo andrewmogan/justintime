@@ -4,6 +4,7 @@ from PIL import Image
 from matplotlib import cm
 from matplotlib.colors import Normalize
 import numpy as np
+import plotly.express as px
 import rich
 from all_data import trigger_record_data
 from plotly.subplots import make_subplots
@@ -116,8 +117,8 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 			column_widths=[0.2,0.9],
 			horizontal_spacing=0.05,
 			shared_yaxes=True,
-			y_title="offline channel",
-			x_title="time ticks",
+			y_title="Offline Channel",
+			x_title="Time Ticks",
 		
 		)
 		fig.add_trace(
@@ -126,7 +127,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 				x=df['peak_time'],
 				mode='markers',name="TP Trace",
 				marker=dict(
-					size=16,
+					size=10,
 					color=df['peak_adc'], #set color equal to a variable
 					colorscale='Plasma', # one of plotly colorscales
 					cmin = cmin,
@@ -171,9 +172,9 @@ def tp_for_adc(df, cmin, cmax):
 				x=df['peak_time'],
 				mode='markers',name="TP Trace",
 				marker=dict(
-					size=3,
+					size=4.5,
 					color=df['peak_adc'], #set color equal to a variable
-					colorscale='Plasma', # one of plotly colorscales
+					colorscale="Turbo", # one of plotly colorscales
 					cmin = cmin,
 					cmax = cmax,
 					showscale=True,
@@ -194,5 +195,63 @@ def tp_for_adc(df, cmin, cmax):
 	
 	return fig
 
+
+def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
+	if not df.empty:
+		# fig=go.Figure()
+		fig=px.density_heatmap(df,y=df['offline_ch'],
+			x=df['peak_time'],nbinsy=200,nbinsx=200,
+				z=df['peak_adc'],histfunc="count",
+				color_continuous_scale="Plasma")
+
+		fig.update_layout(
+    xaxis_title="Time Ticks",
+    yaxis_title="Offline Channel")
+						
+	else:
+		fig = go.Figure()
+		fig.add_trace(
+			go.Scatter(
+			
+			)
+		)
+	fig.update_layout(
+		#width=fig_w,
+		height=fig_h,
+		yaxis = dict(autorange="reversed"),
+		title_text=f"Run {info['run_number']}: {info['trigger_number']}",
+		legend=dict(x=0,y=1),
+		width=950,
+
+		)
+	return fig
+
+
+def waveform_tps(data,channel_num):
+	fig= px.line(data.df_cnr,y=channel_num)
+	if channel_num in set(data.tp_df_tsoff['offline_ch']):
+							
+		
+		print("op")
+		new=(data.tp_df_tsoff.loc[data.tp_df_tsoff['offline_ch'] == channel_num])
+								
+		for i in range(len(new)):
+															
+									
+			time_start = new.iloc[i]['start_time']
+			print(new)
+			time_over_threshold = new.iloc[i]["time_over_threshold"]
+			time_end = (new.iloc[i]["start_time"]+new.iloc[i]["time_over_threshold"])
+			time_peak = new.iloc[i]["peak_time"]
+			channel =new.iloc[i]["offline_ch"]
+			adc_peak = new.iloc[i]["peak_adc"]
+										
+			fig.add_vrect((time_start-time_peak)+time_start, (time_end-time_peak)+time_start)	
+
+	return fig
+
+
+
 def nothing_to_plot():
+
 	return "Nothing to plot"

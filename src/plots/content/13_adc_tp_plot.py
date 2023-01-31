@@ -22,6 +22,7 @@ def return_obj(dash_app, engine, storage):
 	plot.add_ctrl("07_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("08_static_image_ctrl")
 	plot.add_ctrl("10_offset_ctrl")
+	plot.add_ctrl("13_cnr_ctrl")
 
 	init_callbacks(dash_app, storage, plot_id, engine)
 	return(plot)
@@ -38,9 +39,10 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 		State("07_tr_colour_range_slider_comp", "value"),
 		State("08_static_image_ctrl", "value"),
 		State("10_offset_ctrl", "value"),
+		State("13_cnr_ctrl", "value"),
 		State(plot_id, "children"),
 	)
-	def plot_trd_graph(n_clicks, trigger_record, raw_data_file, adcmap_selection, tr_color_range, static_image, offset,original_state):
+	def plot_trd_graph(n_clicks, trigger_record, raw_data_file, adcmap_selection, tr_color_range, static_image, offset,cnr,original_state):
 		##theme = "darkly" if  theme else "superhero"
 		load_figure_template("darkly")
 		if trigger_record and raw_data_file:
@@ -49,40 +51,56 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 				
 				if len(data.df)!=0:
 					data.init_tp()
+					data.init_cnr()
 					fig_w, fig_h = 1500, 1000
 					children = []
 					fzmin, fzmax = tr_color_range
 
 					if 'Z' in adcmap_selection:
 					 #trigger_record_data(engine,trigger_record,raw_data_file).t0_min
-						if "offset_removal" in offset:
-							title = "Z-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+
+						if "cnr_removal" in cnr:
+							title = f"Z-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_Z - data.df_Z_mean).T, zmin = fzmin, zmax = fzmax,title=title)
+								fig = make_static_img(data.df_cnr[data.planes.get(2, {})].T, zmin = fzmin, zmax = fzmax, title = title)
 								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
-			
 							else:
-								fig = px.imshow((data.df_Z - data.df_Z_mean).T, zmin=fzmin, zmax=fzmax, title=title,aspect="auto")
+								fig = px.imshow(data.df_cnr[data.planes.get(2, {})].T, zmin=fzmin, zmax=fzmax, title=title, aspect='auto')
 								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 								fig.update_layout(
-									width=900,
-									height=800,showlegend=True
-								)	
-								
+										width=900,
+										height=800,showlegend=True
+										)
 						else:
-							title = f"Z-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
-						
-							if "make_static_image" in static_image:
-								fig = make_static_img(data.df_Z.T,zmin = fzmin, zmax = fzmax, title = title)
-								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
-								
+							if "offset_removal" in offset:
+								title = "Z-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+								if "make_static_image" in static_image:
+									fig = make_static_img((data.df_Z - data.df_Z_mean).T, zmin = fzmin, zmax = fzmax,title=title)
+									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
+				
+								else:
+									fig = px.imshow((data.df_Z - data.df_Z_mean).T, zmin=fzmin, zmax=fzmax, title=title,aspect="auto")
+									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
+									fig.update_layout(
+										width=900,
+										height=800,showlegend=True
+										)
+
 							else:
-								fig = px.imshow(data.df_Z.T, title=title, aspect='auto')
-								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
-								fig.update_layout(
-									width=900,
-									height=800,showlegend=True
-								)
+								title = f"Z-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+							
+								if "make_static_image" in static_image:
+									fig = make_static_img(data.df_Z.T,zmin = fzmin, zmax = fzmax, title = title)
+									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
+									
+								else:
+									fig = px.imshow(data.df_Z.T, title=title, aspect='auto')
+									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
+									fig.update_layout(
+										width=900,
+										height=800,showlegend=True
+									)
 						add_dunedaq_annotation(fig)
 						children += [
 							html.B("ADC Counts: Z-plane"),
@@ -92,30 +110,48 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					
 					if 'V' in adcmap_selection:
-						if "offset_removal" in offset:
-							title = "V-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+						if "cnr_removal" in cnr:
+							title = f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_V - data.df_V_mean).T,zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img(data.df_cnr[data.planes.get(1, {})].T, zmin = fzmin, zmax = fzmax, title = title)
 								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 							else:
-								fig = px.imshow((data.df_V - data.df_V_mean).T, zmin=fzmin,zmax=fzmax, title=title, aspect='auto')
+								fig = px.imshow(data.df_cnr[data.planes.get(1, {})].T, zmin=fzmin, zmax=fzmax, title=title, aspect='auto')
 								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 								fig.update_layout(
-									width=900,
-									height=800,showlegend=True
-								)
+										width=900,
+										height=800,showlegend=True
+										)
 						else:
-							title = f"V-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
-							if "make_static_image" in static_image:
-								fig = make_static_img(data.df_V.T, zmin = fzmin, zmax = fzmax, title = title)
-								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
+							if "offset_removal" in offset:
+								title = "V-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+								if "make_static_image" in static_image:
+									fig = make_static_img((data.df_V - data.df_V_mean).T, zmin = fzmin, zmax = fzmax,title=title)
+									fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
+				
+								else:
+									fig = px.imshow((data.df_V - data.df_V_mean).T, zmin=fzmin, zmax=fzmax, title=title,aspect="auto")
+									fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
+									fig.update_layout(
+										width=900,
+										height=800,showlegend=True
+										)
+
 							else:
-								fig = px.imshow(data.df_V.T, title=title, aspect='auto')
-								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
-								fig.update_layout(
-									width=900,
-									height=800,showlegend=True
-								)
+								title = f"V-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+							
+								if "make_static_image" in static_image:
+									fig = make_static_img(data.df_V.T,zmin = fzmin, zmax = fzmax, title = title)
+									fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
+									
+								else:
+									fig = px.imshow(data.df_V.T, title=title, aspect='auto')
+									fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
+									fig.update_layout(
+										width=900,
+										height=800,showlegend=True
+									)
 				
 						add_dunedaq_annotation(fig)
 						children += [
@@ -125,31 +161,48 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 						]
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					if 'U' in adcmap_selection:
-						if "offset_removal" in offset:
-							title ="U-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+						if "cnr_removal" in cnr:
+							title = f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_U - data.df_U_mean).T,zmin = fzmin, zmax = fzmax, title = title)
+								fig = make_static_img(data.df_cnr[data.planes.get(0, {})].T, zmin = fzmin, zmax = fzmax, title = title)
 								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 							else:
-								fig = px.imshow((data.df_U - data.df_U_mean).T, zmin=fzmin,zmax=fzmax, title=title, aspect="auto")
+								fig = px.imshow(data.df_cnr[data.planes.get(0, {})].T, zmin=fzmin, zmax=fzmax, title=title, aspect='auto')
 								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
-								
 								fig.update_layout(
-									width=900,
-									height=800,showlegend=True
-								)
+										width=900,
+										height=800,showlegend=True
+										)
 						else:
-							title = f"U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
-							if "make_static_image" in static_image:
-								fig = make_static_img(data.df_U.T, zmin = fzmin, zmax = fzmax, title = title)
-								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
+							if "offset_removal" in offset:
+								title = "U-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+								if "make_static_image" in static_image:
+									fig = make_static_img((data.df_U - data.df_U_mean).T, zmin = fzmin, zmax = fzmax,title=title)
+									fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
+				
+								else:
+									fig = px.imshow((data.df_U - data.df_U_mean).T, zmin=fzmin, zmax=fzmax, title=title,aspect="auto")
+									fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
+									fig.update_layout(
+										width=900,
+										height=800,showlegend=True
+										)
+
 							else:
-								fig = px.imshow(data.df_U.T, title=title, aspect='auto')
-								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
-								fig.update_layout(
-									width=900,
-									height=800,showlegend=True
-								)
+								title = f"U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+							
+								if "make_static_image" in static_image:
+									fig = make_static_img(data.df_U.T,zmin = fzmin, zmax = fzmax, title = title)
+									fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
+									
+								else:
+									fig = px.imshow(data.df_U.T, title=title, aspect='auto')
+									fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
+									fig.update_layout(
+										width=900,
+										height=800,showlegend=True
+									)
 						add_dunedaq_annotation(fig)
 						children += [
 							html.B("ADC Counts: U-plane"),

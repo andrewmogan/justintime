@@ -60,9 +60,8 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
 					    html.A(html.Img(src=pil_image)                          
                             
                         ),
-						html.P(""),
-						html.P(""),
-                        html.H1("Just-in-Time"),
+						
+                        html.H2("Just-in-Time"),
 						html.H4("(Proto)DUNE: Prompt-Feedback"),
 						html.P(id="text_page",style={'fontSize': '14px '}),
 						# html.P( id = "pages_div",style={'fontSize': '12px '}),
@@ -85,15 +84,7 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
                                 ),
                             ],
                         ),
-                        html.P(id="total-rides"),
-                        html.P(id="total-rides-selection"),
-                        html.P(id="date-value"),
-                        dcc.Markdown(
-                            """
-                            Source: [FiveThirtyEight](https://github.com/fivethirtyeight/uber-tlc-foil-response/tree/master/uber-trip-data)
-                            Links: [Source Code](https://github.com/plotly/dash-sample-apps/tree/main/apps/dash-uber-rides-demo) | [Enterprise Demo](https://plotly.com/get-demo/)
-                            """
-                        ),
+                       
                     ],
                 ),
 	

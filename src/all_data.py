@@ -92,8 +92,8 @@ class trigger_record_data:
 		rich.print(self.tp_df)
 		self.tp_df_tsoff = self.tp_df.copy()
 		self.ts_min = self.tp_df_tsoff['start_time'].min()
-		self.tp_df_tsoff['peak_time'] = self.tp_df_tsoff['peak_time']-self.ts_min
-		self.tp_df_tsoff['start_time'] = self.tp_df_tsoff['start_time']-self.ts_min
+		self.tp_df_tsoff['peak_time'] = (self.tp_df_tsoff['peak_time']-self.ts_min)
+		self.tp_df_tsoff['start_time'] = (self.tp_df_tsoff['start_time']-self.ts_min)
 
 		self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(0, {}))]
 		self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(1, {}))]

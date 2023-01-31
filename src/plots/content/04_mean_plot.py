@@ -37,10 +37,10 @@ def init_callbacks(dash_app, storage, plot_id):
 		#theme = "darkly" if  theme else "superhero"
 		load_figure_template("darkly")
 		if trigger_record and raw_data_file:
-			if plot_id in storage.shown_plots:
+			if plot_id in storage.shown_plots :
 
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
-				rich.print(data.df_U_mean)
+				
 				if len(data.df)!=0:
 					fig_mean = make_subplots(rows=1, cols=3,
 						subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
