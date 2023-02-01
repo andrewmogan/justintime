@@ -40,7 +40,8 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 		load_figure_template("darkly")
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
-				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 				
 				if len(data.df)!=0:
 					rich.print(data.fft_phase)

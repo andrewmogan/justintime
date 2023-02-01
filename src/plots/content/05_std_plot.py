@@ -36,7 +36,9 @@ def init_callbacks(dash_app, storage, plot_id):
 		load_figure_template("darkly")
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
-				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				except RuntimeError: return(html.Div(""))
+			
 				if len(data.df)!=0:
 					fig_std = make_subplots(rows=1, cols=3,
 						subplot_titles=("STD U-Plane", "STD V-Plane", "STD Z-Plane"))

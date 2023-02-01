@@ -46,40 +46,43 @@ def init_callbacks(dash_app, storage, plot_id):
 
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
-                
-				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
+
 				data.init_tp()
 				data.init_cnr()
 				print(data.tp_df_tsoff)
 				if len(data.df)!=0:
-					
-					if int(channel_num) in data.channels:
-						
-						fzmin, fzmax = tr_color_range
-						title_U=f"FFT U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}" 
-						print(set(data.tp_df_tsoff['offline_ch']))
-						fig=waveform_tps(data,channel_num)
+					if channel_num:
+						if int(channel_num) in data.channels:
+							print(data.channels)
+							fzmin, fzmax = tr_color_range
+							title_U=f"FFT U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}" 
+							print(set(data.tp_df_tsoff['offline_ch']))
+							fig=waveform_tps(data,channel_num)
 
-						fig.update_layout(
-							xaxis_title="Time Ticks",
-    						yaxis_title="ADC Waveform",
-							#height=fig_h,
-							title_text=f"Run {data.info['run_number']}: {data.info['trigger_number']}",
-							legend=dict(x=0,y=1),
-							width=950,
+							fig.update_layout(
+								xaxis_title="Time Ticks",
+								yaxis_title="ADC Waveform",
+								#height=fig_h,
+								title_text=f"Run {data.info['run_number']}: {data.info['trigger_number']}",
+								legend=dict(x=0,y=1),
+								width=950,
 
-							)
-						
-						add_dunedaq_annotation(fig)
+								)
 							
-						return(html.Div([
-								selection_line(raw_data_file, trigger_record),
-								html.B(f"Waveform and TPs for channel {channel_num}"),
-								html.Hr(),
-								dcc.Graph(figure=fig),
-								]))
+							add_dunedaq_annotation(fig)
+								
+							return(html.Div([
+									selection_line(raw_data_file, trigger_record),
+									html.B(f"Waveform and TPs for channel {channel_num}"),
+									html.Hr(),
+									dcc.Graph(figure=fig),
+									]))
 					else:
-						return(html.Div(html.H6(nothing_to_plot())))
+						return(html.Div("No Channel Selected"))
+				else:
+					return(html.Div(html.H6(nothing_to_plot())))
 					
 				return(original_state)
 			return(html.Div())

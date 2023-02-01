@@ -37,45 +37,45 @@ def init_callbacks(dash_app, storage, plot_id):
 		#theme = "darkly" if  theme else "superhero"
 		load_figure_template("darkly")
 		if trigger_record and raw_data_file:
-			if plot_id in storage.shown_plots :
 
-				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
-				
-				if len(data.df)!=0:
-					fig_mean = make_subplots(rows=1, cols=3,
-						subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
-					fig_mean.add_trace(
-						go.Scattergl(x=data.df_U_mean.index.astype(int), y=data.df_U_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-						row=1, col=1
-					)
-					fig_mean.add_trace(
-						go.Scattergl(x=data.df_V_mean.index.astype(int), y=data.df_V_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-						row=1, col=2
-					)
-					fig_mean.add_trace(
-						go.Scattergl(x=data.df_Z_mean.index.astype(int), y=data.df_Z_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-						row=1, col=3
-					)
-
-					fig_mean.update_layout(
-						# autosize=False,
-						# width=1200,
-						# height=600,
-						margin=dict(
-							l=50,
-							r=50,
-							b=100,
-							t=100,
-							pad=4
+			if plot_id in storage.shown_plots:
+					try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+					except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
+					if len(data.df)!=0:
+						fig_mean = make_subplots(rows=1, cols=3,
+							subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
+						fig_mean.add_trace(
+							go.Scattergl(x=data.df_U_mean.index.astype(int), y=data.df_U_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
+							row=1, col=1
 						)
-						# showlegend=False
-					)
-					add_dunedaq_annotation(fig_mean)
-					#fig_mean.update_layout(plot_bgcolor='rgba(0, 0, 0, 0)',paper_bgcolor='rgba(0, 0, 0, 0)')
+						fig_mean.add_trace(
+							go.Scattergl(x=data.df_V_mean.index.astype(int), y=data.df_V_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
+							row=1, col=2
+						)
+						fig_mean.add_trace(
+							go.Scattergl(x=data.df_Z_mean.index.astype(int), y=data.df_Z_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
+							row=1, col=3
+						)
+
+						fig_mean.update_layout(
+							# autosize=False,
+							# width=1200,
+							# height=600,
+							margin=dict(
+								l=50,
+								r=50,
+								b=100,
+								t=100,
+								pad=4
+							)
+							# showlegend=False
+						)
+						add_dunedaq_annotation(fig_mean)
+						#fig_mean.update_layout(plot_bgcolor='rgba(0, 0, 0, 0)',paper_bgcolor='rgba(0, 0, 0, 0)')
 
 
-					return(html.Div([selection_line(raw_data_file, trigger_record),html.B("Mean by plane"),html.Hr(),dcc.Graph(figure=fig_mean)]))#
-				else:
-					return(html.Div(html.H6(nothing_to_plot())))
+						return(html.Div([selection_line(raw_data_file, trigger_record),html.B("Mean by plane"),html.Hr(),dcc.Graph(figure=fig_mean)]))#
+			else:
+				return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)
 		return(html.Div())
