@@ -25,6 +25,7 @@ def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str,temp
 
 	channel_map_id += 'ChannelMap'
 	theme=([dbc.themes.FLATLY if template=='light' else dbc.themes.DARKLY])
+	rich.print("Light mode" if theme==[dbc.themes.FLATLY] else "Dark mode")
 	dash_app = Dash(__name__,external_stylesheets=theme)
 	##theme_switch = ThemeSwitchAIO(
     ##aio_id="theme", themes=[dbc.themes.DARKLY, dbc.themes.SUPERHERO]
@@ -122,7 +123,7 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,template)
       #  )
 	])]
 ))    		
-		
+	
 	layout.append(html.Div([dcc.Location(id='url', refresh=False),html.Div(id='page-content')])) 
 	#layout.append(dbc.Container([theme], className="m-4 dbc"))
 	#layout.append(load_figure_template(ThemeSwitchAIO))
@@ -160,7 +161,6 @@ def init_page_callback(dash_app, all_storage):
 		pages, plots, ctrls = ld.get_elements()
 		style_list = [{"display":"none"} for _ in range(len(plots)+len(ctrls))]
 
-
 		for page in pages:
 			
 			if pathname:
@@ -168,11 +168,8 @@ def init_page_callback(dash_app, all_storage):
 				if f"/{page.id}" in pathname:
 					page_output=page.name
 					return(calculate_page_style_list(page, plots, ctrls, style_list, all_storage))
-				
 					
 		return(style_list)	
-
-
 
 	@dash_app.callback(Output("02_description_ctrl", "is_open"),Input("open", "n_clicks"), Input("close", "n_clicks"),[State("02_description_ctrl", "is_open")],)
 	
@@ -181,12 +178,8 @@ def init_page_callback(dash_app, all_storage):
 		if n1 or n2:
 			return not is_open
 		return is_open
-			
-		
-
 
 	@dash_app.callback([Output("plot_description","children")],[Input('url', 'pathname')])
-
 	
 	def show_description(pathname):
 		pages, plots, ctrls = ld.get_elements()
@@ -199,8 +192,6 @@ def init_page_callback(dash_app, all_storage):
 					return([page.text])
 			if pathname=='/':
 				return(["Just-in-Time is a prompt feedback tool designed for ProtoDune. It assesses recorded data coming from detector and trigger, with plots that extract complicated information to examine data quality and fragility. Particularly, trigger record displays are provided that allow users to choose run files and trigger records to analyze and compare. A variety of plots is included, which can be found on the navigation bar. "])
-
-
 
 def calculate_page_style_list(page, plots, ctrls, style_list, all_storage):
 	needed_plots = []
@@ -231,7 +222,6 @@ def get_ctrl_dependancies(ctrls,needed_ctrls):
 						needed_ctrls.append(ctrl_in.id)
 						changed = True
 	return(needed_ctrls)
-
 
 if __name__ == "__main__":
 	main()

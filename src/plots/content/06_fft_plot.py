@@ -38,7 +38,15 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 				if len(data.df)!=0:
+					
 					data.init_fft2()
+
+					rich.print("FFT Z-Plane")
+					rich.print(data.df_Z_plane)
+					rich.print("FFT V-Plane")
+					rich.print(data.df_V_plane)
+					rich.print("FFT U-Plane")
+					rich.print(data.df_U_plane)
 
 					title_U=f"FFT U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}" 
 					title_V=f"FFT V-plane: Run {data.info['run_number']}: {data.info['trigger_number']}" 

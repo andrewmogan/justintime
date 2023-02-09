@@ -5,6 +5,7 @@ import plotly.express as px
 from dash_bootstrap_templates import load_figure_template
 from plotly.subplots import make_subplots
 from dash.dependencies import Input, Output, State
+import rich
 from dash_bootstrap_templates import ThemeSwitchAIO
 import numpy as np
 from plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
@@ -38,7 +39,12 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div(""))
-			
+				rich.print("STD Z-Plane")
+				rich.print(data.df_Z_std)
+				rich.print("STD V-Plane")
+				rich.print(data.df_V_std)
+				rich.print("STD U-Plane")
+				rich.print(data.df_U_std)
 				if len(data.df)!=0:
 					fig_std = make_subplots(rows=1, cols=3,
 						subplot_titles=("STD U-Plane", "STD V-Plane", "STD Z-Plane"))

@@ -232,21 +232,22 @@ def waveform_tps(data,channel_num):
 	fig= px.line(data.df_cnr,y=channel_num)
 	if channel_num in set(data.tp_df_tsoff['offline_ch']):
 							
-		
-		print("op")
+		rich.print("Data after CNR:")
+		rich.print(data.df_cnr)
 		new=(data.tp_df_tsoff.loc[data.tp_df_tsoff['offline_ch'] == channel_num])
-								
+		rich.print("Dataframe used for TPs (with similar offline channels)")
+		rich.print(new)	
+		rich.print("TPs time over threshold (in order of appearance):")					
 		for i in range(len(new)):
-															
-									
+																			
 			time_start = new.iloc[i]['start_time']
-			print(new)
 			time_over_threshold = new.iloc[i]["time_over_threshold"]
 			time_end = (new.iloc[i]["start_time"]+new.iloc[i]["time_over_threshold"])
 			time_peak = new.iloc[i]["peak_time"]
 			channel =new.iloc[i]["offline_ch"]
 			adc_peak = new.iloc[i]["peak_adc"]
-										
+			rich.print(time_over_threshold)
+								
 			fig.add_vrect((time_start-time_peak)+time_start, (time_end-time_peak)+time_start, line_color="red")	
 	return fig
 

@@ -41,11 +41,11 @@ class trigger_record_data:
 		self.df.index=self.df.index-self.df.index.min()
 
 		self.tr_ts_sec = self.info['trigger_timestamp']*20/1000000000 # Move to 63.5 MHz
-		rich.print(self.tr_ts_sec)
-		rich.print(self.info)
+		#rich.print(self.tr_ts_sec)
+		#rich.print(self.info)
 		self.dt = datetime.datetime.fromtimestamp(self.tr_ts_sec).strftime('%c')
 		self.channels = list(self.df.columns)
-		rich.print(self.channels[0])
+		#rich.print(self.channels[0])
 		self.group_planes = groupby(self.channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
 		
 		self.planes = {k: [x for x in d if x] for k,d in self.group_planes}
@@ -57,7 +57,7 @@ class trigger_record_data:
 		self.df_V_mean, self.df_V_std = self.df_V.mean(), self.df_V.std()
 		self.df_Z_mean, self.df_Z_std = self.df_Z.mean(), self.df_Z.std()
 		self.fft_phase = {}
-		rich.print(self.df_U)
+		#rich.print(self.df_U)
 
 
 	def find_plane(self, offch):
@@ -99,7 +99,7 @@ class trigger_record_data:
 		
 
 	def init_tp(self):
-		rich.print(self.tp_df)
+		#rich.print(self.tp_df)
 		self.tp_df_tsoff = self.tp_df.copy()
 		self.ts_min = self.tp_df_tsoff['start_time'].min()
 		self.tp_df_tsoff['peak_time'] = (self.tp_df_tsoff['peak_time']-self.ts_min)

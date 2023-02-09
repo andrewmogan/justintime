@@ -34,7 +34,6 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		Output(plot_id, "children"),
 		#Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
-
 		State('04_trigger_record_select_ctrl', "value"),
 		State('03_file_select_ctrl', "value"),
 		State("07_tr_colour_range_slider_comp", "value"),
@@ -47,20 +46,25 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
-				#rich.print(data.df)
 				
 				if len(data.df)!=0:
 					data.init_tp()
 					fzmin, fzmax = tr_color_range
 					fig_w, fig_h = 2600, 500
 					children = []
+					rich.print("TPs for Z plane:")
+					rich.print(data.tp_df_Z)
+					rich.print("TPs for V plane:")
+					rich.print(data.tp_df_V)
+					rich.print("TPs for U plane:")
+					rich.print(data.tp_df_U)
 					if "density_plot" in density:
-						
+						rich.print("2D Density plot chosen")
 						fig = tp_density(data.tp_df_Z,data.xmin_Z, data.xmax_Z,fzmin,fzmax,fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 							html.Hr(),
-							dcc.Graph(figure=fig),]
+							dcc.Graph(figure=fig)]
 						fig = tp_density(data.tp_df_V,data.xmin_V, data.xmax_V,fzmin,fzmax,fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
@@ -79,6 +83,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 							html.Hr(),
 							dcc.Graph(figure=fig)]
 					else:
+						rich.print("Scatter Plot Chosen")
 						fig = make_tp_plot(data.tp_df_Z,data.xmin_Z,data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
@@ -101,7 +106,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 							html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 							html.Hr(),
 							dcc.Graph(figure=fig)]
-					
+					add_dunedaq_annotation(fig)
 					return(html.Div([
 						selection_line(raw_data_file, trigger_record),
 						html.Hr(),

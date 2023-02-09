@@ -52,10 +52,13 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					data.init_fft()
 					if channel_num:
 						if int(channel_num) in data.channels:
-						
+							rich.print("Channel number selected: ",channel_num)
+
 							fzmin, fzmax = tr_color_range
-							print(data.df_fft)
+							rich.print("FFT of values:")
+							rich.print(data.df_fft)
 							fig=px.line(data.df_fft,y=channel_num)
+							rich.print("FFT for the selected channel values:")
 							print(data.df_fft[channel_num])
 							fig.update_layout(
 								xaxis_title="Frequency",

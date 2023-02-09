@@ -41,6 +41,15 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 			if plot_id in storage.shown_plots:
 					try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 					except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
+					rich.print("Dataframe:")
+					rich.print(data.df)
+					rich.print("Mean Z-Plane")
+					rich.print(data.df_Z_mean)
+					rich.print("Mean V-Plane")
+					rich.print(data.df_V_mean)
+					rich.print("Mean U-Plane")
+					rich.print(data.df_U_mean)
+
 					if len(data.df)!=0:
 						fig_mean = make_subplots(rows=1, cols=3,
 							subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
@@ -72,7 +81,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 						)
 						add_dunedaq_annotation(fig_mean)
 						fig_mean.update_layout(font_family="Lato", title_font_family="Lato")
-						return(html.Div([selection_line(raw_data_file, trigger_record),html.B("Mean by plane"),html.Hr(),dcc.Graph(figure=fig_mean)]))#
+						return(html.Div([selection_line(raw_data_file, trigger_record),html.B("Mean by plane"),html.Hr(),dcc.Graph(figure=fig_mean)]))
 			else:
 				return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)
