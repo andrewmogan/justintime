@@ -45,7 +45,9 @@ class trigger_record_data:
 		rich.print(self.info)
 		self.dt = datetime.datetime.fromtimestamp(self.tr_ts_sec).strftime('%c')
 		self.channels = list(self.df.columns)
+		rich.print(self.channels[0])
 		self.group_planes = groupby(self.channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
+		
 		self.planes = {k: [x for x in d if x] for k,d in self.group_planes}
 		self.self_planes = {k:sorted(set(v) & set(self.df.columns)) for k,v in self.planes.items()}
 		self.df_U =  self.df[self.self_planes.get(0, {})]
@@ -55,6 +57,7 @@ class trigger_record_data:
 		self.df_V_mean, self.df_V_std = self.df_V.mean(), self.df_V.std()
 		self.df_Z_mean, self.df_Z_std = self.df_Z.mean(), self.df_Z.std()
 		self.fft_phase = {}
+		rich.print(self.df_U)
 
 
 	def find_plane(self, offch):
@@ -65,6 +68,12 @@ class trigger_record_data:
 		else:
 			return 'D'
 
+	def init_fft(self):
+		try: self.df_fft
+		except AttributeError: 
+			self.df_fft = signal.calc_fft(self.df)
+			
+			
 
 	def init_fft2(self):
 		try: self.df_fft2

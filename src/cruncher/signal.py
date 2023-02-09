@@ -49,9 +49,12 @@ def calc_fft(df: pd.DataFrame) -> pd.DataFrame:
     
     """
     df_fft = df.apply(np.fft.fft)
+    df_fft = np.abs(df_fft) ** 2
     freq = np.fft.fftfreq(df.index.size, 0.5e-6)
     df_fft['Freq'] = freq
-    return df_fft
+    df_fft = df_fft[df_fft['Freq']>0]
+    df_fft = df_fft.set_index('Freq')
+    return df_fft.sort_index()
 
 def calc_fft_sum_by_plane(df: pd.DataFrame, planes: dict) -> pd.DataFrame:
     """Calculates the sum by plane of the FFT 

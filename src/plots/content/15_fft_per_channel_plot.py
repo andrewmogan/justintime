@@ -8,17 +8,16 @@ from plotly.subplots import make_subplots
 from dash.dependencies import Input, Output, State
 import numpy as np
 import rich
+
 import pandas as pd
 from plotting_functions import add_dunedaq_annotation, selection_line,waveform_tps,nothing_to_plot
 
 
 def return_obj(dash_app, engine, storage,theme):
-	plot_id = "14_waveform_vs_tp_plot"
+	plot_id = "15_fft_per_channel_plot"
 	plot_div = html.Div(id = plot_id)
-	plot = plot_class.plot("waveform_tp_plot", plot_id, plot_div, engine, storage,theme)
+	plot = plot_class.plot("FFT_Channel_plot", plot_id, plot_div, engine, storage,theme)
 	plot.add_ctrl("04_trigger_record_select_ctrl")
-
-
 	plot.add_ctrl("07_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("14_channel_number_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
@@ -42,27 +41,25 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 	def plot_fft_graph(n_clicks, trigger_record,channel_num,tr_color_range,raw_data_file, original_state):
 	
 		load_figure_template(theme)
-		
+	
+
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
-
-				data.init_tp()
-				data.init_cnr()
-				#print(data.tp_df_tsoff)
+				
 				if len(data.df)!=0:
+					data.init_fft()
 					if channel_num:
 						if int(channel_num) in data.channels:
-							#print(data.channels)
+						
 							fzmin, fzmax = tr_color_range
-							title_U=f"FFT U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}" 
-							#print(set(data.tp_df_tsoff['offline_ch']))
-							fig=waveform_tps(data,channel_num)
-
+							print(data.df_fft)
+							fig=px.line(data.df_fft,y=channel_num)
+							print(data.df_fft[channel_num])
 							fig.update_layout(
-								xaxis_title="Time Ticks",
-								yaxis_title="ADC Waveform",
+								xaxis_title="Frequency",
+								yaxis_title="FFT",
 								#height=fig_h,
 								title_text=f"Run {data.info['run_number']}: {data.info['trigger_number']}",
 								legend=dict(x=0,y=1),
@@ -74,7 +71,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 							fig.update_layout(font_family="Lato", title_font_family="Lato")
 							return(html.Div([
 									selection_line(raw_data_file, trigger_record),
-									html.B(f"Waveform and TPs for channel {channel_num}"),
+									html.B(f"FFT for channel {channel_num}"),
 									html.Hr(),
 									dcc.Graph(figure=fig),
 									]))
