@@ -10,6 +10,7 @@ import dash_bootstrap_components as dbc
 import click
 import rich
 from PIL import Image
+from dash_bootstrap_templates import load_figure_template
 
 
 @click.command()
@@ -17,24 +18,25 @@ from PIL import Image
 @click.argument('raw_data_path', type=click.Path(exists=True, file_okay=False))
 @click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST']))
 @click.argument('frame_type', type=click.Choice(['ProtoWIB', 'WIB']))
+@click.argument("template",type=click.Choice(['light','dark']),default='light')
 
-def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str):
+
+def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str,template:str):
 
 	channel_map_id += 'ChannelMap'
-	dash_app = Dash(__name__,external_stylesheets=[dbc.themes.DARKLY])
+	theme=([dbc.themes.FLATLY if template=='light' else dbc.themes.DARKLY])
+	dash_app = Dash(__name__,external_stylesheets=theme)
 	##theme_switch = ThemeSwitchAIO(
     ##aio_id="theme", themes=[dbc.themes.DARKLY, dbc.themes.SUPERHERO]
-	##)
 	#templates=[dbc.themes.COSMO, dbc.themes.SUPERHERO]
 	#load_figure_template(templates)
 	##rich.print(theme_switch)
-	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id)
+	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,template)
 	debug=True
 	dash_app.run_server(debug=debug, host='0.0.0.0', port=port)
 
 
-def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
-	
+def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,template):
 	pil_image = Image.open("assets/image3.png")
 	#engine = DataManager("/home/gkokkoro/git/About_time_workarea/sourcecode/data/", "ProtoWIB", 'VDColdbox')
 	engine = DataManager(raw_data_path, frame_type, channel_map_id)
@@ -43,11 +45,11 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
 	rich.print(data_files)
 	#engine = DataManager("/tmp/", 'VDColdboxChannelMap')
 	all_storage = all_data_storage(engine)
-	pages, plots, ctrls = ld.get_elements(dash_app = dash_app, engine = engine, storage = all_storage)
+	pages, plots, ctrls = ld.get_elements(dash_app = dash_app, engine = engine, storage = all_storage,theme=template)
 	
 	layout = []
 	layout.append(create_navbar(pages))
-	#layout.append(dbc.Container([theme], className="m-4 dbc"))
+
 	layout.append(html.Div(
     children=[
         html.Div(
@@ -57,13 +59,11 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
                 html.Div(
                     className="four columns div-user-controls",
                     children=[
-					    html.A(html.Img(src=pil_image)                          
-                            
-                        ),
-						
-                        html.H2("Just-in-Time"),
-						html.H4("(Proto)DUNE: Prompt-Feedback"),
-						html.P(id="text_page",style={'fontSize': '14px '}),
+					    html.A(html.Img(src=pil_image),style={"marginLeft":"0.8em"}),
+                        html.H2("(Proto)DUNE Prompt-Feedback: Just-in-Time",style={"fontSize":"12px","marginBottom":"2em"}),
+					
+						html.H2("   "),
+						html.H2(id="text_page"),
 						# html.P( id = "pages_div",style={'fontSize': '12px '}),
 						html.Div([ctrl.div for ctrl in ctrls], id = "ctrls_div",style={'fontSize': '12px '}),
                         
@@ -103,28 +103,27 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id):
                 
                 ),
 			# Column for app graphs and plots
-                html.Div(
-                    className="five columns div-for-charts",
-                    children=[
+              #  html.Div(
+                 #   className="five columns div-for-charts",
+                  #  children=[
                         
-                        html.Div(
-                            className="text-padding",
-                            children=[
+                   #     html.Div(
+                    #        className="text-padding",
+                    #        children=[
                                 
-                            ],
-                        ),
-						html.H2(id="title"),
-						html.P(""),
-                        html.P(id="description",style={'fontSize': '14px '})],
+                       #     ],
+                       # ),
+						#html.H2(id="title"),
+						#html.P(""),
+                       # html.P(id="description",style={'fontSize': '14px '})],
                 
-                ),
-            ],
-        )
-    ]
+              #  ),
+           # ],
+      #  )
+	])]
 ))    		
 		
 	layout.append(html.Div([dcc.Location(id='url', refresh=False),html.Div(id='page-content')])) 
-
 	#layout.append(dbc.Container([theme], className="m-4 dbc"))
 	#layout.append(load_figure_template(ThemeSwitchAIO))
 	init_page_callback(dash_app, all_storage)
@@ -173,9 +172,23 @@ def init_page_callback(dash_app, all_storage):
 					
 		return(style_list)	
 
-	@dash_app.callback([Output("title","children")],[Output("description","children")],[Input('url', 'pathname')])
 
-	def show_page(pathname):
+
+	@dash_app.callback(Output("02_description_ctrl", "is_open"),Input("open", "n_clicks"), Input("close", "n_clicks"),[State("02_description_ctrl", "is_open")],)
+	
+	def toggle_modal(n1, n2, is_open):
+
+		if n1 or n2:
+			return not is_open
+		return is_open
+			
+		
+
+
+	@dash_app.callback([Output("plot_description","children")],[Input('url', 'pathname')])
+
+	
+	def show_description(pathname):
 		pages, plots, ctrls = ld.get_elements()
 		for page in pages:
 			
@@ -183,10 +196,12 @@ def init_page_callback(dash_app, all_storage):
 				
 				if f"/{page.id}" in pathname:
 					
-					return(["Plot Description"],[page.text])
+					return([page.text])
 			if pathname=='/':
-				return([""],[""])
-	
+				return(["Just-in-Time is a prompt feedback tool designed for ProtoDune. It assesses recorded data coming from detector and trigger, with plots that extract complicated information to examine data quality and fragility. Particularly, trigger record displays are provided that allow users to choose run files and trigger records to analyze and compare. A variety of plots is included, which can be found on the navigation bar. "])
+
+
+
 def calculate_page_style_list(page, plots, ctrls, style_list, all_storage):
 	needed_plots = []
 	needed_ctrls = []

@@ -14,10 +14,10 @@ def return_obj(dash_app, engine):
 				{'label': 'U', 'value': 'U'},
 			],
 			value=[],
-			labelStyle={'display': 'inline-block'},
-			style={'display': 'inline-block'},
+			labelStyle={'display': 'inline-block',"marginRight":"0.15em"},
+			style={'display': 'inline-block',"marginRight":"0.15em"},
 		)
-	])
+	],style={"marginBottom":"1em"})
 
 	ctrl = ctrl_class.ctrl("adc_map_selection", ctrl_id, ctrl_div, engine)
 

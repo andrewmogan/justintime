@@ -103,7 +103,6 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
 		yaxis_title="Offline Channel",
 		xaxis_title="Time ticks")
 
-
 	# fig.show(config={'doubleClick': 'reset'})
 	return fig
 
@@ -143,6 +142,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 		)
 		
 		fig.update_yaxes(range=[xmin,xmax])
+		fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 
 	else:
 		fig = go.Figure()
@@ -157,11 +157,11 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 		height=fig_h,
 		yaxis = dict(autorange="reversed"),
 		title_text=f"Run {info['run_number']}: {info['trigger_number']}",
-		legend=dict(x=0,y=1),
-		width=950,
+		#legend=dict(x=0,y=1),
+		width=950
 
 		)
-	
+
 	return fig
 
 def tp_for_adc(df, cmin, cmax):
@@ -221,9 +221,10 @@ def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
 		yaxis = dict(autorange="reversed"),
 		title_text=f"Run {info['run_number']}: {info['trigger_number']}",
 		legend=dict(x=0,y=1),
-		width=950,
+		width=950
 
 		)
+	fig.update_layout(font_family="Lato", title_font_family="Lato")
 	return fig
 
 
@@ -246,8 +247,7 @@ def waveform_tps(data,channel_num):
 			channel =new.iloc[i]["offline_ch"]
 			adc_peak = new.iloc[i]["peak_adc"]
 										
-			fig.add_vrect((time_start-time_peak)+time_start, (time_end-time_peak)+time_start)	
-
+			fig.add_vrect((time_start-time_peak)+time_start, (time_end-time_peak)+time_start, line_color="red")	
 	return fig
 
 

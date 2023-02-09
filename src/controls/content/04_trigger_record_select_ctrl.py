@@ -10,7 +10,7 @@ def return_obj(dash_app, engine):
 		dcc.Dropdown(
 			id=ctrl_id
 		)
-	])
+	],style={"marginBottom":"1.5em"})
 
 	ctrl = ctrl_class.ctrl("trigger_record_select", ctrl_id, ctrl_div, engine)
 	ctrl.add_ctrl("03_file_select_ctrl")

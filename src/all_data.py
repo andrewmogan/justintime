@@ -81,12 +81,13 @@ class trigger_record_data:
 		except AttributeError: self.df_fft = signal.calc_fft(self.df)
 		try: self.fft_phase[f"{fmin}-{fmax}"]
 		except KeyError:
-			try:
-				self.fft_phase[f"{fmin}-{fmax}"] = signal.calc_fft_phase(self.df_fft, fmin, fmax)
-				self.fft_phase[f"{fmin}-{fmax}"]['femb']  = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.engine.femb_id_from_offch)
-				self.fft_phase[f"{fmin}-{fmax}"]['plane'] = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.find_plane)
-			except (KeyError,ValueError):
-				pass # some code here that communicates to the user that there is nothing within that range.
+
+			self.fft_phase[f"{fmin}-{fmax}"] = signal.calc_fft_phase(self.df_fft, fmin, fmax)
+			#print(self.fft_phase[f"{fmin}-{fmax}"])
+			self.fft_phase[f"{fmin}-{fmax}"]['femb']  = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.engine.femb_id_from_offch)
+			self.fft_phase[f"{fmin}-{fmax}"]['plane'] = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.find_plane)				
+			
+		
 
 	def init_tp(self):
 		rich.print(self.tp_df)

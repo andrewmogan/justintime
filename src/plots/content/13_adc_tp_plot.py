@@ -12,10 +12,10 @@ import pandas as pd
 from all_data import trigger_record_data
 from plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot,make_tp_plot,tp_for_adc
 
-def return_obj(dash_app, engine, storage):
+def return_obj(dash_app, engine, storage,theme):
 	plot_id = "13_adc_tp_plot"
 	plot_div = html.Div(id = plot_id)
-	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage)
+	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
 	plot.add_ctrl("04_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 	plot.add_ctrl("06_adc_map_selection_ctrl")
@@ -24,10 +24,10 @@ def return_obj(dash_app, engine, storage):
 	plot.add_ctrl("10_offset_ctrl")
 	plot.add_ctrl("13_cnr_ctrl")
 
-	init_callbacks(dash_app, storage, plot_id, engine)
+	init_callbacks(dash_app, storage, plot_id, engine,theme)
 	return(plot)
 
-def init_callbacks(dash_app, storage, plot_id, engine):
+def init_callbacks(dash_app, storage, plot_id, engine,theme):
 
 	@dash_app.callback(
 		Output(plot_id, "children"),
@@ -43,8 +43,8 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 		State(plot_id, "children"),
 	)
 	def plot_trd_graph(n_clicks, trigger_record, raw_data_file, adcmap_selection, tr_color_range, static_image, offset,cnr,original_state):
-		##theme = "darkly" if  theme else "superhero"
-		load_figure_template("darkly")
+		
+		load_figure_template(theme)
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
@@ -58,10 +58,9 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 					fzmin, fzmax = tr_color_range
 
 					if 'Z' in adcmap_selection:
-					 #trigger_record_data(engine,trigger_record,raw_data_file).t0_min
 
 						if "cnr_removal" in cnr:
-							title = f"Z-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+							title = f"Z-plane (CNR): Run {data.info['run_number']}: {data.info['trigger_number']} "
 
 							if "make_static_image" in static_image:
 								fig = make_static_img(data.df_cnr[data.planes.get(2, {})].T, zmin = fzmin, zmax = fzmax, title = title)
@@ -71,7 +70,8 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 								fig.update_layout(
 										width=900,
-										height=800,showlegend=True
+										height=800,yaxis_title="Offline Channel",
+										xaxis_title="Time ticks",showlegend=True
 										)
 						else:
 							if "offset_removal" in offset:
@@ -85,7 +85,8 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 									fig.update_layout(
 										width=900,
-										height=800,showlegend=True
+										height=800,yaxis_title="Offline Channel",
+										xaxis_title="Time ticks",showlegend=True
 										)
 
 							else:
@@ -100,9 +101,11 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 									fig.update_layout(
 										width=900,
-										height=800,showlegend=True
+										height=800,yaxis_title="Offline Channel",
+										xaxis_title="Time ticks",showlegend=True
 									)
 						add_dunedaq_annotation(fig)
+						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
 							html.B("ADC Counts: Z-plane"),
 							html.Hr(),
@@ -122,7 +125,8 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 								fig.update_layout(
 										width=900,
-										height=800,showlegend=True
+										height=800,yaxis_title="Offline Channel",
+										xaxis_title="Time ticks",showlegend=True
 										)
 						else:
 							if "offset_removal" in offset:
@@ -136,7 +140,8 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 									fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 									fig.update_layout(
 										width=900,
-										height=800,showlegend=True
+										height=800,yaxis_title="Offline Channel",
+										xaxis_title="Time ticks",showlegend=True
 										)
 
 							else:
@@ -151,10 +156,12 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 									fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 									fig.update_layout(
 										width=900,
-										height=800,showlegend=True
+										height=800,yaxis_title="Offline Channel",
+										xaxis_title="Time ticks",showlegend=True
 									)
 				
 						add_dunedaq_annotation(fig)
+						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
 							html.B("ADC Counts: V-plane"),
 							html.Hr(),
@@ -173,7 +180,8 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 								fig.update_layout(
 										width=900,
-										height=800,showlegend=True
+										height=800,yaxis_title="Offline Channel",
+										xaxis_title="Time ticks",showlegend=True
 										)
 						else:
 							if "offset_removal" in offset:
@@ -187,7 +195,8 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 									fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 									fig.update_layout(
 										width=900,
-										height=800,showlegend=True
+										height=800,yaxis_title="Offline Channel",
+										xaxis_title="Time ticks",showlegend=True
 										)
 
 							else:
@@ -202,9 +211,11 @@ def init_callbacks(dash_app, storage, plot_id, engine):
 									fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 									fig.update_layout(
 										width=900,
-										height=800,showlegend=True
+										height=800,yaxis_title="Offline Channel",
+										xaxis_title="Time ticks",showlegend=True
 									)
 						add_dunedaq_annotation(fig)
+						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
 							html.B("ADC Counts: U-plane"),
 							html.Hr(),

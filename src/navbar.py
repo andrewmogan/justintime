@@ -25,7 +25,7 @@ def create_navbar(pages):
                     # side of the Navbar.  The first parameter is the text that appears and the second parameter 
                     # is the URL extension.
                     dbc.DropdownMenuItem("Home", href='/',style={'fontSize': '14px '}), # Hyperlink item that appears in the dropdown menu
-                    html.Div([dbc.DropdownMenuItem(page.name, href=f"/{page.id}") for page in pages],style={'fontSize': '14px ',"border":"2px black solid"}),
+                    html.Div([dbc.DropdownMenuItem(page.name, href=f"/{page.id}") for page in pages],style={'fontSize': '14px '}),
    
         ] 
             ),
@@ -33,7 +33,7 @@ def create_navbar(pages):
         brand="Home",  # Set the text on the left side of the Navbar
         brand_href="/",  # Set the URL where the user will be sent when they click the brand we just created "Home"
         sticky="top",  # Stick it to the top... like Spider Man crawling on the ceiling?
-        color="secondary",  # Change this to change color of the navbar e.g. "primary", "secondary" etc.
+        color="primary",  # Change this to change color of the navbar e.g. "primary", "secondary" etc.
         dark=True,  # Change this to change color of text within the navbar (False for light text)
         
     )

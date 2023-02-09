@@ -13,7 +13,8 @@ def return_obj(dash_app, engine):
 			max=1024,
 			step=64,
 			value=[-192, 192],
-			marks={ v:f"{v}" for v in range(-1024, 1025, 256) }
+			marks={ v:f"{v}" for v in range(-1024, 1025, 256) },
+			
 		)
 	], id = ctrl_id)
 

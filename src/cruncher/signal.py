@@ -104,5 +104,5 @@ def calc_diffs(df_a: pd.DataFrame, df_b: pd.DataFrame) -> pd.DataFrame:
 
 def calc_fft_phase(df_fft: pd.DataFrame, fmin: float=0., fmax: float=2e6) -> pd.DataFrame:
     df_phase = df_fft[(df_fft['Freq'] > fmin) & (df_fft['Freq'] < fmax)].drop('Freq', axis=1).apply(np.angle).mean().to_frame('phase')
-    
+    #print(df_phase)
     return df_phase

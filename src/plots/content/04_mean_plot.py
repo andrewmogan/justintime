@@ -13,17 +13,17 @@ from all_data import trigger_record_data
 from plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
 
 
-def return_obj(dash_app, engine, storage):
+def return_obj(dash_app, engine, storage,theme):
 	plot_id = "04_mean_plot"
 	plot_div = html.Div(id = plot_id)
-	plot = plot_class.plot("Mean_plot", plot_id, plot_div, engine, storage)
+	plot = plot_class.plot("Mean_plot", plot_id, plot_div, engine, storage,theme)
 	plot.add_ctrl("04_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
-	init_callbacks(dash_app, storage, plot_id)
+	init_callbacks(dash_app, storage, plot_id,theme)
 	return(plot)
 
-def init_callbacks(dash_app, storage, plot_id):
+def init_callbacks(dash_app, storage, plot_id,theme):
 	
 	@dash_app.callback(
 		Output(plot_id, "children"),
@@ -34,8 +34,8 @@ def init_callbacks(dash_app, storage, plot_id):
 		State(plot_id, "children")
 	)
 	def plot_mean_graph(n_clicks, trigger_record, raw_data_file, original_state):
-		#theme = "darkly" if  theme else "superhero"
-		load_figure_template("darkly")
+
+		load_figure_template(theme)
 		if trigger_record and raw_data_file:
 
 			if plot_id in storage.shown_plots:
@@ -71,9 +71,7 @@ def init_callbacks(dash_app, storage, plot_id):
 							# showlegend=False
 						)
 						add_dunedaq_annotation(fig_mean)
-						#fig_mean.update_layout(plot_bgcolor='rgba(0, 0, 0, 0)',paper_bgcolor='rgba(0, 0, 0, 0)')
-
-
+						fig_mean.update_layout(font_family="Lato", title_font_family="Lato")
 						return(html.Div([selection_line(raw_data_file, trigger_record),html.B("Mean by plane"),html.Hr(),dcc.Graph(figure=fig_mean)]))#
 			else:
 				return(html.Div(html.H6(nothing_to_plot())))

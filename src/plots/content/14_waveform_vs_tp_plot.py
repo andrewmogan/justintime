@@ -12,10 +12,10 @@ import pandas as pd
 from plotting_functions import add_dunedaq_annotation, selection_line,waveform_tps,nothing_to_plot
 
 
-def return_obj(dash_app, engine, storage):
+def return_obj(dash_app, engine, storage,theme):
 	plot_id = "14_waveform_vs_tp_plot"
 	plot_div = html.Div(id = plot_id)
-	plot = plot_class.plot("waveform_tp_plot", plot_id, plot_div, engine, storage)
+	plot = plot_class.plot("waveform_tp_plot", plot_id, plot_div, engine, storage,theme)
 	plot.add_ctrl("04_trigger_record_select_ctrl")
 
 
@@ -23,11 +23,11 @@ def return_obj(dash_app, engine, storage):
 	plot.add_ctrl("14_channel_number_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
-	init_callbacks(dash_app, storage, plot_id)
+	init_callbacks(dash_app, storage, plot_id,theme)
 
 	return(plot)
 
-def init_callbacks(dash_app, storage, plot_id):
+def init_callbacks(dash_app, storage, plot_id,theme):
 	@dash_app.callback(
 		Output(plot_id, "children"),
 		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
@@ -40,8 +40,8 @@ def init_callbacks(dash_app, storage, plot_id):
 		State(plot_id, "children"),
 	)
 	def plot_fft_graph(n_clicks, trigger_record,channel_num,tr_color_range,raw_data_file, original_state):
-		#theme = "darkly" if  theme else "superhero"
-		load_figure_template("darkly")
+	
+		load_figure_template(theme)
 		fir_shift = 16
 
 		if trigger_record and raw_data_file:
@@ -72,7 +72,7 @@ def init_callbacks(dash_app, storage, plot_id):
 								)
 							
 							add_dunedaq_annotation(fig)
-								
+							fig.update_layout(font_family="Lato", title_font_family="Lato")
 							return(html.Div([
 									selection_line(raw_data_file, trigger_record),
 									html.B(f"Waveform and TPs for channel {channel_num}"),
