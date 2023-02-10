@@ -2,6 +2,7 @@ from itertools import groupby
 import datetime
 from cruncher import signal
 import rich
+import numpy as np
 from dash import Dash, html
 class all_data_storage:
 	def __init__(self, engine):
@@ -71,9 +72,7 @@ class trigger_record_data:
 	def init_fft(self):
 		try: self.df_fft
 		except AttributeError: 
-			self.df_fft = signal.calc_fft(self.df)
-			
-			
+			self.df_fft = signal.calc_fft_2(self.df)
 
 	def init_fft2(self):
 		try: self.df_fft2
@@ -92,7 +91,7 @@ class trigger_record_data:
 		except KeyError:
 
 			self.fft_phase[f"{fmin}-{fmax}"] = signal.calc_fft_phase(self.df_fft, fmin, fmax)
-			#print(self.fft_phase[f"{fmin}-{fmax}"])
+			print(self.fft_phase[f"{fmin}-{fmax}"])
 			self.fft_phase[f"{fmin}-{fmax}"]['femb']  = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.engine.femb_id_from_offch)
 			self.fft_phase[f"{fmin}-{fmax}"]['plane'] = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.find_plane)				
 			
