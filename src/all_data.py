@@ -28,37 +28,42 @@ class all_data_storage:
 		self.raw_data_files[raw_data_file] = {}
 		return(self.add_trigger_record_to_file(trigger_record, raw_data_file))
 
-_cache=None
 class trigger_record_data:
 	
 	def __init__(self, engine, trigger_record, raw_data_file):
 		self.engine = engine
 		self.info, self.df, self.tp_df, self.fwtp_df = engine.load_entry(raw_data_file, int(trigger_record))
-
-		global _cache 
-		if _cache is None:
-			_cache = self.df.index.min()
-		self.t0_min=_cache
-		self.df.index=self.df.index-self.df.index.min()
+		
+	
+		self.df_tsoff=self.df.copy()
+		self.t0_min= self.df_tsoff.index.min()
+		print("Initial Time Stamp")
+		print(self.t0_min)
+		
+		self.df_tsoff.index=self.df_tsoff.index-self.t0_min
 
 		self.tr_ts_sec = self.info['trigger_timestamp']*20/1000000000 # Move to 63.5 MHz
 		#rich.print(self.tr_ts_sec)
 		#rich.print(self.info)
 		self.dt = datetime.datetime.fromtimestamp(self.tr_ts_sec).strftime('%c')
-		self.channels = list(self.df.columns)
+		self.channels = list(self.df_tsoff.columns)
 		#rich.print(self.channels[0])
 		self.group_planes = groupby(self.channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
 		
 		self.planes = {k: [x for x in d if x] for k,d in self.group_planes}
-		self.self_planes = {k:sorted(set(v) & set(self.df.columns)) for k,v in self.planes.items()}
-		self.df_U =  self.df[self.self_planes.get(0, {})]
-		self.df_V =  self.df[self.self_planes.get(1, {})]
-		self.df_Z =  self.df[self.self_planes.get(2, {})]
+		self.self_planes = {k:sorted(set(v) & set(self.df_tsoff.columns)) for k,v in self.planes.items()}
+		self.df_U =  self.df_tsoff[self.self_planes.get(0, {})]
+		self.df_V =  self.df_tsoff[self.self_planes.get(1, {})]
+		self.df_Z =  self.df_tsoff[self.self_planes.get(2, {})]
 		self.df_U_mean, self.df_U_std = self.df_U.mean(), self.df_U.std()
 		self.df_V_mean, self.df_V_std = self.df_V.mean(), self.df_V.std()
 		self.df_Z_mean, self.df_Z_std = self.df_Z.mean(), self.df_Z.std()
 		self.fft_phase = {}
-		#rich.print(self.df_U)
+
+		rich.print("DF U:")
+		rich.print(self.df_U)
+		rich.print("DF:")
+		rich.print(self.df_tsoff)
 
 
 	def find_plane(self, offch):
@@ -72,11 +77,11 @@ class trigger_record_data:
 	def init_fft(self):
 		try: self.df_fft
 		except AttributeError: 
-			self.df_fft = signal.calc_fft_2(self.df)
+			self.df_fft = signal.calc_fft_fft_sq(self.df_tsoff)[1]
 
 	def init_fft2(self):
 		try: self.df_fft2
-		except AttributeError: self.df_fft2 = signal.calc_fft_sum_by_plane(self.df, self.planes)
+		except AttributeError: self.df_fft2 = signal.calc_fft_sum_by_plane(self.df_tsoff, self.planes)
 		try: self.df_U_plane
 		except AttributeError: self.df_U_plane = self.df_fft2['U-plane']
 		try: self.df_V_plane
@@ -86,7 +91,7 @@ class trigger_record_data:
 
 	def init_fft_phase(self, fmin, fmax):
 		try: self.df_fft
-		except AttributeError: self.df_fft = signal.calc_fft(self.df)
+		except AttributeError: self.df_fft = signal.calc_fft(self.df_tsoff)
 		try: self.fft_phase[f"{fmin}-{fmax}"]
 		except KeyError:
 
@@ -155,7 +160,7 @@ class trigger_record_data:
 	def init_cnr(self):
 		try: self.df_cnr
 		except AttributeError: 
-			self.df_cnr = self.df.copy()
+			self.df_cnr = self.df_tsoff.copy()
 			self.df_cnr = self.df_cnr-self.df_cnr.mean()
 			for p, p_chans in self.planes.items():
 				for f,f_chans in self.engine.femb_to_offch.items():

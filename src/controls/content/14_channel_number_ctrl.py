@@ -35,7 +35,7 @@ def init_callbacks(dash_app,engine):
 		if "Z" in plane:
 				channel_num= [{'label':str(n), 'value':(n)} for n in (trigger_record_data(engine,trigger_record,raw_data_file).df_Z.columns)]
 		#rich.print(trigger_record_data(engine,trigger_record,raw_data_file).df_U)
-		#rich.print(trigger_record_data(engine,trigger_record,raw_data_file).df_U.columns)
+		rich.print(trigger_record_data(engine,trigger_record,raw_data_file).df_U.columns)
 		if "V" in plane:
 				channel_num= [{'label':str(n), 'value':(n)} for n in (trigger_record_data(engine,trigger_record,raw_data_file).df_V.columns)]
 		if "U" in plane:
