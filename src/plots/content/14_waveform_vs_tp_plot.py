@@ -59,7 +59,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 							rich.print("Channel number selected: ",channel_num)
 							
 							fzmin, fzmax = tr_color_range
-							title_U=f"FFT U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}" 
+							
 							#print(set(data.tp_df_tsoff['offline_ch']))
 							rich.print()
 							fig=waveform_tps(data,channel_num)

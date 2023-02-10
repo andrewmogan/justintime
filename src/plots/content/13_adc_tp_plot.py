@@ -85,7 +85,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								rich.print((data.df_Z - data.df_Z_mean).T)
 								rich.print("TPs:")
 								rich.print(data.tp_df_Z)
-								title = "Z-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+								title = f"Z-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
 								if "make_static_image" in static_image:
 									fig = make_static_img((data.df_Z - data.df_Z_mean).T, zmin = fzmin, zmax = fzmax,title=title)
 									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
@@ -105,7 +105,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								rich.print(data.df_Z)
 								rich.print("TPs:")
 								rich.print(data.tp_df_Z)
-								title = f"Z-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+								title = f"Z-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							
 								if "make_static_image" in static_image:
 									fig = make_static_img(data.df_Z.T,zmin = fzmin, zmax = fzmax, title = title)
@@ -122,7 +122,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						add_dunedaq_annotation(fig)
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
-							html.B("ADC Counts: Z-plane"),
+							html.B(f"ADC Counts: Z-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)}"),
 							html.Hr(),
 							dcc.Graph(figure=fig),
 						]
@@ -136,7 +136,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 							rich.print(data.df_cnr[data.planes.get(1, {})].T)
 							rich.print("TPs:")
 							rich.print(data.tp_df_V)
-							title = f"V-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+							title = f"V-plane (CNR), Run {data.info['run_number']}: {data.info['trigger_number']}"
 
 							if "make_static_image" in static_image:
 								fig = make_static_img(data.df_cnr[data.planes.get(1, {})].T, zmin = fzmin, zmax = fzmax, title = title)
@@ -156,7 +156,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								rich.print((data.df_V - data.df_V_mean).T)
 								rich.print("TPs:")
 								rich.print(data.tp_df_V)
-								title = "V-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+								title = f"V-plane offset removal,  Run {data.info['run_number']}: {data.info['trigger_number']}"
 								if "make_static_image" in static_image:
 									fig = make_static_img((data.df_V - data.df_V_mean).T, zmin = fzmin, zmax = fzmax,title=title)
 									fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
@@ -175,7 +175,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								rich.print(data.df_V)
 								rich.print("TPs:")
 								rich.print(data.tp_df_V)
-								title = f"V-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+								title = f"V-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							
 								if "make_static_image" in static_image:
 									fig = make_static_img(data.df_V.T,zmin = fzmin, zmax = fzmax, title = title)
@@ -193,7 +193,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						add_dunedaq_annotation(fig)
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
-							html.B("ADC Counts: V-plane"),
+							html.B(f"ADC Counts: V-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)}"),
 							html.Hr(),
 							dcc.Graph(figure=fig),
 						]
@@ -206,7 +206,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 							rich.print(data.df_cnr[data.planes.get(0, {})].T)
 							rich.print("TPs:")
 							rich.print(data.tp_df_U)
-							title = f"U-plane, (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+							title = f"U-plane (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}"
 
 							if "make_static_image" in static_image:
 								fig = make_static_img(data.df_cnr[data.planes.get(0, {})].T, zmin = fzmin, zmax = fzmax, title = title)
@@ -226,7 +226,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								rich.print((data.df_U - data.df_U_mean).T)
 								rich.print("TPs:")
 								rich.print(data.tp_df_U)
-								title = "U-plane offset removal,  Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+								title = f"U-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
 								if "make_static_image" in static_image:
 									fig = make_static_img((data.df_U - data.df_U_mean).T, zmin = fzmin, zmax = fzmax,title=title)
 									fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
@@ -245,7 +245,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								rich.print(data.df_U)
 								rich.print("TPs:")
 								rich.print(data.tp_df_U)
-								title = f"U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)
+								title = f"U-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							
 								if "make_static_image" in static_image:
 									fig = make_static_img(data.df_U.T,zmin = fzmin, zmax = fzmax, title = title)
@@ -262,7 +262,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						add_dunedaq_annotation(fig)
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
-							html.B("ADC Counts: U-plane"),
+							html.B(f"ADC Counts: U-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)}"),
 							html.Hr(),
 							dcc.Graph(figure=fig),
 						]
