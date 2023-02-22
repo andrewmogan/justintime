@@ -186,12 +186,7 @@ def tp_for_adc(df, cmin, cmax):
 	
 
 	else:
-		fig = go.Figure()
-		fig.add_trace(
-			go.Scatter(
-			
-			)
-		)
+		fig =go.Scatter()
 	
 	return fig
 
