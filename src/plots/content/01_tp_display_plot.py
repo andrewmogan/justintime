@@ -63,53 +63,52 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						fig = tp_density(data.tp_df_Z,data.xmin_Z, data.xmax_Z,fzmin,fzmax,fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig)]
 						fig = tp_density(data.tp_df_V,data.xmin_V, data.xmax_V,fzmin,fzmax,fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig)]
 						
 						fig = tp_density(data.tp_df_U,data.xmin_U, data.xmax_U,fzmin,fzmax,fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig)]
 
 						fig = tp_density(data.tp_df_O,data.xmin_O, data.xmax_O,fzmin,fzmax,fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig)]
 					else:
 						rich.print("Scatter Plot Chosen")
 						fig = make_tp_plot(data.tp_df_Z,data.xmin_Z,data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig),]
 						fig = make_tp_plot(data.tp_df_V, data.xmin_V,data.xmax_V, fzmin, fzmax, fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig)]
 						
 						fig = make_tp_plot(data.tp_df_U, data.xmin_U,data.xmax_U, fzmin, fzmax, fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig)]
 
 						fig = make_tp_plot(data.tp_df_O,data.xmin_O,data.xmax_O, fzmin, fzmax, fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig)]
 					add_dunedaq_annotation(fig)
 					return(html.Div([
 						selection_line(raw_data_file, trigger_record),
-						html.Hr(),
 						html.Div(children)]))
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))

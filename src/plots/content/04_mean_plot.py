@@ -81,7 +81,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 						)
 						add_dunedaq_annotation(fig_mean)
 						fig_mean.update_layout(font_family="Lato", title_font_family="Lato")
-						return(html.Div([selection_line(raw_data_file, trigger_record),html.B("Mean by plane"),html.Hr(),dcc.Graph(figure=fig_mean)]))
+						return(html.Div([selection_line(raw_data_file, trigger_record),html.B("Mean by plane"),dcc.Graph(figure=fig_mean)]))
 			else:
 				return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)

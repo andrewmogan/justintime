@@ -64,13 +64,13 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					return(html.Div([
 						selection_line(raw_data_file, trigger_record),
 						html.B("FFT U-Plane"),
-						html.Hr(),
+						#html.Hr(),
 						dcc.Graph(figure=fig_U),
 						html.B("FFT V-Plane"),
-						html.Hr(),
+						#html.Hr(),
 						dcc.Graph(figure=fig_V),
 						html.B("FFT Z-Plane"),
-						html.Hr(),
+						#html.Hr(),
 						dcc.Graph(figure=fig_Z)]))
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))

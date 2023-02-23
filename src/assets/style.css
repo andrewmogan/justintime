@@ -60,18 +60,19 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
       width: 22%;
  }
   .four.columns {
-      width: 25.6666666667%;
+      width: 25%;
      min-height: fit-content;
       margin-right:0;
+      margin-left: 1px;
  }
  
   .five.columns {
-      width: 12%;
-      margin-top:  0;
+      width: 25%;
+      /*margin-top:  0;
       margin-left:0px;
       border: 0px solid #484848;
       height:fit-content;
-      min-height:1px ;
+      min-height:1px ;*/
 
 
  }
@@ -82,7 +83,7 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
       width: 56.6666666667%;
  }
   .eight.columns {
-      width: 61%;
+      width: 68%;
       min-block-size: 1000px;
       height:fit-content;
       left: 0px;

@@ -79,7 +79,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 							return(html.Div([
 									selection_line(raw_data_file, trigger_record),
 									html.B(f"Waveform and TPs for channel {channel_num}"),
-									html.Hr(),
+									#html.Hr(),
 									dcc.Graph(figure=fig),
 									]))
 					else:

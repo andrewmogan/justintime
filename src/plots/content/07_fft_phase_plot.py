@@ -57,7 +57,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 					return(html.Div([
 						selection_line(raw_data_file, trigger_record),
 						html.B("Noise phase by FEMB peak"),
-						html.Hr(),
+						#html.Hr(),
 						dcc.Graph(figure=fig)]))
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))

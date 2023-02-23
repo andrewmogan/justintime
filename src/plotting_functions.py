@@ -27,11 +27,10 @@ def add_dunedaq_annotation(figure):
 		))
 
 def selection_line(raw_data_file, trigger_record):
-	return(html.Div([html.Hr(),
+	return(html.Div([
 		html.B("selected raw data file:"),
-		html.Br(),html.Div(raw_data_file),
-		html.Br(),html.B("selected trigger record:"),
-		html.Br(),html.Div(trigger_record),html.Hr()]))
+		html.Div(raw_data_file),html.B("selected trigger record:"),
+		html.Div(trigger_record),html.Hr()]))
 
 def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
 

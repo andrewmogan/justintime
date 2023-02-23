@@ -123,7 +123,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
 							html.B(f"ADC Counts: Z-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)}"),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig),
 						]
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
@@ -194,7 +194,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
 							html.B(f"ADC Counts: V-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)}"),
-							html.Hr(),
+						#	html.Hr(),
 							dcc.Graph(figure=fig),
 						]
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
@@ -263,17 +263,17 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
 							html.B(f"ADC Counts: U-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)}"),
-							html.Hr(),
+							#html.Hr(),
 							dcc.Graph(figure=fig),
 						]
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					if adcmap_selection:
 						return(html.Div([
 							selection_line(raw_data_file, trigger_record),
-							html.Hr(),
+							#html.Hr(),
 							html.Div(children)]))
 					else:
-						return(html.Div("No ADC map selected"))
+						return(html.Div(html.H6("No ADC map selected")))
 					
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))
