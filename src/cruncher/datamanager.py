@@ -21,6 +21,8 @@ import collections
 import rich
 from rich import print
 from itertools import groupby
+from collections import defaultdict
+
 # from . import unpack_fwtps
 
 """
@@ -168,6 +170,24 @@ class DataManager:
             files += fnmatch.filter(next(walk(self.data_path), (None, None, []))[2], m)  # [] if no file
 
         return sorted(files, reverse=True, key=lambda f: os.path.getmtime(os.path.join(self.data_path, f)))
+
+
+    def get_session_run_files_map(self) -> defaultdict:
+        re_app_run = re.compile(r'(.*)_run(\d*)')
+
+        # List files
+        lf = self.list_files()
+
+        # Group by regex
+        gf_it = groupby(lf, lambda x: re_app_run.match(x).groups())
+        gf = {k: [x for x in d if x] for k,d in gf_it}
+        srf_map = defaultdict(dict)
+
+        # Populate the map
+        for k,v in gf.items():
+            srf_map[k[0]][int(k[1])]=v
+
+        return srf_map
 
     def has_trigger_records(self, file_name: str) -> list:
         file_path = os.path.join(self.data_path, file_name)
