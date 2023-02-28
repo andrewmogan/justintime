@@ -51,9 +51,8 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 				data.init_tp()
 				data.init_cnr()
 				#print(data.tp_df_tsoff)
-				if len(data.df)!=0:
-					rich.print("Raw ADCs:")
-					rich.print(data.df)
+				if len(data.df)!=0 and len(data.df.index!=0):
+					
 					if channel_num:
 						if int(channel_num) in data.channels:
 							rich.print("Channel number selected: ",channel_num)
@@ -61,7 +60,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 							fzmin, fzmax = tr_color_range
 							
 							#print(set(data.tp_df_tsoff['offline_ch']))
-							rich.print()
+							#rich.print()
 							fig=waveform_tps(data,channel_num)
 
 							fig.update_layout(
@@ -82,10 +81,11 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 									#html.Hr(),
 									dcc.Graph(figure=fig),
 									]))
+						
 					else:
-						return(html.Div("No Channel Selected"))
+						return(html.Div(html.H6("No Channel Selected")))
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))
 					
-				return(original_state)
-			return(html.Div())
+			return(original_state)
+		return(html.Div())

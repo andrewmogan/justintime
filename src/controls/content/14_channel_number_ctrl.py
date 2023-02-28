@@ -31,13 +31,12 @@ def init_callbacks(dash_app,engine):
 	def update_select(plane,trigger_record,raw_data_file):
 		if not plane:
 			return [""]
-		
-		if "Z" in plane:
+		try: 
+			if "Z" in plane:
 				channel_num= [{'label':str(n), 'value':(n)} for n in (trigger_record_data(engine,trigger_record,raw_data_file).df_Z.columns)]
-		#rich.print(trigger_record_data(engine,trigger_record,raw_data_file).df_U)
-		rich.print(trigger_record_data(engine,trigger_record,raw_data_file).df_U.columns)
-		if "V" in plane:
+			if "V" in plane:
 				channel_num= [{'label':str(n), 'value':(n)} for n in (trigger_record_data(engine,trigger_record,raw_data_file).df_V.columns)]
-		if "U" in plane:
+			if "U" in plane:
 				channel_num=[{'label':str(n), 'value':(n)} for n in (trigger_record_data(engine,trigger_record,raw_data_file).df_U.columns)]
-		return(channel_num)
+			return(channel_num)
+		except RuntimeError:return([""])

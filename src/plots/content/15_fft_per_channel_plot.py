@@ -48,7 +48,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 				
-				if len(data.df)!=0:
+				if len(data.df)!=0 and len(data.df.index!=0):
 					data.init_fft()
 					if channel_num:
 						if int(channel_num) in data.channels:
@@ -79,9 +79,9 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 									dcc.Graph(figure=fig),
 									]))
 					else:
-						return(html.Div("No Channel Selected"))
+						return(html.Div(html.H6("No Channel Selected")))
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))
 					
-				return(original_state)
-			return(html.Div())
+			return(original_state)
+		return(html.Div())

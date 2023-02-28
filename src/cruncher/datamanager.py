@@ -364,12 +364,14 @@ class DataManager:
 
         tp_df = pd.DataFrame(tp_array, columns=['start_time', 'peak_time', 'time_over_threshold', 'offline_ch', 'sum_adc', 'peak_adc', 'flag'])
         
-        if tpc_dfs:
+        if tpc_dfs: 
             tpc_df = pd.concat(tpc_dfs, axis=1)
             # Sort columns (channels)
+            rich.print("test:")
+            rich.print(tpc_df.columns)
             tpc_df = tpc_df.reindex(sorted(tpc_df.columns), axis=1)
         else:
-            tpc_df = pd.DataFrame( columns=['ts'])
+            tpc_df = pd.DataFrame( columns=['ts']) 
             tpc_df = tpc_df.set_index('ts')
 
         if fwtp_dfs:

@@ -41,7 +41,8 @@ class trigger_record_data:
 		print(self.t0_min)
 		
 		self.df_tsoff.index=self.df_tsoff.index-self.t0_min
-
+		rich.print("DF:")
+		rich.print(self.df_tsoff)
 		self.tr_ts_sec = self.info['trigger_timestamp']*20/1000000000 # Move to 63.5 MHz
 		#rich.print(self.tr_ts_sec)
 		#rich.print(self.info)
@@ -60,10 +61,6 @@ class trigger_record_data:
 		self.df_Z_mean, self.df_Z_std = self.df_Z.mean(), self.df_Z.std()
 		self.fft_phase = {}
 
-		rich.print("DF U:")
-		rich.print(self.df_U)
-		rich.print("DF:")
-		rich.print(self.df_tsoff)
 
 
 	def find_plane(self, offch):

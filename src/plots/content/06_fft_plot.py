@@ -37,7 +37,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
-				if len(data.df)!=0:
+				if len(data.df)!=0 and len(data.df.index!=0):
 					
 					data.init_fft2()
 

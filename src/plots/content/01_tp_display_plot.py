@@ -45,9 +45,12 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		load_figure_template(str(theme))
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
-				data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
+				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 				
-				if len(data.df)!=0:
+				
+				if len(data.df)!=0 and len(data.df.index!=0):
+
 					data.init_tp()
 					fzmin, fzmax = tr_color_range
 					fig_w, fig_h = 2600, 500
