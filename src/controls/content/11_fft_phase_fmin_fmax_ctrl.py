@@ -3,9 +3,9 @@ from dash import html, dcc
 from dash.dependencies import Input, Output, State
 
 def return_obj(dash_app, engine):
-	ctrl_id = "09_fft_phase_fmin_fmax_ctrl"
-	comp_id_fmin = "09_fft_phase_fmin_comp"
-	comp_id_fmax = "09_fft_phase_fmax_comp"
+	ctrl_id = "11_fft_phase_fmin_fmax_ctrl"
+	comp_id_fmin = "11_fft_phase_fmin_comp"
+	comp_id_fmax = "11_fft_phase_fmax_comp"
 
 	ctrl_div = html.Div([
 		html.Div("fmin"),

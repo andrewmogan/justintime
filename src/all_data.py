@@ -34,7 +34,8 @@ class trigger_record_data:
 		self.engine = engine
 		self.info, self.df, self.tp_df, self.fwtp_df = engine.load_entry(raw_data_file, int(trigger_record))
 		
-	
+		rich.print("edw")
+		rich.print(self.tp_df)
 		self.df_tsoff=self.df.copy()
 		self.t0_min= self.df_tsoff.index.min()
 		print("Initial Time Stamp")

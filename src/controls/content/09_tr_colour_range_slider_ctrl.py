@@ -3,8 +3,8 @@ from dash import html, dcc
 from dash.dependencies import Input, Output, State
 
 def return_obj(dash_app, engine):
-	ctrl_id = "07_tr_colour_range_slider_ctrl"
-	comp_id = "07_tr_colour_range_slider_comp"
+	ctrl_id = "09_tr_colour_range_slider_ctrl"
+	comp_id = "09_tr_colour_range_slider_comp"
 
 	ctrl_div = html.Div([
 		dcc.RangeSlider(

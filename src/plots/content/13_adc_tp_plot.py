@@ -16,13 +16,16 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_id = "13_adc_tp_plot"
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
-	plot.add_ctrl("04_trigger_record_select_ctrl")
+
+	plot.add_ctrl("04_partition_select_ctrl")
+	plot.add_ctrl("05_run_select_ctrl")
+	plot.add_ctrl("07_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
-	plot.add_ctrl("06_adc_map_selection_ctrl")
-	plot.add_ctrl("07_tr_colour_range_slider_ctrl")
-	plot.add_ctrl("08_static_image_ctrl")
-	plot.add_ctrl("10_offset_ctrl")
-	plot.add_ctrl("13_cnr_ctrl")
+	plot.add_ctrl("08_adc_map_selection_ctrl")
+	plot.add_ctrl("09_tr_colour_range_slider_ctrl")
+	plot.add_ctrl("10_static_image_ctrl")
+	plot.add_ctrl("12_offset_ctrl")
+	plot.add_ctrl("15_cnr_ctrl")
 
 	init_callbacks(dash_app, storage, plot_id, engine,theme)
 	return(plot)
@@ -33,16 +36,18 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		Output(plot_id, "children"),
 		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
-		State('04_trigger_record_select_ctrl', "value"),
-		State('03_file_select_ctrl', "value"),
-		State("06_adc_map_selection_ctrl", "value"),
-		State("07_tr_colour_range_slider_comp", "value"),
-		State("08_static_image_ctrl", "value"),
-		State("10_offset_ctrl", "value"),
-		State("13_cnr_ctrl", "value"),
+		State('07_trigger_record_select_ctrl', "value"),
+		State('06_file_select_ctrl', "value"),
+		State("04_partition_select_ctrl","value"),
+		State('05_run_select_ctrl', "value"),
+		State("08_adc_map_selection_ctrl", "value"),
+		State("09_tr_colour_range_slider_comp", "value"),
+		State("10_static_image_ctrl", "value"),
+		State("12_offset_ctrl", "value"),
+		State("15_cnr_ctrl", "value"),
 		State(plot_id, "children"),
 	)
-	def plot_trd_graph(n_clicks, trigger_record, raw_data_file, adcmap_selection, tr_color_range, static_image, offset,cnr,original_state):
+	def plot_trd_graph(n_clicks, trigger_record, raw_data_file,partition,run, adcmap_selection, tr_color_range, static_image, offset,cnr,original_state):
 		
 		load_figure_template(theme)
 		if trigger_record and raw_data_file:

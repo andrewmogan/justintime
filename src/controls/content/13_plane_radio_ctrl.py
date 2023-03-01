@@ -3,7 +3,7 @@ from dash import html, dcc
 from dash.dependencies import Input, Output, State
 
 def return_obj(dash_app, engine):
-	ctrl_id = "11_plane_radio_ctrl"
+	ctrl_id = "13_plane_radio_ctrl"
 
 	ctrl_div = html.Div([
 		dcc.RadioItems(

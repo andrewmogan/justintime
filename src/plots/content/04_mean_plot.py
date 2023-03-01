@@ -17,7 +17,9 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_id = "04_mean_plot"
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("Mean_plot", plot_id, plot_div, engine, storage,theme)
-	plot.add_ctrl("04_trigger_record_select_ctrl")
+	plot.add_ctrl("04_partition_select_ctrl")
+	plot.add_ctrl("05_run_select_ctrl")
+	plot.add_ctrl("07_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
 	init_callbacks(dash_app, storage, plot_id,theme)
@@ -29,11 +31,13 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		Output(plot_id, "children"),
 		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
-		State('04_trigger_record_select_ctrl', "value"),
-		State('03_file_select_ctrl', "value"),
+		State('07_trigger_record_select_ctrl', "value"),
+		State("04_partition_select_ctrl","value"),
+		State('05_run_select_ctrl', "value"),
+		State('06_file_select_ctrl', "value"),
 		State(plot_id, "children")
 	)
-	def plot_mean_graph(n_clicks, trigger_record, raw_data_file, original_state):
+	def plot_mean_graph(n_clicks, trigger_record,partition,run, raw_data_file, original_state):
 
 		load_figure_template(theme)
 		if trigger_record and raw_data_file:
