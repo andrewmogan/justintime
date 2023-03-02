@@ -21,7 +21,7 @@ def return_obj(dash_app, engine):
 def init_callbacks(dash_app, engine):
 	@dash_app.callback(
 		Output('07_trigger_record_select_ctrl', 'options'),
-		Input('06_file_select_ctrl', 'value')
+		Input('file_storage_id', 'data')
 		)
 	def update_trigger_record_select(raw_data_file):
 		if not raw_data_file:
