@@ -103,7 +103,8 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
 			xaxis=dict(showgrid=False, zeroline=False, range=[xmin, xmax]),
 			yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
 			yaxis_title="Offline Channel",
-			xaxis_title="Time ticks")
+			xaxis_title="Time ticks",
+			height=500)
 	else:
 		
 		fig=go.Figure()

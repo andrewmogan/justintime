@@ -79,8 +79,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								fig = px.imshow(data.df_cnr[data.planes.get(2, {})].T, zmin=fzmin, zmax=fzmax, title=title,  color_continuous_scale='plasma',aspect='auto')
 								fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 								fig.update_layout(
-										width=900,
-										height=800,yaxis_title="Offline Channel",
+										
+										height=500,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 										)
 						else:
@@ -100,8 +100,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 									fig = px.imshow((data.df_Z - data.df_Z_mean).T, zmin=fzmin, zmax=fzmax, title=title,color_continuous_scale='plasma',aspect="auto")
 									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 									fig.update_layout(
-										width=900,
-										height=800,yaxis_title="Offline Channel",
+										height=500,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 										)
 
@@ -120,8 +119,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 									fig = px.imshow(data.df_Z.T, title=title, color_continuous_scale='plasma',aspect='auto')
 									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 									fig.update_layout(
-										width=900,
-										height=800,yaxis_title="Offline Channel",
+										
+										height=500,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 									)
 						add_dunedaq_annotation(fig)
@@ -150,8 +149,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								fig = px.imshow(data.df_cnr[data.planes.get(1, {})].T, zmin=fzmin, zmax=fzmax, title=title, color_continuous_scale='plasma',aspect='auto')
 								fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 								fig.update_layout(
-										width=900,
-										height=800,yaxis_title="Offline Channel",
+										
+										height=500,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 										)
 						else:
@@ -170,8 +169,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 									fig = px.imshow((data.df_V - data.df_V_mean).T, zmin=fzmin, zmax=fzmax, title=title,color_continuous_scale='plasma',aspect="auto")
 									fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 									fig.update_layout(
-										width=900,
-										height=800,yaxis_title="Offline Channel",
+										
+										height=500,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 										)
 
@@ -190,8 +189,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 									fig = px.imshow(data.df_V.T, title=title, color_continuous_scale='plasma',aspect='auto')
 									fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 									fig.update_layout(
-										width=900,
-										height=800,yaxis_title="Offline Channel",
+										
+										height=500,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 									)
 				
@@ -220,8 +219,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								fig = px.imshow(data.df_cnr[data.planes.get(0, {})].T, zmin=fzmin, zmax=fzmax, title=title, color_continuous_scale='plasma',aspect='auto')
 								fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 								fig.update_layout(
-										width=900,
-										height=800,yaxis_title="Offline Channel",
+										
+										height=500,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 										)
 						else:
@@ -240,8 +239,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 									fig = px.imshow((data.df_U - data.df_U_mean).T, zmin=fzmin, zmax=fzmax, title=title,color_continuous_scale='plasma',aspect="auto")
 									fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 									fig.update_layout(
-										width=900,
-										height=800,yaxis_title="Offline Channel",
+									
+										height=500,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 										)
 
@@ -260,8 +259,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 									fig = px.imshow(data.df_U.T, title=title, color_continuous_scale='plasma',aspect='auto')
 									fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 									fig.update_layout(
-										width=900,
-										height=800,yaxis_title="Offline Channel",
+									
+										height=500,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 									)
 						add_dunedaq_annotation(fig)
