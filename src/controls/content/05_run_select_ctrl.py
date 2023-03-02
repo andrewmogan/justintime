@@ -8,7 +8,7 @@ def return_obj(dash_app, engine):
 	ctrl_id = "05_run_select_ctrl"
 
 	ctrl_div = html.Div([
-		dcc.Dropdown(
+		dcc.Dropdown(placeholder="Run Number",
 			id=ctrl_id
 		),
         dcc.Store("run_storage_id")

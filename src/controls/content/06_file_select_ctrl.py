@@ -8,7 +8,7 @@ def return_obj(dash_app, engine):
 	ctrl_id = "06_file_select_ctrl"
 
 	ctrl_div = html.Div([
-		dcc.Dropdown(
+		dcc.Dropdown(placeholder="Data File",
 			id=ctrl_id
 		),
         dcc.Store("file_storage_id")
