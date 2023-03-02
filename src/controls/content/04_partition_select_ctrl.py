@@ -10,7 +10,7 @@ def return_obj(dash_app, engine):
 	data=engine.get_session_run_files_map()
 	ctrl_div = html.Div([
 	
-		dcc.Dropdown(options=list(data.keys()),placeholder="Partition",
+		dcc.Dropdown(options=list(data.keys()),placeholder="Select Partition",
 			id=ctrl_id),
 
         dcc.Store("partition_storage_id")

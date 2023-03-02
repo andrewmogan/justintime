@@ -33,75 +33,80 @@ def selection_line(raw_data_file, trigger_record):
 		html.Div(trigger_record),html.Hr()]))
 
 def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
-
-	xmin, xmax = min(df.columns), max(df.columns)
-	#ymin, ymax = min(df.index), max(df.index)
-	ymin, ymax = max(df.index), min(df.index)
-	col_range = list(range(ymax, ymin))
 	
-	df = df.reindex(index=col_range, fill_value=0)
+	if not df.empty:
+		
+		xmin, xmax = min(df.columns), max(df.columns)
+		#ymin, ymax = min(df.index), max(df.index)
+		ymin, ymax = max(df.index), min(df.index)
+		col_range = list(range(ymax, ymin))
+		
+		df = df.reindex(index=col_range, fill_value=0)
 
-	img_width = df.columns.size
-	img_height = df.index.size
+		img_width = df.columns.size
+		img_height = df.index.size
 
-	a = df.to_numpy()
-	amin = zmin if zmin is not None else np.min(a)
-	amax = zmax if zmax is not None else np.max(a)
+		a = df.to_numpy()
+		amin = zmin if zmin is not None else np.min(a)
+		amax = zmax if zmax is not None else np.max(a)
 
-	# Some normalization from matplotlib
-	col_norm = Normalize(vmin=amin, vmax=amax)
-	scalarMap  = cm.ScalarMappable(norm=col_norm, cmap='plasma' )
-	seg_colors = scalarMap.to_rgba(a) 
-	img = Image.fromarray(np.uint8(seg_colors*255))
+		# Some normalization from matplotlib
+		col_norm = Normalize(vmin=amin, vmax=amax)
+		scalarMap  = cm.ScalarMappable(norm=col_norm, cmap='plasma' )
+		seg_colors = scalarMap.to_rgba(a) 
+		img = Image.fromarray(np.uint8(seg_colors*255))
 
-	# Create figure
-	fig = go.Figure()
+		# Create figure
+		fig = go.Figure()
 
 	# Add invisible scatter trace.
 	# This trace is added to help the autoresize logic work.
 	# We also add a color to the scatter points so we can have a colorbar next to our image
-	fig.add_trace(
-		go.Scatter(
-			x=[xmin, xmax],
-			y=[ymin, ymax],
-			mode="markers",
-			marker={"color":[amin, amax],
-					"colorscale":'Plasma',
-					"showscale":True,
-					"colorbar":{
-						# "title":"Counts",
-						"titleside": "right"
-					},
-					"opacity": 0
-				}
+		fig.add_trace(
+			go.Scatter(
+				x=[xmin, xmax],
+				y=[ymin, ymax],
+				mode="markers",
+				marker={"color":[amin, amax],
+						"colorscale":'Plasma',
+						"showscale":True,
+						"colorbar":{
+							# "title":"Counts",
+							"titleside": "right"
+						},
+						"opacity": 0
+					}
+			)
 		)
-	)
+	
 
-	# Add image
+		# Add image
 
 
-	fig.update_layout(
-		images=[go.layout.Image(
-			x=xmin,
-			sizex=xmax-xmin,
-			y=ymax,
-			sizey=ymax-ymin,
-			xref="x",
-			yref="y",
-			opacity=1.0,
-			layer="below",
-			sizing="stretch",
-			source=img)]
-	)
+		fig.update_layout(
+			images=[go.layout.Image(
+				x=xmin,
+				sizex=xmax-xmin,
+				y=ymax,
+				sizey=ymax-ymin,
+				xref="x",
+				yref="y",
+				opacity=1.0,
+				layer="below",
+				sizing="stretch",
+				source=img)]
+		)
 
-	# Configure other layout
-	fig.update_layout(
-		title=title,
-		xaxis=dict(showgrid=False, zeroline=False, range=[xmin, xmax]),
-		yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
-		yaxis_title="Offline Channel",
-		xaxis_title="Time ticks")
-
+		# Configure other layout
+		fig.update_layout(
+			title=title,
+			xaxis=dict(showgrid=False, zeroline=False, range=[xmin, xmax]),
+			yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
+			yaxis_title="Offline Channel",
+			xaxis_title="Time ticks")
+	else:
+		
+		fig=go.Figure()
 	# fig.show(config={'doubleClick': 'reset'})
 	return fig
 

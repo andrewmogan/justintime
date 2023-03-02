@@ -9,7 +9,7 @@ def return_obj(dash_app, engine):
 	ctrl_id = "16_channel_number_ctrl"
 
 	ctrl_div = html.Div([
-		dcc.Dropdown(placeholder="Channel Number",
+		dcc.Dropdown(placeholder="Select Channel Number",
 			id=ctrl_id
 		)
 	],

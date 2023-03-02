@@ -67,7 +67,7 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
  }
  
   .five.columns {
-      width: 25%;
+      width: 30px;
       /*margin-top:  0;
       margin-left:0px;
       border: 0px solid #484848;
@@ -83,7 +83,7 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
       width: 56.6666666667%;
  }
   .eight.columns {
-      width: 68%;
+      width: 1000px;
       min-block-size: 1000px;
       height:fit-content;
       left: 0px;
@@ -542,6 +542,15 @@ a {
   background-color: #ffffff; 
   color: rgb(0, 0, 0);}
 
+.Select-placeholder {
+  color: #484848;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+
 #modelselector .Select-control{
   max-height: 82px;
   overflow-y: auto;
@@ -622,6 +631,9 @@ a {
 .SingleDatePicker_picker__directionLeft_2{
   filter:invert(100%);
 }
+
+
+
 
 /* For Mobile Phones and small screens ––––––––––––––––––––––––––––––––––––––––––––––––––*/
 @media only screen and (max-width: 768px) {

@@ -7,7 +7,7 @@ def return_obj(dash_app, engine):
 	ctrl_id = "07_trigger_record_select_ctrl"
 
 	ctrl_div = html.Div([
-		dcc.Dropdown(placeholder="Trigger Record",
+		dcc.Dropdown(placeholder="Select Trigger Record",
 			id=ctrl_id
 		)
 	],style={"marginBottom":"1.5em"})
