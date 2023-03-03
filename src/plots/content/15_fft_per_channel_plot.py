@@ -52,16 +52,21 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
+
+				rich.print("Initial Time Stamp:",data.t0_min)
+				rich.print(" ")
+				rich.print("Initial Dataframe:")
+				rich.print(data.df_tsoff)
 				
 				if len(data.df)!=0 and len(data.df.index!=0):
 					data.init_fft()
 					if channel_num:
 						if int(channel_num) in data.channels:
-							rich.print("Channel number selected: ",channel_num)
 
 							fzmin, fzmax = tr_color_range
 							rich.print("FFT of values:")
 							rich.print(data.df_fft)
+							rich.print("Channel number selected: ",channel_num)
 							fig=px.line(data.df_fft,y=channel_num)
 							rich.print("FFT for the selected channel values:")
 							print(data.df_fft[channel_num])

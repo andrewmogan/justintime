@@ -371,7 +371,7 @@ class DataManager:
             try: tpc_df.drop(columns=4294967295,inplace=True)
             except KeyError:pass
             # Sort columns (channels)
-           # rich.print("test:")
+           
            # rich.print(tpc_df.columns)
             counts = {}
             for c in tpc_df.columns:
@@ -379,7 +379,7 @@ class DataManager:
                 if c not in counts:
                     counts[c] = 0
                 counts[c] += 1
-            rich.print( { k:v for k,v in counts.items() if v != 1})
+           # rich.print( { k:v for k,v in counts.items() if v != 1})
             tpc_df = tpc_df.reindex(sorted(tpc_df.columns), axis=1)
         else:
             tpc_df = pd.DataFrame( columns=['ts'])

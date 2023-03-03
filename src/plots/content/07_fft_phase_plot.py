@@ -46,6 +46,11 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
+
+				rich.print("Initial Time Stamp:",data.t0_min)
+				rich.print(" ")
+				rich.print("Initial Dataframe:")
+				rich.print(data.df_tsoff)
 				
 				if len(data.df)!=0 and len(data.df.index!=0):
 					

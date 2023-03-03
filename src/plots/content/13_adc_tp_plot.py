@@ -54,6 +54,11 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
+
+				rich.print("Initial Time Stamp:",data.t0_min)
+				rich.print(" ")
+				rich.print("Initial Dataframe:")
+				rich.print(data.df_tsoff)
 				
 				if len(data.df)!=0 and len(data.df.index!=0):
 					data.init_tp()
@@ -66,9 +71,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						rich.print("Z Plane selected")
 						if "cnr_removal" in cnr:
 							rich.print("CNR selected")
-							rich.print("Raw ADCs:")
+							rich.print("Raw ADCs in Z-plane after CNR:")
 							rich.print(data.df_cnr[data.planes.get(2, {})].T)
-							rich.print("TPs:")
+							rich.print("TPs in Z-Plane:")
 							rich.print(data.tp_df_Z)
 							title = f"Z-plane (CNR): Run {data.info['run_number']}: {data.info['trigger_number']} "
 
@@ -86,9 +91,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						else:
 							if "offset_removal" in offset:
 								rich.print("Offset removal selected")
-								rich.print("Raw ADCs:")
+								rich.print("Raw ADCs in Z-Plane after offset removal:")
 								rich.print((data.df_Z - data.df_Z_mean).T)
-								rich.print("TPs:")
+								rich.print("TPs in Z-Plane:")
 								rich.print(data.tp_df_Z)
 								title = f"Z-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
 								if "make_static_image" in static_image:
@@ -105,9 +110,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 										)
 
 							else:
-								rich.print("Raw ADCs:")
+								rich.print("Raw ADCs in Z-Plane:")
 								rich.print(data.df_Z)
-								rich.print("TPs:")
+								rich.print("TPs in Z-Plane:")
 								rich.print(data.tp_df_Z)
 								title = f"Z-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							
@@ -136,9 +141,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						rich.print("V Plane selected")
 						if "cnr_removal" in cnr:
 							rich.print("CNR selected")
-							rich.print("Raw ADCs:")
+							rich.print("Raw ADCs in V-Plane after CNR:")
 							rich.print(data.df_cnr[data.planes.get(1, {})].T)
-							rich.print("TPs:")
+							rich.print("TPs in V-Plane:")
 							rich.print(data.tp_df_V)
 							title = f"V-plane (CNR), Run {data.info['run_number']}: {data.info['trigger_number']}"
 
@@ -156,9 +161,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						else:
 							if "offset_removal" in offset:
 								rich.print("Offset removal selected")
-								rich.print("Raw ADCs:")
+								rich.print("Raw ADCs in V-Plane after offset removal:")
 								rich.print((data.df_V - data.df_V_mean).T)
-								rich.print("TPs:")
+								rich.print("TPs in V-Plane:")
 								rich.print(data.tp_df_V)
 								title = f"V-plane offset removal,  Run {data.info['run_number']}: {data.info['trigger_number']}"
 								if "make_static_image" in static_image:
@@ -175,9 +180,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 										)
 
 							else:
-								rich.print("Raw ADCs:")
+								rich.print("Raw ADCs in V-Plane:")
 								rich.print(data.df_V)
-								rich.print("TPs:")
+								rich.print("TPs in V-Plane:")
 								rich.print(data.tp_df_V)
 								title = f"V-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							
@@ -206,9 +211,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						rich.print("U Plane selected")
 						if "cnr_removal" in cnr:
 							rich.print("CNR selected")
-							rich.print("Raw ADCs:")
+							rich.print("Raw ADCs in U-Plane after CNR:")
 							rich.print(data.df_cnr[data.planes.get(0, {})].T)
-							rich.print("TPs:")
+							rich.print("TPs in U-Plane:")
 							rich.print(data.tp_df_U)
 							title = f"U-plane (CNR): Run {data.info['run_number']}: {data.info['trigger_number']}"
 
@@ -226,9 +231,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						else:
 							if "offset_removal" in offset:
 								rich.print("Offset removal selected")
-								rich.print("Raw ADCs:")
+								rich.print("Raw ADCs in U-Plane after offset removal:")
 								rich.print((data.df_U - data.df_U_mean).T)
-								rich.print("TPs:")
+								rich.print("TPs in U-Plane:")
 								rich.print(data.tp_df_U)
 								title = f"U-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
 								if "make_static_image" in static_image:
@@ -245,9 +250,9 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 										)
 
 							else:
-								rich.print("Raw ADCs:")
+								rich.print("Raw ADCs in U-Plane:")
 								rich.print(data.df_U)
-								rich.print("TPs:")
+								rich.print("TPs in U-Plane:")
 								rich.print(data.tp_df_U)
 								title = f"U-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							

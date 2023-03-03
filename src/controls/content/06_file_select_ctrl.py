@@ -39,8 +39,8 @@ def init_callbacks(dash_app, engine):
 	def store_subset(selection, parent_stored_value):
 		if not selection:
 			return {}
-		rich.print("here")
-		rich.print(selection)
-		rich.print(parent_stored_value)
-		#subset = parent_stored_value[selection]
+		
+		rich.print("Data File Selection:",selection)
+		
+
 		return(selection)

@@ -230,10 +230,11 @@ def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
 
 def waveform_tps(data,channel_num):
 	fig= px.line(data.df_cnr,y=channel_num)
+	rich.print("Data after CNR:")
+	rich.print(data.df_cnr)
 	if channel_num in set(data.tp_df_tsoff['offline_ch']):
 							
-		rich.print("Data after CNR:")
-		rich.print(data.df_cnr)
+		
 		new=(data.tp_df_tsoff.loc[data.tp_df_tsoff['offline_ch'] == channel_num])
 		rich.print("Dataframe used for TPs (with similar offline channels)")
 		rich.print(new)	

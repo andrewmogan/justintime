@@ -46,16 +46,26 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 					except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 					
-
+					rich.print("Initial Time Stamp:",data.t0_min)
+					rich.print(" ")
+					rich.print("Initial Dataframe:")
+					rich.print(data.df_tsoff)
 					if len(data.df)!=0 and len(data.df.index!=0):
-						rich.print("Dataframe:")
-						rich.print(data.df)
+
+						rich.print("Dataframe in Z-Plane:")
+						rich.print(data.df_Z)
+						rich.print("Dataframe in V-Plane:")
+						rich.print(data.df_V)
+						rich.print("Dataframe in U-Plane:")
+						rich.print(data.df_U)
+
 						rich.print("Mean Z-Plane")
 						rich.print(data.df_Z_mean)
 						rich.print("Mean V-Plane")
 						rich.print(data.df_V_mean)
 						rich.print("Mean U-Plane")
 						rich.print(data.df_U_mean)
+						
 						fig_mean = make_subplots(rows=1, cols=3,
 							subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
 						fig_mean.add_trace(

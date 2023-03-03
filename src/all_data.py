@@ -34,16 +34,14 @@ class trigger_record_data:
 		self.engine = engine
 		self.info, self.df, self.tp_df, self.fwtp_df = engine.load_entry(raw_data_file, int(trigger_record))
 		
-		rich.print("edw")
-		rich.print(self.tp_df)
 		self.df_tsoff=self.df.copy()
 		self.t0_min= self.df_tsoff.index.min()
-		print("Initial Time Stamp")
-		print(self.t0_min)
+		#print("Initial Time Stamp")
+		#print(self.t0_min)
 		
 		self.df_tsoff.index=self.df_tsoff.index-self.t0_min
-		rich.print("DF:")
-		rich.print(self.df_tsoff)
+		#rich.print("DF:")
+		#rich.print(self.df_tsoff)
 		self.tr_ts_sec = self.info['trigger_timestamp']*20/1000000000 # Move to 63.5 MHz
 		#rich.print(self.tr_ts_sec)
 		#rich.print(self.info)
