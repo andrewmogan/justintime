@@ -179,7 +179,7 @@ def tp_for_adc(df, cmin, cmax):
 				marker=dict(
 					size=4.5,
 					color=df['peak_adc'], #set color equal to a variable
-					colorscale="Turbo", # one of plotly colorscales
+					colorscale="delta", # one of plotly colorscales
 					cmin = cmin,
 					cmax = cmax,
 					showscale=True,
@@ -225,14 +225,11 @@ def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
 	return fig
 
 
-def waveform_tps(df,channel_num):
+def waveform_tps(fig,df,channel_num):
 	if not df.empty:
 		# fig=go.Figure()
-	
-		fig = go.Scatter()
-	
-		if channel_num in set(df['offline_ch']):
-						
+		
+		if channel_num in set(df['offline_ch']):			
 			
 			new=(df[df['offline_ch'] == channel_num])
 			rich.print("Dataframe used for TPs (with similar offline channels)")
@@ -248,14 +245,10 @@ def waveform_tps(df,channel_num):
 				adc_peak = new.iloc[i]["peak_adc"]
 				rich.print(time_over_threshold)
 									
-				fig.add_vrect((time_start-time_peak)+time_start, (time_end-time_peak)+time_start, line_color="red")	
-		
+				fig.add_vrect((time_start-time_peak)+time_start, (time_end-time_peak)+time_start, line_color="red")
 						
 	else:
 		fig = go.Scatter()
-		
-	
-	
 		
 	return fig
 

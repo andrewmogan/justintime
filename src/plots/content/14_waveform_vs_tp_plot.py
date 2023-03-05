@@ -68,7 +68,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					if channel_num:
 						if int(channel_num) in data.channels:
 							rich.print("Channel number selected: ",channel_num)
-							
+
 							fzmin, fzmax = tr_color_range
 							if "offset_removal" in offset:
 								
@@ -77,7 +77,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 									rich.print(data.df_Z.T.loc[channel_num])
 									fig=px.line((data.df_Z - data.df_Z_mean),y=channel_num)
 									if  "tp_overlay" in overlay_tps :
-										fig.add_trace(waveform_tps(data.tp_df_Z,channel_num))
+										waveform_tps(fig,data.tp_df_Z,channel_num)
 
 									
 								if "V" in plane:
@@ -85,20 +85,24 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 									rich.print(data.df_V.T.loc[channel_num])
 									fig=px.line((data.df_V - data.df_V_mean),y=channel_num)
 									if  "tp_overlay" in overlay_tps :
-										fig.add_trace(waveform_tps(data.tp_df_V,channel_num))
+										waveform_tps(fig,data.tp_df_V,channel_num)
+										rich.print(waveform_tps(fig,data.tp_df_V,channel_num))
 								if "U" in plane:
 									rich.print("Dataframe for U-Plane for channel",channel_num,":")
 									rich.print(data.df_U.T.loc[channel_num])
 									fig=px.line((data.df_U - data.df_U_mean),y=channel_num)
 									if  "tp_overlay" in overlay_tps :
-										fig.add_trace(waveform_tps(data.tp_df_U,channel_num))
+										waveform_tps(fig,data.tp_df_U,channel_num)
 								
 							#print(set(data.tp_df_tsoff['offline_ch']))
 							#rich.print()
 							else:
 
 								fig=px.line(data.df_tsoff,y=channel_num)
+								if  "tp_overlay" in overlay_tps :
+									waveform_tps(data.tp_df_tsoff,channel_num)
 
+						
 
 							fig.update_layout(
 								xaxis_title="Time Ticks",
