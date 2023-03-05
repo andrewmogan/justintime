@@ -13,7 +13,7 @@ def return_obj(dash_app, engine):
 			id=ctrl_id
 		)
 	],
-			style={"marginBottom":"1em"},)
+			style={"marginBottom":"1em","marginTop":"1em"},)
 
 	ctrl = ctrl_class.ctrl("channel_num", ctrl_id, ctrl_div, engine)
 	ctrl.add_ctrl("13_plane_radio_ctrl")
@@ -39,4 +39,5 @@ def init_callbacks(dash_app,engine):
 			if "U" in plane:
 				channel_num=[{'label':str(n), 'value':(n)} for n in (trigger_record_data(engine,trigger_record,raw_data_file).df_U.columns)]
 			return(channel_num)
-		except RuntimeError:return([""])
+		except RuntimeError :return([""])
+		except TypeError: return([""])

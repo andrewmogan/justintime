@@ -22,6 +22,8 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("07_trigger_record_select_ctrl")
 	plot.add_ctrl("09_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("16_channel_number_ctrl")
+	plot.add_ctrl("17_offset_ctrl")
+	plot.add_ctrl("19_tp_overlay_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
 	init_callbacks(dash_app, storage, plot_id,theme)
@@ -36,13 +38,16 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		State('07_trigger_record_select_ctrl', "value"),
 		State("04_partition_select_ctrl","value"),
 		State('05_run_select_ctrl', "value"),
+		State("13_plane_radio_ctrl","value"),
 		State('16_channel_number_ctrl',"value"),
+		State('17_offset_ctrl',"value"),
+		State('19_tp_overlay_ctrl',"value"),
 		State("09_tr_colour_range_slider_comp", "value"),
 		State('06_file_select_ctrl', "value"),
 		
 		State(plot_id, "children"),
 	)
-	def plot_fft_graph(n_clicks, trigger_record,partition,run,channel_num,tr_color_range,raw_data_file, original_state):
+	def plot_fft_graph(n_clicks, trigger_record,partition,run,plane,channel_num,offset,overlay_tps,tr_color_range,raw_data_file,original_state):
 	
 		load_figure_template(theme)
 		
@@ -56,20 +61,44 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 				rich.print("Initial Dataframe:")
 				rich.print(data.df_tsoff)
 
-				data.init_tp()
-				data.init_cnr()
-				#print(data.tp_df_tsoff)
+				
 				if len(data.df)!=0 and len(data.df.index!=0):
+					data.init_tp()
 					
 					if channel_num:
 						if int(channel_num) in data.channels:
 							rich.print("Channel number selected: ",channel_num)
 							
 							fzmin, fzmax = tr_color_range
-							
+							if "offset_removal" in offset:
+								
+								if "Z" in plane:
+									rich.print("Dataframe for Z-Plane for channel",channel_num,":")
+									rich.print(data.df_Z.T.loc[channel_num])
+									fig=px.line((data.df_Z - data.df_Z_mean),y=channel_num)
+									if  "tp_overlay" in overlay_tps :
+										fig.add_trace(waveform_tps(data.tp_df_Z,channel_num))
+
+									
+								if "V" in plane:
+									rich.print("Dataframe for V-Plane for channel",channel_num,":")
+									rich.print(data.df_V.T.loc[channel_num])
+									fig=px.line((data.df_V - data.df_V_mean),y=channel_num)
+									if  "tp_overlay" in overlay_tps :
+										fig.add_trace(waveform_tps(data.tp_df_V,channel_num))
+								if "U" in plane:
+									rich.print("Dataframe for U-Plane for channel",channel_num,":")
+									rich.print(data.df_U.T.loc[channel_num])
+									fig=px.line((data.df_U - data.df_U_mean),y=channel_num)
+									if  "tp_overlay" in overlay_tps :
+										fig.add_trace(waveform_tps(data.tp_df_U,channel_num))
+								
 							#print(set(data.tp_df_tsoff['offline_ch']))
 							#rich.print()
-							fig=waveform_tps(data,channel_num)
+							else:
+
+								fig=px.line(data.df_tsoff,y=channel_num)
+
 
 							fig.update_layout(
 								xaxis_title="Time Ticks",

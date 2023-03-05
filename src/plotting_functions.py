@@ -209,12 +209,9 @@ def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
     yaxis_title="Offline Channel")
 						
 	else:
-		fig = go.Figure()
-		fig.add_trace(
-			go.Scatter(
+		fig = go.Scatter()
 			
-			)
-		)
+	
 	fig.update_layout(
 		#width=fig_w,
 		height=fig_h,
@@ -228,28 +225,38 @@ def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
 	return fig
 
 
-def waveform_tps(data,channel_num):
-	fig= px.line(data.df_cnr,y=channel_num)
-	rich.print("Data after CNR:")
-	rich.print(data.df_cnr)
-	if channel_num in set(data.tp_df_tsoff['offline_ch']):
-							
+def waveform_tps(df,channel_num):
+	if not df.empty:
+		# fig=go.Figure()
+	
+		fig = go.Scatter()
+	
+		if channel_num in set(df['offline_ch']):
+						
+			
+			new=(df[df['offline_ch'] == channel_num])
+			rich.print("Dataframe used for TPs (with similar offline channels)")
+			rich.print(new)	
+			rich.print("TPs time over threshold (in order of appearance):")					
+			for i in range(len(new)):
+																				
+				time_start = new.iloc[i]['start_time']
+				time_over_threshold = new.iloc[i]["time_over_threshold"]
+				time_end = (new.iloc[i]["start_time"]+new.iloc[i]["time_over_threshold"])
+				time_peak = new.iloc[i]["peak_time"]
+				channel =new.iloc[i]["offline_ch"]
+				adc_peak = new.iloc[i]["peak_adc"]
+				rich.print(time_over_threshold)
+									
+				fig.add_vrect((time_start-time_peak)+time_start, (time_end-time_peak)+time_start, line_color="red")	
 		
-		new=(data.tp_df_tsoff.loc[data.tp_df_tsoff['offline_ch'] == channel_num])
-		rich.print("Dataframe used for TPs (with similar offline channels)")
-		rich.print(new)	
-		rich.print("TPs time over threshold (in order of appearance):")					
-		for i in range(len(new)):
-																			
-			time_start = new.iloc[i]['start_time']
-			time_over_threshold = new.iloc[i]["time_over_threshold"]
-			time_end = (new.iloc[i]["start_time"]+new.iloc[i]["time_over_threshold"])
-			time_peak = new.iloc[i]["peak_time"]
-			channel =new.iloc[i]["offline_ch"]
-			adc_peak = new.iloc[i]["peak_adc"]
-			rich.print(time_over_threshold)
-								
-			fig.add_vrect((time_start-time_peak)+time_start, (time_end-time_peak)+time_start, line_color="red")	
+						
+	else:
+		fig = go.Scatter()
+		
+	
+	
+		
 	return fig
 
 
