@@ -17,7 +17,7 @@ def add_dunedaq_annotation(figure):
 		# x=1,
 		# y=-0.20,
 		x=1,
-		y=1.20,
+		y=1.10,
 		showarrow=False,
 		align="right",
 		text='Powered by DUNE-DAQ',
@@ -207,10 +207,9 @@ def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
 		fig.update_layout(
     xaxis_title="Time Ticks",
     yaxis_title="Offline Channel")
-						
+
 	else:
-		fig = go.Scatter()
-			
+		fig = px.scatter()		
 	
 	fig.update_layout(
 		#width=fig_w,

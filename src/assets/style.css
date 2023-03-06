@@ -333,6 +333,9 @@ fieldset {
 }
 input[type="checkbox"], input[type="radio"] {
   display: inline;
+  width: 30px;
+  height:18px;
+  font-size: 14px;
 }
 label > .label-body {
   display: inline-block;
@@ -355,7 +358,7 @@ ul ul, ul ol, ol ol, ol ul {
   font-size: 60%;
 }
 li {
-  margin-bottom: 1rem;
+  margin-bottom: 1rem
 }
 /* Tables –––––––––––––––––––––––––––––––––––––––––––––––––– */
 table {

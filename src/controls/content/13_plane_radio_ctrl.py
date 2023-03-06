@@ -14,8 +14,8 @@ def return_obj(dash_app, engine):
 				{'label': 'U', 'value': 'U'},
 			],
 			
-			labelStyle={'display': 'inline-block',"marginRight":"0.2em"},
-			style={'display': 'inline-block',"marginRight":"0.2em","fontSize": "1.35rem"},
+			labelStyle={'display': 'inline-block',"marginRight":"0.2em","fontSize": "1.5rem"},
+			style={'display': 'inline-block',"marginRight":"0.2em","fontSize": "1.5rem"},
 		)
 	])
 

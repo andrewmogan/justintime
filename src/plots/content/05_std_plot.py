@@ -6,7 +6,6 @@ from dash_bootstrap_templates import load_figure_template
 from plotly.subplots import make_subplots
 from dash.dependencies import Input, Output, State
 import rich
-from dash_bootstrap_templates import ThemeSwitchAIO
 import numpy as np
 from plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
 

@@ -27,11 +27,7 @@ def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str,temp
 	theme=([dbc.themes.FLATLY if template=='light' else dbc.themes.DARKLY])
 	rich.print("Light mode" if theme==[dbc.themes.FLATLY] else "Dark mode")
 	dash_app = Dash(__name__,external_stylesheets=theme)
-	##theme_switch = ThemeSwitchAIO(
-    ##aio_id="theme", themes=[dbc.themes.DARKLY, dbc.themes.SUPERHERO]
-	#templates=[dbc.themes.COSMO, dbc.themes.SUPERHERO]
-	#load_figure_template(templates)
-	##rich.print(theme_switch)
+
 	init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,template)
 	debug=True
 	dash_app.run_server(debug=debug, host='0.0.0.0', port=port)
@@ -103,30 +99,12 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,template)
                         html.Div([plot.div for plot in plots], id = "plots_div",style={'fontSize': '14px '})],
                 
                 ),
-			# Column for app graphs and plots
-              #  html.Div(
-                 #   className="five columns div-for-charts",
-                  #  children=[
-                        
-                   #     html.Div(
-                    #        className="text-padding",
-                    #        children=[
-                                
-                       #     ],
-                       # ),
-						#html.H2(id="title"),
-						#html.P(""),
-                       # html.P(id="description",style={'fontSize': '14px '})],
-                
-              #  ),
-           # ],
-      #  )
+			
 	])]
 ))    		
 	
 	layout.append(html.Div([dcc.Location(id='url', refresh=False),html.Div(id='page-content')])) 
-	#layout.append(dbc.Container([theme], className="m-4 dbc"))
-	#layout.append(load_figure_template(ThemeSwitchAIO))
+	
 	init_page_callback(dash_app, all_storage)
 
 	dash_app.layout = html.Div(layout)

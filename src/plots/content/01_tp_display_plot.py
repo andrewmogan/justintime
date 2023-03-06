@@ -7,7 +7,6 @@ from plotly.subplots import make_subplots
 from dash.dependencies import Input, Output, State
 import numpy as np
 import rich
-from dash_bootstrap_templates import ThemeSwitchAIO
 from dash_bootstrap_templates import load_figure_template
 import pandas as pd
 from all_data import trigger_record_data
@@ -24,6 +23,7 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("05_run_select_ctrl")
 	plot.add_ctrl("07_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
+	plot.add_ctrl("08_adc_map_selection_ctrl")
 	plot.add_ctrl("09_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("14_density_plot_ctrl")
 	plot.add_ctrl('02_description_ctrl')
@@ -41,12 +41,13 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		State("04_partition_select_ctrl","value"),
 		State('05_run_select_ctrl', "value"),
 		State('06_file_select_ctrl', "value"),
+		State("08_adc_map_selection_ctrl","value"),
 		State("09_tr_colour_range_slider_comp", "value"),
 		State('14_density_plot_ctrl', "value"),
 		State('02_description_ctrl',"style"),
 		State(plot_id, "children"),
 	)
-	def plot_tp_graph(n_clicks, trigger_record,partition,run, raw_data_file, tr_color_range, density,description,original_state):
+	def plot_tp_graph(n_clicks, trigger_record,partition,run, raw_data_file,adcmap, tr_color_range, density,description,original_state):
 		load_figure_template(str(theme))
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
@@ -71,22 +72,24 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 					rich.print(data.tp_df_U)
 					if "density_plot" in density:
 						rich.print("2D Density plot chosen")
-						fig = tp_density(data.tp_df_Z,data.xmin_Z, data.xmax_Z,fzmin,fzmax,fig_w, fig_h, data.info)
-						children += [
-							html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							#html.Hr(),
-							dcc.Graph(figure=fig)]
-						fig = tp_density(data.tp_df_V,data.xmin_V, data.xmax_V,fzmin,fzmax,fig_w, fig_h, data.info)
-						children += [
+						if "Z" in adcmap:
+							fig = tp_density(data.tp_df_Z,data.xmin_Z, data.xmax_Z,fzmin,fzmax,fig_w, fig_h, data.info)
+							children += [
+								html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								#html.Hr(),
+								dcc.Graph(figure=fig)]
+						if "V" in adcmap:
+							fig = tp_density(data.tp_df_V,data.xmin_V, data.xmax_V,fzmin,fzmax,fig_w, fig_h, data.info)
+							children += [
 							html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 							#html.Hr(),
 							dcc.Graph(figure=fig)]
-						
-						fig = tp_density(data.tp_df_U,data.xmin_U, data.xmax_U,fzmin,fzmax,fig_w, fig_h, data.info)
-						children += [
-							html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							#html.Hr(),
-							dcc.Graph(figure=fig)]
+						if "U" in adcmap:
+							fig = tp_density(data.tp_df_U,data.xmin_U, data.xmax_U,fzmin,fzmax,fig_w, fig_h, data.info)
+							children += [
+								html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								#html.Hr(),
+								dcc.Graph(figure=fig)]
 
 						fig = tp_density(data.tp_df_O,data.xmin_O, data.xmax_O,fzmin,fzmax,fig_w, fig_h, data.info)
 						children += [
@@ -95,22 +98,24 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 							dcc.Graph(figure=fig)]
 					else:
 						rich.print("Scatter Plot Chosen")
-						fig = make_tp_plot(data.tp_df_Z,data.xmin_Z,data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info)
-						children += [
-							html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							#html.Hr(),
-							dcc.Graph(figure=fig),]
-						fig = make_tp_plot(data.tp_df_V, data.xmin_V,data.xmax_V, fzmin, fzmax, fig_w, fig_h, data.info)
-						children += [
-							html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							#html.Hr(),
-							dcc.Graph(figure=fig)]
-						
-						fig = make_tp_plot(data.tp_df_U, data.xmin_U,data.xmax_U, fzmin, fzmax, fig_w, fig_h, data.info)
-						children += [
-							html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
-							#html.Hr(),
-							dcc.Graph(figure=fig)]
+						if "Z" in adcmap:
+							fig = make_tp_plot(data.tp_df_Z,data.xmin_Z,data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info)
+							children += [
+								html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								#html.Hr(),
+								dcc.Graph(figure=fig),]
+						if "V" in adcmap:
+							fig = make_tp_plot(data.tp_df_V, data.xmin_V,data.xmax_V, fzmin, fzmax, fig_w, fig_h, data.info)
+							children += [
+								html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								#html.Hr(),
+								dcc.Graph(figure=fig)]
+						if "U" in adcmap:
+							fig = make_tp_plot(data.tp_df_U, data.xmin_U,data.xmax_U, fzmin, fzmax, fig_w, fig_h, data.info)
+							children += [
+								html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								#html.Hr(),
+								dcc.Graph(figure=fig)]
 
 						fig = make_tp_plot(data.tp_df_O,data.xmin_O,data.xmax_O, fzmin, fzmax, fig_w, fig_h, data.info)
 						children += [
@@ -118,9 +123,14 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 							#html.Hr(),
 							dcc.Graph(figure=fig)]
 					add_dunedaq_annotation(fig)
-					return(html.Div([
-						selection_line(raw_data_file, trigger_record),
-						html.Div(children)]))
+					if adcmap:
+						return(html.Div([
+							selection_line(raw_data_file, trigger_record),
+							#html.Hr(),
+							html.Div(children)]))
+					else:
+						return(html.Div(html.H6("No ADC map selected")))
+					
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)

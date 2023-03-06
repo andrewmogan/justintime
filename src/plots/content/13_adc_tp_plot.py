@@ -7,7 +7,6 @@ from plotly.subplots import make_subplots
 from dash.dependencies import Input, Output, State
 import numpy as np
 import rich
-from dash_bootstrap_templates import ThemeSwitchAIO
 import pandas as pd
 from all_data import trigger_record_data
 from plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot,make_tp_plot,tp_for_adc

@@ -17,7 +17,7 @@ def return_obj(dash_app, engine):
 			labelStyle={'display': 'inline-block',"marginRight":"0.2em"},
 			style={'display': 'inline-block',"marginRight":"0.2em"},
 		)
-	],style={"marginBottom":"1em","fontSize": "1.35rem"})
+	],style={"marginBottom":"1em","fontSize": "1.5rem"})
 
 	ctrl = ctrl_class.ctrl("adc_map_selection", ctrl_id, ctrl_div, engine)
 

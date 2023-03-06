@@ -6,7 +6,6 @@ from dash_bootstrap_templates import load_figure_template
 import dash_bootstrap_components as dbc
 from plotly.subplots import make_subplots
 from dash.dependencies import Input, Output, State
-from dash_bootstrap_templates import ThemeSwitchAIO
 import numpy as np
 import rich
 from all_data import trigger_record_data
