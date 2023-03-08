@@ -179,8 +179,15 @@ class DataManager:
         # List files
         lf = self.list_files()
 
+        def extract_session_run( fname : str ):
+            m = re_app_run.match(fname)
+            if not m:
+                return ('none', '0')
+            else:
+                return m.groups()
+
         # Group by regex
-        gf_it = groupby(lf, lambda x: re_app_run.match(x).groups())
+        gf_it = groupby(lf, extract_session_run)
         gf = {k: [x for x in d if x] for k,d in gf_it}
         srf_map = defaultdict(dict)
 
