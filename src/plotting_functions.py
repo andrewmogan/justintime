@@ -5,6 +5,7 @@ from matplotlib import cm
 from matplotlib.colors import Normalize
 import numpy as np
 import plotly.express as px
+import dash_bootstrap_components as dbc
 import rich
 from all_data import trigger_record_data
 from plotly.subplots import make_subplots
@@ -26,11 +27,27 @@ def add_dunedaq_annotation(figure):
 		yref="paper"
 		))
 
-def selection_line(raw_data_file, trigger_record):
+def selection_line(partition,run,raw_data_file, trigger_record):
 	return(html.Div([
-		html.B("selected raw data file:"),
-		html.Div(raw_data_file),html.B("selected trigger record:"),
-		html.Div(trigger_record),html.Hr()]))
+		html.Div([
+        html.B("Selected partition: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+        html.Div(partition,style={"display":"inline-block"})]),
+	
+		html.Div([
+        html.B("Selected run: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+        html.Div(run,style={"display":"inline-block"})]),
+	
+		html.Div([
+        html.B("Selected raw data file: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+        html.Div(raw_data_file,style={"display":"inline-block"})]),
+
+		html.Div([
+		
+		html.B("Selected trigger record: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+		html.Div(trigger_record,style={"display":"inline-block"})])
+		,html.Hr()
+	]))
+
 
 def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
 	

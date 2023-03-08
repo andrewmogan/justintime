@@ -16,8 +16,9 @@ def return_obj(dash_app, engine, storage,theme):
 	
 	plot = plot_class.plot("std_plot", plot_id, plot_div, engine, storage,theme)
 	
-	plot.add_ctrl("04_partition_select_ctrl")
-	plot.add_ctrl("05_run_select_ctrl")
+	plot.add_ctrl("partition_select_ctrl")
+	plot.add_ctrl("run_select_ctrl")
+
 	plot.add_ctrl("07_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
@@ -30,10 +31,10 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		Output(plot_id, "children"),
 	##	Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
-		State("04_partition_select_ctrl","value"),
-		State('05_run_select_ctrl', "value"),
-		State('07_trigger_record_select_ctrl', "value"),
-		State('06_file_select_ctrl', "value"),
+		State("partition_select_ctrl","value"),
+		State("run_select_ctrl","value"),
+		State('trigger_record_select_ctrl', "value"),
+		State('file_select_ctrl', "value"),
 		State(plot_id, "children")
 	)
 	def plot_std_graph(n_clicks, partition,run,trigger_record, raw_data_file, original_state):
@@ -81,7 +82,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					)
 					add_dunedaq_annotation(fig_std)
 					fig_std.update_layout(font_family="Lato", title_font_family="Lato")
-					return(html.Div([selection_line(raw_data_file, trigger_record),html.B("STD by plane"),dcc.Graph(figure=fig_std)]))
+					return(html.Div([html.B("STD by plane"),dcc.Graph(figure=fig_std)]))
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)

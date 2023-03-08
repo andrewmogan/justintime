@@ -26,7 +26,7 @@ def return_obj(dash_app, engine):
 def init_callbacks(dash_app,engine):
 	@dash_app.callback(
 		Output('16_channel_number_ctrl', 'options'),
-		Input('13_plane_radio_ctrl', 'value'),Input("07_trigger_record_select_ctrl", 'value'),Input('06_file_select_ctrl', 'value')
+		Input('13_plane_radio_ctrl', 'value'),Input("trigger_record_select_ctrl", 'value'),Input('file_select_ctrl', 'value')
 		)
 	def update_select(plane,trigger_record,raw_data_file):
 		if not plane:

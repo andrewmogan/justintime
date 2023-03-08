@@ -16,8 +16,9 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_id = "04_mean_plot"
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("Mean_plot", plot_id, plot_div, engine, storage,theme)
-	plot.add_ctrl("04_partition_select_ctrl")
-	plot.add_ctrl("05_run_select_ctrl")
+	
+	plot.add_ctrl("partition_select_ctrl")
+	plot.add_ctrl("run_select_ctrl")
 	plot.add_ctrl("07_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
@@ -30,17 +31,17 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		Output(plot_id, "children"),
 		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
-		State('07_trigger_record_select_ctrl', "value"),
-		State("04_partition_select_ctrl","value"),
-		State('05_run_select_ctrl', "value"),
-		State('06_file_select_ctrl', "value"),
+		State('trigger_record_select_ctrl', "value"),
+		State("partition_select_ctrl","value"),
+		State("run_select_ctrl","value"),
+		State('file_select_ctrl', "value"),
 		State(plot_id, "children")
 	)
-	def plot_mean_graph(n_clicks, trigger_record,partition,run, raw_data_file, original_state):
+	def plot_mean_graph(n_clicks, trigger_record,partition,run,raw_data_file, original_state):
 
 		load_figure_template(theme)
 		if trigger_record and raw_data_file:
-
+			
 			if plot_id in storage.shown_plots:
 					try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 					except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
@@ -49,6 +50,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					rich.print(" ")
 					rich.print("Initial Dataframe:")
 					rich.print(data.df_tsoff)
+
 					if len(data.df)!=0 and len(data.df.index!=0):
 
 						rich.print("Dataframe in Z-Plane:")
@@ -64,7 +66,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 						rich.print(data.df_V_mean)
 						rich.print("Mean U-Plane")
 						rich.print(data.df_U_mean)
-						
+
 						fig_mean = make_subplots(rows=1, cols=3,
 							subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
 						fig_mean.add_trace(
@@ -95,7 +97,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 						)
 						add_dunedaq_annotation(fig_mean)
 						fig_mean.update_layout(font_family="Lato", title_font_family="Lato")
-						return(html.Div([selection_line(raw_data_file, trigger_record),html.B("Mean by plane"),dcc.Graph(figure=fig_mean)]))
+						return(html.Div([selection_line(partition,run,raw_data_file, trigger_record),html.B("Mean by plane"),dcc.Graph(figure=fig_mean)]))
 			else:
 				return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)

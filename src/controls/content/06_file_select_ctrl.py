@@ -5,27 +5,35 @@ import rich
 from dash.dependencies import Input, Output, State
 
 def return_obj(dash_app, engine):
+
 	ctrl_id = "06_file_select_ctrl"
 
 	ctrl_div = html.Div([
-		dcc.Dropdown(placeholder="Select Data File",
-			id=ctrl_id
+		html.Div([
+		html.Label("Select a Data File: ",style={"fontSize":"12px"}),
+		html.Div([
+		
+		dcc.Dropdown(placeholder="Data File",
+			id="file_select_ctrl"
 		),
         dcc.Store("file_storage_id")
-	],style={"marginBottom":"1.5em"})
+	],style={"marginBottom":"1.0em"})])],id=ctrl_id)
 
 	ctrl = ctrl_class.ctrl("file_select", ctrl_id, ctrl_div, engine)
-	ctrl.add_ctrl("05_run_select_id")
+	ctrl.add_ctrl("04_partition_run_select_ctrl")
 
 	init_callbacks(dash_app, engine)
 	return(ctrl)
 
 def init_callbacks(dash_app, engine):
+
 	@dash_app.callback(
-		Output('06_file_select_ctrl', 'options'),
+		Output('file_select_ctrl', 'options'),
 		Input('run_storage_id', 'data')
 		)
+	
 	def update_select(stored_value):
+
 		if not stored_value:
 			return []
 		options = [{'label':str(n), 'value':str(n)} for n in stored_value]
@@ -33,14 +41,14 @@ def init_callbacks(dash_app, engine):
         
 	@dash_app.callback(
 		Output('file_storage_id', 'data'),
-		Input('06_file_select_ctrl', 'value'),
+		Input('file_select_ctrl', 'value'),
         State('run_storage_id', 'data')
 		)
+	
 	def store_subset(selection, parent_stored_value):
 		if not selection:
 			return {}
 		
 		rich.print("Data File Selection:",selection)
-		
 
 		return(selection)

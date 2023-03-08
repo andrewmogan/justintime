@@ -4,7 +4,6 @@ from dash import Dash, html, dcc, callback_context
 from dash.dependencies import Input, Output, State
 import load_all as ld
 from cruncher.datamanager import DataManager
-import dash_bootstrap_components as dbc
 import click
 import rich
 

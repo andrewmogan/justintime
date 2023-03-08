@@ -16,8 +16,9 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
 
-	plot.add_ctrl("04_partition_select_ctrl")
-	plot.add_ctrl("05_run_select_ctrl")
+	plot.add_ctrl("partition_select_ctrl")
+	plot.add_ctrl("run_select_ctrl")
+
 	plot.add_ctrl("07_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 	plot.add_ctrl("08_adc_map_selection_ctrl")
@@ -36,10 +37,11 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		Output(plot_id, "children"),
 		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
-		State('07_trigger_record_select_ctrl', "value"),
-		State('06_file_select_ctrl', "value"),
-		State("04_partition_select_ctrl","value"),
-		State('05_run_select_ctrl', "value"),
+		State('trigger_record_select_ctrl', "value"),
+		State('file_select_ctrl', "value"),
+		State("partition_select_ctrl","value"),
+		State("run_select_ctrl","value"),
+
 		State("08_adc_map_selection_ctrl", "value"),
 		State("09_tr_colour_range_slider_comp", "value"),
 		State("10_static_image_ctrl", "value"),
@@ -323,7 +325,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					if adcmap_selection:
 						return(html.Div([
-							selection_line(raw_data_file, trigger_record),
+							selection_line(partition,run,raw_data_file, trigger_record),
 							#html.Hr(),
 							html.Div(children)]))
 					else:

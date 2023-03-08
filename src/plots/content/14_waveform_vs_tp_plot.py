@@ -16,8 +16,9 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("waveform_tp_plot", plot_id, plot_div, engine, storage,theme)
 
-	plot.add_ctrl("04_partition_select_ctrl")
-	plot.add_ctrl("05_run_select_ctrl")
+	plot.add_ctrl("partition_select_ctrl")
+	plot.add_ctrl("run_select_ctrl")
+
 	plot.add_ctrl("07_trigger_record_select_ctrl")
 	plot.add_ctrl("09_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("16_channel_number_ctrl")
@@ -34,15 +35,16 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		Output(plot_id, "children"),
 		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
-		State('07_trigger_record_select_ctrl', "value"),
-		State("04_partition_select_ctrl","value"),
-		State('05_run_select_ctrl', "value"),
+		State('trigger_record_select_ctrl', "value"),
+		State("partition_select_ctrl","value"),
+		State("run_select_ctrl","value"),
+
 		State("13_plane_radio_ctrl","value"),
 		State('16_channel_number_ctrl',"value"),
 		State('17_offset_ctrl',"value"),
 		State('19_tp_overlay_ctrl',"value"),
 		State("09_tr_colour_range_slider_comp", "value"),
-		State('06_file_select_ctrl', "value"),
+		State('file_select_ctrl', "value"),
 		
 		State(plot_id, "children"),
 	)
@@ -116,7 +118,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 							add_dunedaq_annotation(fig)
 							fig.update_layout(font_family="Lato", title_font_family="Lato")
 							return(html.Div([
-									selection_line(raw_data_file, trigger_record),
+									selection_line(partition,run,raw_data_file, trigger_record),
 									html.B(f"Waveform and TPs for channel {channel_num}"),
 									#html.Hr(),
 									dcc.Graph(figure=fig),
