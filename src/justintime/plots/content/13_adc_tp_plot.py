@@ -16,11 +16,11 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_id = "13_adc_tp_plot"
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
-
+	plot.add_ctrl("07_refresh_ctrl")
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
 
-	plot.add_ctrl("07_trigger_record_select_ctrl")
+	plot.add_ctrl("06_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 	plot.add_ctrl("08_adc_map_selection_ctrl")
 	plot.add_ctrl("09_tr_colour_range_slider_ctrl")
@@ -38,6 +38,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		Output(plot_id, "children"),
 		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
+		State('07_refresh_ctrl', "value"),
 		State('trigger_record_select_ctrl', "value"),
 		State('file_select_ctrl', "value"),
 		State("partition_select_ctrl","value"),
@@ -51,7 +52,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		State("19_tp_overlay_ctrl","value"),
 		State(plot_id, "children"),
 	)
-	def plot_trd_graph(n_clicks, trigger_record, raw_data_file,partition,run, adcmap_selection, tr_color_range, static_image, offset,cnr,overlay_tps,original_state):
+	def plot_trd_graph(n_clicks, refresh,trigger_record, raw_data_file,partition,run, adcmap_selection, tr_color_range, static_image, offset,cnr,overlay_tps,original_state):
 		
 		load_figure_template(theme)
 		if trigger_record and raw_data_file:

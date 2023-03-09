@@ -5,7 +5,7 @@ from .. import ctrl_class
 
 def return_obj(dash_app, engine):
 
-	ctrl_id = "07_trigger_record_select_ctrl"
+	ctrl_id = "06_trigger_record_select_ctrl"
 
 	ctrl_div = html.Div([
 		
@@ -17,7 +17,7 @@ def return_obj(dash_app, engine):
 	],style={"marginBottom":"1.5em"})],id=ctrl_id)
 
 	ctrl = ctrl_class.ctrl("trigger_record_select", ctrl_id, ctrl_div, engine)
-	ctrl.add_ctrl("06_file_select_ctrl")
+	ctrl.add_ctrl("05_file_select_ctrl")
 
 	init_callbacks(dash_app, engine)
 	return(ctrl)

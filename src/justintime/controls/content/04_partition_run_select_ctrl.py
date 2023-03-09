@@ -9,71 +9,83 @@ from ... cruncher.datamanager import DataManager
 
 
 def return_obj(dash_app, engine):
-	ctrl_id = "04_partition_run_select_ctrl"
-	data=engine.get_session_run_files_map()
-	ctrl_div = html.Div(
-		html.Div([
-		html.Label("Select Partition and Run Number: ",style={"fontSize":"12px"}),
-		dbc.Row([
-		
-		dbc.Col(html.Div([
-	
-		dcc.Dropdown(options=list(data.keys()),placeholder="Partition",
-			id="partition_select_ctrl"),
+    ctrl_id = "04_partition_run_select_ctrl"
+    data=engine.get_session_run_files_map()
+    ctrl_div = html.Div(
+        html.Div([
+            dcc.Store("session_run_files_map", data=data),
+            html.Label("Select Partition and Run Number: ",style={"fontSize":"12px"}),
+            dbc.Row([
+                dbc.Col(html.Div([
+                    # dcc.Dropdown(options=list(data.keys()),placeholder="Partition",
+                    dcc.Dropdown(placeholder="Partition",
+                        id="partition_select_ctrl"),
 
-        dcc.Store("partition_storage_id")
-		],style={"marginBottom":"1.0em"})),
+                    dcc.Store("partition_storage_id")
+                 ],style={"marginBottom":"1.0em"})),
 
-		dbc.Col(html.Div([
-		
-		dcc.Dropdown(placeholder="Run Number",
-			id="run_select_ctrl"
-		),
-        dcc.Store("run_storage_id")],style={"marginBottom":"1.0em"}))
-	])]),id=ctrl_id)
-	
+                dbc.Col(html.Div([
+            
+                    dcc.Dropdown(placeholder="Run Number",
+                        id="run_select_ctrl"
+                    ),
+                    dcc.Store("run_storage_id")],style={"marginBottom":"1.0em"}))
+                ])]),
+        id=ctrl_id
+    )
+    
 
-	ctrl = ctrl_class.ctrl("name", ctrl_id, ctrl_div, engine)
-	
-
-	init_callbacks(dash_app,engine, data)
-	return(ctrl)
-
-
-	
-def init_callbacks(dash_app, engine,data):
-	@dash_app.callback(
-		Output('partition_storage_id', 'data'),
-		Input('partition_select_ctrl', 'value')
-		)
+    ctrl = ctrl_class.ctrl("name", ctrl_id, ctrl_div, engine)
+    
+    init_callbacks(dash_app,engine)
+    return(ctrl)
 
 
-	def store_subset(selection):
-		if not selection:
-			return {}
-		subset = data[selection]
-		return(subset)
-	
-	@dash_app.callback(
-		Output('run_select_ctrl', 'options'),
-		Input('partition_storage_id', 'data')
-		)
-	
-	def update_select(stored_value):
-		if not stored_value:
-			return []
-		options = [{'label':str(n), 'value':str(n)} for n in stored_value]
-		return(options)
+    
+    
+def init_callbacks(dash_app, engine):
+
+    @dash_app.callback(
+        Output('partition_select_ctrl', 'options'),
+        Input('session_run_files_map', 'data')
+        )
+    def update_file_list(data):
+        if not data:
+            return {}
+        opts = list(data.keys())
+        return (opts)
+
+
+    @dash_app.callback(
+        Output('partition_storage_id', 'data'),
+        Input('partition_select_ctrl', 'value'),
+        State('session_run_files_map', 'data')
+        )
+    def store_subset(selection, data):
+        if not selection:
+            return {}
+        subset = data[selection]
+        return(subset)
+
+    
+    @dash_app.callback(
+        Output('run_select_ctrl', 'options'),
+        Input('partition_storage_id', 'data')
+        )
+    def update_select(stored_value):
+        if not stored_value:
+            return []
+        options = [{'label':str(n), 'value':str(n)} for n in sorted(stored_value, reverse=True)]
+        return(options)
         
-	@dash_app.callback(
-		Output('run_storage_id', 'data'),
-		Input('run_select_ctrl', 'value'),
-        State('partition_storage_id', 'data')
-		)
-	
-	def store_subset(selection, parent_stored_value):
-		if not selection:
-			return {}
-		subset = parent_stored_value[selection]
-		return(subset)
 
+    @dash_app.callback(
+        Output('run_storage_id', 'data'),
+        Input('run_select_ctrl', 'value'),
+        State('partition_storage_id', 'data')
+        )
+    def store_subset(selection, parent_stored_value):
+        if not selection:
+            return {}
+        subset = parent_stored_value[selection]
+        return(subset)
