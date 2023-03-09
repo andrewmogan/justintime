@@ -4,9 +4,9 @@ import logging
 from .. import ctrl_class
 
 def return_obj(dash_app, engine):
-    ctrl_id = "03_refresh_ctrl"
+    ctrl_id = "07_refresh_ctrl"
    
-    ctrl_div = html.Div([html.Button('Refresh Files', id=ctrl_id, n_clicks=0)])
+    ctrl_div = html.Div([html.Button('Refresh Files', id=ctrl_id, n_clicks=0)],style={"marginBottom":"1.0em"})
     ctrl = ctrl_class.ctrl("refresh_button", ctrl_id, ctrl_div, engine)
     
     return(ctrl)

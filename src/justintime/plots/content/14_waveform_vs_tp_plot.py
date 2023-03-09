@@ -16,11 +16,11 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_id = "14_waveform_vs_tp_plot"
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("waveform_tp_plot", plot_id, plot_div, engine, storage,theme)
-	plot.add_ctrl("03_refresh_ctrl")
+	plot.add_ctrl("07_refresh_ctrl")
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
 
-	plot.add_ctrl("07_trigger_record_select_ctrl")
+	plot.add_ctrl("06_trigger_record_select_ctrl")
 	plot.add_ctrl("09_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("16_channel_number_ctrl")
 	plot.add_ctrl("17_offset_ctrl")
@@ -36,7 +36,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		Output(plot_id, "children"),
 		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
-		State('03_refresh_ctrl', "value"),
+		State('07_refresh_ctrl', "value"),
 		State('trigger_record_select_ctrl', "value"),
 		State("partition_select_ctrl","value"),
 		State("run_select_ctrl","value"),

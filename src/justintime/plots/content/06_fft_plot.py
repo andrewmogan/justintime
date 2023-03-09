@@ -17,11 +17,11 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_id = "06_fft_plot"
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
-	plot.add_ctrl("03_refresh_ctrl")
+	plot.add_ctrl("07_refresh_ctrl")
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
 
-	plot.add_ctrl("07_trigger_record_select_ctrl")
+	plot.add_ctrl("06_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
 	init_callbacks(dash_app, storage, plot_id,theme)
@@ -31,7 +31,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 	@dash_app.callback(
 		Output(plot_id, "children"),
 		Input("90_plot_button_ctrl", "n_clicks"),
-		State('03_refresh_ctrl', "value"),
+		State('07_refresh_ctrl', "value"),
 		State("partition_select_ctrl","value"),
 		State("run_select_ctrl","value"),
 		

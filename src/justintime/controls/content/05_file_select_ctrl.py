@@ -7,7 +7,7 @@ from ... cruncher.datamanager import DataManager
 
 def return_obj(dash_app, engine):
 
-	ctrl_id = "06_file_select_ctrl"
+	ctrl_id = "05_file_select_ctrl"
 
 	ctrl_div = html.Div([
 		html.Div([
