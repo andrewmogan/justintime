@@ -16,6 +16,8 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_id = "07_fft_phase_plot"
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
+	plot.add_ctrl("03_refresh_ctrl")
+	
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
 
@@ -32,6 +34,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		Output(plot_id, "children"),
 		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
+		State('03_refresh_ctrl', "n_clicks"),
 		State('trigger_record_select_ctrl', "value"),
 		State('file_select_ctrl', "value"),
 		State("partition_select_ctrl","value"),
@@ -41,7 +44,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		State('11_fft_phase_fmax_comp', "value"),
 		State(plot_id, "children"),
 	)
-	def plot_fft_phase_graph(n_clicks, trigger_record, raw_data_file,partition,run, fmin, fmax, original_state):
+	def plot_fft_phase_graph(n_clicks,refresh, trigger_record, raw_data_file,partition,run, fmin, fmax, original_state):
 
 		load_figure_template(theme)
 		if trigger_record and raw_data_file:

@@ -18,8 +18,8 @@ def return_obj(dash_app, engine):
 		
 		dbc.Col(html.Div([
 	
-		dcc.Dropdown(options=list(data.keys()),placeholder="Partition",
-			id="partition_select_ctrl"),
+		dcc.Dropdown(placeholder="Partition",
+			id="partition_select_ctrl"), #options=list(data.keys())
 
         dcc.Store("partition_storage_id")
 		],style={"marginBottom":"1.0em"})),
@@ -32,11 +32,12 @@ def return_obj(dash_app, engine):
         dcc.Store("run_storage_id")],style={"marginBottom":"1.0em"}))
 	])]),id=ctrl_id)
 	
-
+	
 	ctrl = ctrl_class.ctrl("name", ctrl_id, ctrl_div, engine)
+	ctrl.add_ctrl("03_refresh_ctrl")
 	
 
-	init_callbacks(dash_app,engine, data)
+	init_callbacks(dash_app,engine,data)
 	return(ctrl)
 
 

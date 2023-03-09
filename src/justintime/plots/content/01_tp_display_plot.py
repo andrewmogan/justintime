@@ -18,7 +18,7 @@ def return_obj(dash_app, engine, storage,theme):
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("tp_plot", plot_id, plot_div, engine, storage,theme)
 	
-	
+	plot.add_ctrl("03_refresh_ctrl")
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
 
@@ -38,6 +38,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		Output(plot_id, "children"),
 		#Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
+		State('03_refresh_ctrl', "value"),
 		State('trigger_record_select_ctrl', "value"),
 		State("partition_select_ctrl","value"),
 		State("run_select_ctrl","value"),
@@ -49,7 +50,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		State('02_description_ctrl',"style"),
 		State(plot_id, "children"),
 	)
-	def plot_tp_graph(n_clicks, trigger_record,partition,run, raw_data_file,adcmap, tr_color_range, density,description,original_state):
+	def plot_tp_graph(n_clicks, refresh,trigger_record,partition,run, raw_data_file,adcmap, tr_color_range, density,description,original_state):
 		load_figure_template(str(theme))
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
