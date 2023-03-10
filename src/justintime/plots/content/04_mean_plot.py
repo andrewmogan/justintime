@@ -49,7 +49,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 					except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 					
-					logging.info("Initial Time Stamp:",data.t0_min)
+					logging.info(f"Initial Time Stamp: {data.t0_min}")
 					logging.info(" ")
 					logging.info("Initial Dataframe:")
 					logging.info(data.df_tsoff)

@@ -38,7 +38,12 @@ class trigger_record_data:
 		
 		self.tr_ts = self.info['trigger_timestamp']
 		self.tr_ts_sec = self.tr_ts/int(62e6) 
-		self.tr_ts_date = datetime.datetime.fromtimestamp(self.tr_ts_sec).strftime('%c')
+		logging.info(f"Trigger timestamp (ticks): {self.tr_ts}")
+		logging.info(f"Trigger timestamp (sec from epoc): {self.tr_ts_sec}")
+		try:
+			self.tr_ts_date = datetime.datetime.fromtimestamp(self.tr_ts_sec).strftime('%c')
+		except ValueError:
+			self.tr_ts_date = 'Invalid'
 
 		# Move to 63.5 MHz
 
