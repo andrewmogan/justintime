@@ -1,7 +1,10 @@
 VOLUME_ID=2
 IS_TEST=true
 BASE_PORT=18000
-DCKR_IMG=justintime:v0.3.1
+JINT_TAG=$(git describe --tags --exact-match 2> /dev/null \
+  || git symbolic-ref -q --short HEAD \
+  || git rev-parse --short HEAD)
+DCKR_IMG=justintime:${JINT_TAG}
 CHANNEL_MAP_NAME=VDColdbox
 
 DATA_PATH="/data${VOLUME_ID}"
