@@ -2,7 +2,7 @@ from itertools import groupby
 import datetime
 import rich
 import numpy as np
-from dash import Dash, html
+import logging
 
 from .cruncher import signal
 
@@ -36,18 +36,23 @@ class trigger_record_data:
 		self.engine = engine
 		self.info, self.df, self.tp_df, self.fwtp_df = engine.load_entry(raw_data_file, int(trigger_record))
 		
-		self.df_tsoff=self.df.copy()
-		self.t0_min= self.df_tsoff.index.min()
+		self.tr_ts = self.info['trigger_timestamp']
+		self.tr_ts_sec = self.tr_ts/int(62e6) 
+		self.tr_ts_date = datetime.datetime.fromtimestamp(self.tr_ts_sec).strftime('%c')
+
+		# Move to 63.5 MHz
+
+		self.df_tsoff = self.df.copy()
+		self.t0_min = self.df_tsoff.index.min()
 		#print("Initial Time Stamp")
 		#print(self.t0_min)
 		
-		self.df_tsoff.index=self.df_tsoff.index-self.t0_min
+		# self.df_tsoff.index=self.df_tsoff.index-self.t0_min
+		self.df_tsoff.index=self.df_tsoff.index-self.tr_ts
 		#rich.print("DF:")
 		#rich.print(self.df_tsoff)
-		self.tr_ts_sec = self.info['trigger_timestamp']*20/1000000000 # Move to 63.5 MHz
 		#rich.print(self.tr_ts_sec)
 		#rich.print(self.info)
-		self.dt = datetime.datetime.fromtimestamp(self.tr_ts_sec).strftime('%c')
 		self.channels = list(self.df_tsoff.columns)
 		#rich.print(self.channels[0])
 		self.group_planes = groupby(self.channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
@@ -65,6 +70,15 @@ class trigger_record_data:
 
 		self.fft_phase = {}
 
+		# Save planes boundaries
+		self.xmin_U = min(self.planes.get(0,{}),default=0)
+		self.xmax_U = max(self.planes.get(0,{}),default=0)
+		self.xmin_V = min(self.planes.get(1,{}),default=0)
+		self.xmax_V = max(self.planes.get(1,{}),default=0)
+		self.xmin_Z = min(self.planes.get(2,{}),default=0)
+		self.xmax_Z = max(self.planes.get(2,{}),default=0)
+		self.xmin_O = min(self.planes.get(9999,{}),default=0)
+		self.xmax_O = max(self.planes.get(9999,{}),default=0)
 
 
 	def find_plane(self, offch):
@@ -100,29 +114,21 @@ class trigger_record_data:
 			print(self.fft_phase[f"{fmin}-{fmax}"])
 			self.fft_phase[f"{fmin}-{fmax}"]['femb']  = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.engine.femb_id_from_offch)
 			self.fft_phase[f"{fmin}-{fmax}"]['plane'] = self.fft_phase[f"{fmin}-{fmax}"].index.map(self.find_plane)				
-			
-		
+	
 
 	def init_tp(self):
 		#rich.print(self.tp_df)
 		self.tp_df_tsoff = self.tp_df.copy()
-		self.ts_min = self.tp_df_tsoff['start_time'].min()
-		self.tp_df_tsoff['peak_time'] = (self.tp_df_tsoff['peak_time']-self.ts_min)
-		self.tp_df_tsoff['start_time'] = (self.tp_df_tsoff['start_time']-self.ts_min)
+		# self.ts_min = self.tp_df_tsoff['start_time'].min()
+		self.tp_df_tsoff['peak_time'] = (self.tp_df_tsoff['peak_time']-self.tr_ts)
+		self.tp_df_tsoff['start_time'] = (self.tp_df_tsoff['start_time']-self.tr_ts)
 
 		self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(0, {}))]
 		self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(1, {}))]
 		self.tp_df_Z = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(2, {}))]
 		self.tp_df_O = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(9999, {}))]
 		
-		self.xmin_U = min(self.planes.get(0,{}),default=0)
-		self.xmax_U = max(self.planes.get(0,{}),default=0)
-		self.xmin_V = min(self.planes.get(1,{}),default=0)
-		self.xmax_V = max(self.planes.get(1,{}),default=0)
-		self.xmin_Z = min(self.planes.get(2,{}),default=0)
-		self.xmax_Z = max(self.planes.get(2,{}),default=0)
-		self.xmin_O = min(self.planes.get(9999,{}),default=0)
-		self.xmax_O = max(self.planes.get(9999,{}),default=0)
+
 
 
 	# def init_fft_phase_22(self):

@@ -19,7 +19,6 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("07_refresh_ctrl")
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
-
 	plot.add_ctrl("06_trigger_record_select_ctrl")
 	plot.add_ctrl("09_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("16_channel_number_ctrl")
@@ -110,7 +109,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 								xaxis_title="Time Ticks",
 								yaxis_title="ADC Waveform",
 								#height=fig_h,
-								title_text=f"Run {data.info['run_number']}: {data.info['trigger_number']}",
+								title_text=f"Run {data.info['run_number']}: {data.info['trigger_number']} - Channel {channel_num}",
 								legend=dict(x=0,y=1),
 								width=950,
 
