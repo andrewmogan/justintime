@@ -1,13 +1,16 @@
 
-DCKR_BUILD_HERE:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-DST_AREA=${DCKR_BUILD_HERE}/workarea
+DCKR_MAKE_HERE:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 DCKR_BASE_IMG=ghcr.io/dune-daq/c8-minimal:latest
 DUNEDAQ_RELEASE=v3.2.2
-DCKR_TAG=justintime
+JINT_ROOT=$(shell git rev-parse --show-toplevel)
 JINT_BRANCH=$(shell git describe --tags --exact-match 2> /dev/null \
   || git symbolic-ref -q --short HEAD \
   || git rev-parse --short HEAD)
-DCKR_VERSION=${JINT_BRANCH}
+DCKR_TAG=justintime
+DCKR_VERSION=$(shell echo ${JINT_BRANCH} | sed 's|/|_|g')
+BUILD_AREA=${DCKR_MAKE_HERE}/workarea
+BUILD_AREA=/tmp/${USER}/justintime/${DCKR_VERSION}
+RUN_AREA=/tmp/${USER}/justintime/${DCKR_VERSION}/workarea
 
 DCKR_OPTS=--user $(shell id -u):$(shell id -g) \
     -it \
@@ -16,6 +19,14 @@ DCKR_OPTS=--user $(shell id -u):$(shell id -g) \
     -v /cvmfs/dunedaq.opensciencegrid.org:/cvmfs/dunedaq.opensciencegrid.org:ro \
     -v /cvmfs/dunedaq-development.opensciencegrid.org:/cvmfs/dunedaq-development.opensciencegrid.org:ro
 
+.PHONY: info
+info: 
+	@echo just-in-time root: ${JINT_ROOT}
+	@echo just-in-time tag/branch/hash: ${JINT_BRANCH}
+	@echo build area: ${BUILD_AREA}
+	@echo run area: ${RUN_AREA}
+	@echo docker tag: ${DCKR_TAG}
+	@echo docker version: ${DCKR_VERSION}
 
 connection-check: ## Check that GPN connection is available
 	@curl  --connect-timeout 1 github.com &> /dev/null
@@ -27,21 +38,19 @@ all: connection-check  workarea gits dunedaq justintime image ## Build all targe
 .PHONY: workarea ## Create dunedaq work area
 workarea:
 	@echo "------------------------------------------"
-	@echo "🚧 Creating new  workarea 🚧"
+	@echo "🚧 Creating new workarea 🚧"
 	@echo "------------------------------------------"
-	mkdir -p ${DST_AREA}
+	mkdir -p ${RUN_AREA}
 	docker run ${DCKR_OPTS} \
 	    -v /nfs:/nfs:ro \
-	    -v ${DST_AREA}:/dunedaq/run:z \
-	    -v ${DCKR_BUILD_HERE}/create_workarea.sh:/dunedaq/bin/create_workarea.sh \
+	    -v ${RUN_AREA}:/dunedaq/run:z \
+	    -v ${DCKR_MAKE_HERE}/create_workarea.sh:/dunedaq/bin/create_workarea.sh \
 	    ${DCKR_BASE_IMG} \
 	    -c "export PATH=\"/dunedaq/bin/:$$PATH\"; cd /dunedaq/run; create_workarea.sh ${DUNEDAQ_RELEASE}"
 
-${DST_AREA}/dunedaq-area/sourcecode/detchannelmaps: connection-check
-	git -C ${DST_AREA}/dunedaq-area/sourcecode/ clone https://github.com/DUNE-DAQ/detchannelmaps.git -b thea/inverse_map
+${RUN_AREA}/dunedaq-area/sourcecode/detchannelmaps: connection-check
+	git -C ${RUN_AREA}/dunedaq-area/sourcecode/ clone https://github.com/DUNE-DAQ/detchannelmaps.git -b thea/inverse_map
 
-${DST_AREA}/justintime: connection-check
-	git -C ${DST_AREA} clone https://github.com/DUNE-DAQ/justintime.git -b ${JINT_BRANCH}
 
 .PHONY: dunedaq 
 dunedaq: ## Build extra dunedaq packages
@@ -49,7 +58,7 @@ dunedaq: ## Build extra dunedaq packages
 	@echo "🛠 Building work area 🛠"
 	@echo "------------------------------------------"
 	docker run ${DCKR_OPTS} \
-		-v ${DST_AREA}:/dunedaq/run:z \
+		-v ${RUN_AREA}:/dunedaq/run:z \
 		-w /dunedaq/run/dunedaq-area \
 		${DCKR_BASE_IMG} \
 		-c "source ./quick_env.sh; dbt-build"
@@ -59,9 +68,10 @@ justintime: ## Install just-in-time extra python packages
 	@echo "------------------------------------------"
 	@echo "🐍 Installing extra python packages 🐍"
 	@echo "------------------------------------------"
+	cp -r ${JINT_ROOT}/ ${RUN_AREA}/justintime
 	@docker run ${DCKR_OPTS} \
 		-v /nfs:/nfs:ro \
-		-v ${DST_AREA}:/dunedaq/run:z \
+		-v ${RUN_AREA}:/dunedaq/run:z \
 		--env HTTP_PROXY=${HTTP_PROXY} \
 		--env HTTPS_PROXY=${HTTPS_PROXY} \
 		--env NO_PROXY=${NO_PROXY} \
@@ -73,18 +83,19 @@ image: ## Build docker image
 	@echo "------------------------------------------"
 	@echo "📦 Building image 📦"
 	@echo "------------------------------------------"
-	set -x
-	docker buildx build --tag ${DCKR_TAG}:${DCKR_VERSION} --tag ${DCKR_TAG}:latest ${DCKR_BUILD_HERE} 
+	cp ${DCKR_MAKE_HERE}/{Dockerfile,entrypoint.sh} ${BUILD_AREA}
+	docker buildx build --tag ${DCKR_TAG}:${DCKR_VERSION} --tag ${DCKR_TAG}:latest ${BUILD_AREA}
 
 .PHONY: clean
-clean:
+clean: ## Clean the build area
 	@echo "------------------------------------------"
 	@echo "🧹 Clearing old workarea 🧹"
 	@echo "------------------------------------------"
-	rm -rf ${DST_AREA}
+	rm -rf ${BUILD_AREA}
 
 .PHONY: gits
-gits: ${DST_AREA}/dunedaq-area/sourcecode/detchannelmaps ${DST_AREA}/justintime
+gits: ${RUN_AREA}/dunedaq-area/sourcecode/detchannelmaps 
+
 
 .PHONY: help
 help: ## Display this help
@@ -94,6 +105,3 @@ help: ## Display this help
 	done; unset IFS;
 
 
-.PHONY: info
-info: 
-	@echo just-in-time tag/branch/hash: ${JINT_BRANCH}
