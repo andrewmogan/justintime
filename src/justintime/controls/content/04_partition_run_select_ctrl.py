@@ -3,6 +3,7 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 
 import rich
+import logging
 
 from .. import ctrl_class
 from ... cruncher.datamanager import DataManager
@@ -50,6 +51,7 @@ def init_callbacks(dash_app, engine):
         Input('session_run_files_map', 'data')
         )
     def update_file_list(data):
+        logging.debug('Update_partition called')
         if not data:
             return {}
         opts = list(data.keys())
@@ -62,6 +64,7 @@ def init_callbacks(dash_app, engine):
         State('session_run_files_map', 'data')
         )
     def store_subset(selection, data):
+        logging.debug('store_partitions called')
         if not selection:
             return {}
         subset = data[selection]
@@ -73,6 +76,7 @@ def init_callbacks(dash_app, engine):
         Input('partition_storage_id', 'data')
         )
     def update_select(stored_value):
+        logging.debug('update_run_selection called')
         if not stored_value:
             return []
         options = [{'label':str(n), 'value':str(n)} for n in sorted(stored_value, reverse=True)]
@@ -85,6 +89,7 @@ def init_callbacks(dash_app, engine):
         State('partition_storage_id', 'data')
         )
     def store_subset(selection, parent_stored_value):
+        logging.debug('store_run_selection called')
         if not selection:
             return {}
         subset = parent_stored_value[selection]
