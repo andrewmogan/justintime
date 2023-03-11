@@ -48,7 +48,7 @@ if __name__ == "__main__":
     from rich.logging import RichHandler
 
     logging.basicConfig(
-        level="WARNING",
+        level="DEBUG",
         format="%(message)s",
         datefmt="[%X]",
         handlers=[RichHandler(rich_tracebacks=True)]
