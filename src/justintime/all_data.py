@@ -45,19 +45,11 @@ class trigger_record_data:
 		except ValueError:
 			self.tr_ts_date = 'Invalid'
 
-		# Move to 63.5 MHz
+		self.t0_min = self.df.index.min()
+		self.ts_off = self.t0_min
 
-		self.df_tsoff = self.df.copy()
-		self.t0_min = self.df_tsoff.index.min()
-		#print("Initial Time Stamp")
-		#print(self.t0_min)
-		
-		# self.df_tsoff.index=self.df_tsoff.index-self.t0_min
-		self.df_tsoff.index=self.df_tsoff.index-self.tr_ts
-		#rich.print("DF:")
-		#rich.print(self.df_tsoff)
-		#rich.print(self.tr_ts_sec)
-		#rich.print(self.info)
+		self.df_tsoff = self.df.copy()		
+		self.df_tsoff.index=self.df_tsoff.index-self.ts_off
 		self.channels = list(self.df_tsoff.columns)
 		#rich.print(self.channels[0])
 		self.group_planes = groupby(self.channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
@@ -125,8 +117,8 @@ class trigger_record_data:
 		#rich.print(self.tp_df)
 		self.tp_df_tsoff = self.tp_df.copy()
 		# self.ts_min = self.tp_df_tsoff['start_time'].min()
-		self.tp_df_tsoff['peak_time'] = (self.tp_df_tsoff['peak_time']-self.tr_ts)
-		self.tp_df_tsoff['start_time'] = (self.tp_df_tsoff['start_time']-self.tr_ts)
+		self.tp_df_tsoff['peak_time'] = (self.tp_df_tsoff['peak_time']-self.ts_off)
+		self.tp_df_tsoff['start_time'] = (self.tp_df_tsoff['start_time']-self.ts_off)
 
 		self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(0, {}))]
 		self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(1, {}))]
