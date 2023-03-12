@@ -58,7 +58,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
                 try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
                 except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 
-                rich.print("Initial Time Stamp:",data.t0_min)
+                rich.print("Initial Time Stamp:",data.ts_min)
                 rich.print(" ")
                 rich.print("Initial Dataframe:")
                 rich.print(data.df_tsoff)
@@ -95,23 +95,22 @@ def graph(partition,run,raw_data_file, trigger_record,data,offset,plane,overlay_
                                         
             if "Z" in plane:
                 try:
-                    rich.print("Dataframe for Z-Plane for channel",channel_num,":")
+                    rich.print("Dataframe for Z-Plane for channel", channel_num,":")
                     rich.print(data.df_Z.T.loc[channel_num])
                     fig=px.line((data.df_Z - data.df_Z_mean),y=channel_num)
                
-
                     if  "tp_overlay" in overlay_tps :
-                        waveform_tps(fig,data.tp_df_Z,channel_num)
+                        waveform_tps(fig, data.tp_df_Z, channel_num)
                 except KeyError: pass
                                             
             if "V" in plane and channel_num in data.df_V.columns:
                 try:
-                    rich.print("Dataframe for V-Plane for channel",channel_num,":")
+                    rich.print("Dataframe for V-Plane for channel", channel_num,":")
                     rich.print(data.df_V.T.loc[channel_num])
                     fig=px.line((data.df_V - data.df_V_mean),y=channel_num)
                     if  "tp_overlay" in overlay_tps :
                         waveform_tps(fig,data.tp_df_V,channel_num)
-                        rich.print(waveform_tps(fig,data.tp_df_V,channel_num))
+                        rich.print(waveform_tps(fig, data.tp_df_V, channel_num))
                 except KeyError:pass
             
             if "U" in plane and channel_num in data.df_U.columns:
@@ -120,7 +119,7 @@ def graph(partition,run,raw_data_file, trigger_record,data,offset,plane,overlay_
                     rich.print(data.df_U.T.loc[channel_num])
                     fig=px.line((data.df_U - data.df_U_mean),y=channel_num)
                     if  "tp_overlay" in overlay_tps :
-                        waveform_tps(fig,data.tp_df_U,channel_num)
+                        waveform_tps(fig, data.tp_df_U, channel_num)
                 except KeyError:pass                       
                                     #print(set(data.tp_df_tsoff['offline_ch']))
                                     #rich.print()
@@ -128,7 +127,7 @@ def graph(partition,run,raw_data_file, trigger_record,data,offset,plane,overlay_
 
             fig=px.line(data.df_tsoff,y=channel_num)
             if  "tp_overlay" in overlay_tps :
-                waveform_tps(fig,data.tp_df_tsoff,channel_num)
+                waveform_tps(fig, data.tp_df_tsoff, channel_num)
 
                                     
 
