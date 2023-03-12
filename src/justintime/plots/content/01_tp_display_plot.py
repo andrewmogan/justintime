@@ -44,7 +44,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		State("run_select_ctrl","value"),
 	
 		State('file_select_ctrl', "value"),
-		State("08_adc_map_selection_ctrl","value"),
+		State("adc_map_selection_ctrl","value"),
 		State("09_tr_colour_range_slider_comp", "value"),
 		State('14_density_plot_ctrl', "value"),
 		State('02_description_ctrl',"style"),
@@ -65,7 +65,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 
 					data.init_tp()
 					fzmin, fzmax = tr_color_range
-					fig_w, fig_h = 2600, 500
+					fig_w, fig_h = 2600, 600
 					children = []
 					rich.print("TPs for Z plane:")
 					rich.print(data.tp_df_Z)
@@ -93,12 +93,13 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 								#html.Hr(),
 								dcc.Graph(figure=fig)]
-
+						add_dunedaq_annotation(fig)
 						fig = tp_density(data.tp_df_O,data.xmin_O, data.xmax_O,fzmin,fzmax,fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 							#html.Hr(),
 							dcc.Graph(figure=fig)]
+						add_dunedaq_annotation(fig)
 					else:
 						rich.print("Scatter Plot Chosen")
 						if "Z" in adcmap:
@@ -119,7 +120,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
 								#html.Hr(),
 								dcc.Graph(figure=fig)]
-
+						add_dunedaq_annotation(fig)
 						fig = make_tp_plot(data.tp_df_O,data.xmin_O,data.xmax_O, fzmin, fzmax, fig_w, fig_h, data.info)
 						children += [
 							html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),

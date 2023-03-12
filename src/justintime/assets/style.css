@@ -29,7 +29,19 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
   width: 100%;
   float: left;
   box-sizing: border-box;
+
+
+ 
 }
+
+.row{
+  display:flex;
+  flex-wrap: nowrap;
+ 
+}
+
+
+
 /* For devices larger than 400px */
 @media (min-width: 400px) {
   .container {
@@ -39,12 +51,21 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
 }
 /* For devices larger than 550px */
 @media (min-width: 550px) {
-  .container {
-      width: 80%;
+  
+  
+.container {
+  display: table;
+  flex-wrap: nowrap;
+
+  
+      
  }
   .column, .columns {
-      margin-left: 4%;
+      margin-left: 2%;
+      display: table;
+      
  }
+
   .column:first-child, .columns:first-child {
       margin-left: 0;
  }
@@ -62,7 +83,8 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
   .four.columns {
       width: 395px;
      min-height: fit-content;
-      margin-right:0;
+  
+     
       margin-left: 1px;
  }
  
@@ -83,12 +105,25 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
       width: 56.6666666667%;
  }
   .eight.columns {
-      width: 1000px;
-      min-block-size: 1000px;
-      height:fit-content;
+    
+   
+    display: table-cell;
+
+    flex-shrink: initial;
+     /* width: 1000px;
+     white-space:nowrap;
+      display: flex;
+       display: flex;
+        height:fit-content;
+    height:fit-content;
+     margin: left -0px;
       left: 0px;
-      margin: left -0px;
       border: 0px solid #484848;
+      min-block-size: 1000px;*/
+      
+     
+  
+      
 
        }
   .nine.columns {
@@ -446,6 +481,8 @@ hr {
   content: "";
   display: table;
   clear: both;
+  display: flex;
+  flex-wrap: nowrap;
 }
 /* Media Queries –––––––––––––––––––––––––––––––––––––––––––––––––– */
 /* Note: The best way to structure the use of media queries is to create the queries near the relevant code. For example, if you wanted to change the styles for buttons on small devices, paste the mobile query code up in the buttons section and style it there. */
@@ -507,11 +544,12 @@ a {
 
 /* Graph Layout ––––––––––––––––––––––––––––––––––––––––––––––––––*/
 .div-for-charts{
-  display: flex;
+ /* display: flex;
+  margin:auto*/
   flex-direction: column;
   height: 100vh;
   width: 100%;
-  margin:auto
+ 
 }
 #histogram {
   flex-grow: 1

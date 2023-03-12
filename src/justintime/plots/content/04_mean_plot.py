@@ -83,7 +83,8 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 							go.Scattergl(x=data.df_Z_mean.index.astype(int), y=data.df_Z_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
 							row=1, col=3
 						)
-
+					#	fig_mean.update_xaxes(mirror=True,showline=True,linecolor='black',)
+					#	fig_mean.update_yaxes(mirror=True,showline=True,linecolor='black',)
 						fig_mean.update_layout(
 							# autosize=False,
 							# width=1200,
@@ -99,6 +100,8 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 						)
 						add_dunedaq_annotation(fig_mean)
 						fig_mean.update_layout(font_family="Lato", title_font_family="Lato")
+						if theme=="lightly":
+							fig_mean.update_layout(plot_bgcolor='lightgrey')
 						return(html.Div([selection_line(partition,run,raw_data_file, trigger_record),html.B("Mean by plane"),dcc.Graph(figure=fig_mean)]))
 			else:
 				return(html.Div(html.H6(nothing_to_plot())))

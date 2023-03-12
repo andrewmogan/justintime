@@ -18,7 +18,7 @@ def add_dunedaq_annotation(figure):
 		# x=1,
 		# y=-0.20,
 		x=1,
-		y=1.10,
+		y=1.15,
 		showarrow=False,
 		align="right",
 		text='Powered by DUNE-DAQ',
@@ -30,20 +30,20 @@ def add_dunedaq_annotation(figure):
 def selection_line(partition,run,raw_data_file, trigger_record):
 	return(html.Div([
 		html.Div([
-        html.B("Selected partition: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+        html.B("Partition: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
         html.Div(partition,style={"display":"inline-block"})]),
 	
 		html.Div([
-        html.B("Selected run: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+        html.B("Run: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
         html.Div(run,style={"display":"inline-block"})]),
 	
 		html.Div([
-        html.B("Selected raw data file: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+        html.B("Raw Data File: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
         html.Div(raw_data_file,style={"display":"inline-block"})]),
 
 		html.Div([
 		
-		html.B("Selected trigger record: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+		html.B("Trigger Record: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
 		html.Div(trigger_record,style={"display":"inline-block"})])
 		,html.Hr()
 	]))
@@ -121,7 +121,7 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
 			yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
 			yaxis_title="Offline Channel",
 			xaxis_title="Time ticks",
-			height=500)
+			height=600)
 	else:
 		
 		fig=go.Figure()

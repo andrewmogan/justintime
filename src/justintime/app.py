@@ -25,13 +25,13 @@ from .all_data import all_data_storage
 @click.argument('raw_data_path', type=click.Path(exists=True, file_okay=False))
 @click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST']))
 @click.argument('frame_type', type=click.Choice(['ProtoWIB', 'WIB']))
-@click.argument("template",type=click.Choice(['light','dark']),default='light')
+@click.argument("template",type=click.Choice(['lightly','darkly']),default='lightly')
 
 
 def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str,template:str):
 
 	channel_map_id += 'ChannelMap'
-	theme=([dbc.themes.FLATLY if template=='light' else dbc.themes.DARKLY])
+	theme=([dbc.themes.FLATLY if template=='lightly' else dbc.themes.DARKLY])
 	rich.print("Light mode" if theme==[dbc.themes.FLATLY] else "Dark mode")
 	dash_app = Dash(__name__,external_stylesheets=theme)
 
