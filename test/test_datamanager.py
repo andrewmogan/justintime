@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from cruncher.datamanager import DataManager
+from justintime.cruncher.datamanager import DataManager
 import sys
 import rich
 import logging
@@ -26,8 +26,8 @@ def cli(channel_map_id: str, frame_type: str, interactive: bool, file_path: str)
 
     # rdm = DataManager(dp.parent, 'ProtoWIB', 'VDColdbox')
     rdm = DataManager(dp.parent, frame_type, channel_map_id)
-    data_files = sorted(rdm.list_files(), reverse=True)
-    rich.print(data_files)
+    # data_files = sorted(rdm.list_files(), reverse=True)
+    # rich.print(data_files)
     f = dp.name
     rich.print(f)
     trl = rdm.get_entry_list(f)

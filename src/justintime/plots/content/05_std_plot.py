@@ -8,7 +8,7 @@ import rich
 import numpy as np
 
 from .. import plot_class
-from ... plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
+from ... plotting_functions import add_dunedaq_annotation, selection_line, nothing_to_plot
 
 
 def return_obj(dash_app, engine, storage,theme):

@@ -8,19 +8,15 @@ from ... all_data import trigger_record_data
 
 def return_obj(dash_app, engine):
 	ctrl_id = "16_channel_number_ctrl"
-
-	ctrl_div = html.Div([
-		dcc.Dropdown(placeholder="Select Channel Number",
-			id=ctrl_id,multi=True
-		)
-	],
-			style={"marginBottom":"1em","marginTop":"1em"},)
-
+    
+	ctrl_div = html.Div([dcc.Dropdown(placeholder="Select Channel Number",
+		id=ctrl_id,multi=True)],style={"marginBottom":"1em","marginTop":"1em"},)
+    
 	ctrl = ctrl_class.ctrl("channel_num", ctrl_id, ctrl_div, engine)
 	ctrl.add_ctrl("08_adc_map_selection_ctrl")
 	ctrl.add_ctrl("06_file_select_ctrl")
 	ctrl.add_ctrl("07_trigger_record_select_ctrl")
-
+    
 	init_callbacks(dash_app,engine )
 	return(ctrl)
 

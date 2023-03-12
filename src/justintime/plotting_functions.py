@@ -130,146 +130,146 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
 
 
 def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
-	if not df.empty:
-		# fig=go.Figure()
-		fig= make_subplots(
-			rows=1, cols=2, 
-			#subplot_titles=(["Trigger Primitives"]), 
-			column_widths=[0.2,0.9],
-			horizontal_spacing=0.05,
-			shared_yaxes=True,
-			y_title="Offline Channel",
-			x_title="Time Ticks",
-		
-		)
-		fig.add_trace(
-			go.Scattergl(
-				y=df['offline_ch'],
-				x=df['peak_time'],
-				mode='markers',name="TP Trace",
-				marker=dict(
-					size=10,
-					color=df['peak_adc'], #set color equal to a variable
-					colorscale='Plasma', # one of plotly colorscales
-					cmin = cmin,
-					cmax = cmax,
-					showscale=True
-					),
-				),
-				row=1, col=2
-			)
-		fig.add_trace(
-		go.Histogram(y=df["offline_ch"],name='channel', nbinsy=(xmax-xmin)), 
-		row=1, col=1,
-		)
-		
-		fig.update_yaxes(range=[xmin,xmax])
-		fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
+    if not df.empty:
+        # fig=go.Figure()
+        fig= make_subplots(
+            rows=1, cols=2, 
+            #subplot_titles=(["Trigger Primitives"]), 
+            column_widths=[0.2,0.9],
+            horizontal_spacing=0.05,
+            shared_yaxes=True,
+            y_title="Offline Channel",
+            x_title="Time Ticks",
+        
+        )
+        fig.add_trace(
+            go.Scattergl(
+                y=df['offline_ch'],
+                x=df['peak_time'],
+                mode='markers',name="TP Trace",
+                marker=dict(
+                    size=10,
+                    color=df['peak_adc'], #set color equal to a variable
+                    colorscale='Plasma', # one of plotly colorscales
+                    cmin = cmin,
+                    cmax = cmax,
+                    showscale=True
+                    ),
+                ),
+                row=1, col=2
+            )
+        fig.add_trace(
+        go.Histogram(y=df["offline_ch"],name='channel', nbinsy=(xmax-xmin)), 
+        row=1, col=1,
+        )
+        
+        fig.update_yaxes(range=[xmin,xmax])
+        fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 
-	else:
-		fig = go.Figure()
-		fig.add_trace(
-			go.Scatter(
-				y=[xmin, xmax],
-				mode="markers",
-			)
-		)
-	fig.update_layout(
-		#width=fig_w,
-		height=fig_h,
-		yaxis = dict(autorange="reversed"),
-		title_text=f"Run {info['run_number']}: {info['trigger_number']}",
-		#legend=dict(x=0,y=1),
-		width=950
+    else:
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                y=[xmin, xmax],
+                mode="markers",
+            )
+        )
+    fig.update_layout(
+        #width=fig_w,
+        height=fig_h,
+        yaxis = dict(autorange="reversed"),
+        title_text=f"Run {info['run_number']}: {info['trigger_number']}",
+        #legend=dict(x=0,y=1),
+        width=950
 
-		)
+        )
 
-	return fig
+    return fig
 
 def tp_for_adc(df, cmin, cmax):
-	if not df.empty:
-		# fig=go.Figure()
-		fig=go.Scattergl(
-				y=df['offline_ch'],
-				x=df['peak_time'],
-				mode='markers',name="TP Trace",
-				marker=dict(
-					size=4.5,
-					color=df['peak_adc'], #set color equal to a variable
-					colorscale="delta", # one of plotly colorscales
-					cmin = cmin,
-					cmax = cmax,
-					showscale=True,
-					
-					
-					),
-				)
-				
-	
+    if not df.empty:
+        # fig=go.Figure()
+        fig=go.Scattergl(
+                y=df['offline_ch'],
+                x=df['peak_time'],
+                mode='markers',name="TP Trace",
+                marker=dict(
+                    size=4.5,
+                    color=df['peak_adc'], #set color equal to a variable
+                    colorscale="delta", # one of plotly colorscales
+                    cmin = cmin,
+                    cmax = cmax,
+                    showscale=True,
+                    
+                    
+                    ),
+                )
+                
+    
 
-	else:
-		fig =go.Scatter()
-	
-	return fig
+    else:
+        fig =go.Scatter()
+    
+    return fig
 
 
 def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
-	if not df.empty:
-		# fig=go.Figure()
-		fig=px.density_heatmap(df,y=df['offline_ch'],
-			x=df['peak_time'],nbinsy=200,nbinsx=200,
-				z=df['peak_adc'],histfunc="count",
-				color_continuous_scale="Plasma")
+    if not df.empty:
+        # fig=go.Figure()
+        fig=px.density_heatmap(df,y=df['offline_ch'],
+            x=df['peak_time'],nbinsy=200,nbinsx=200,
+                z=df['peak_adc'],histfunc="count",
+                color_continuous_scale="Plasma")
 
-		fig.update_layout(
+        fig.update_layout(
     xaxis_title="Time Ticks",
     yaxis_title="Offline Channel")
 
-	else:
-		fig = px.scatter()		
-	
-	fig.update_layout(
-		#width=fig_w,
-		height=fig_h,
-		yaxis = dict(autorange="reversed"),
-		title_text=f"Run {info['run_number']}: {info['trigger_number']}",
-		legend=dict(x=0,y=1),
-		width=950
+    else:
+        fig = px.scatter()      
+    
+    fig.update_layout(
+        #width=fig_w,
+        height=fig_h,
+        yaxis = dict(autorange="reversed"),
+        title_text=f"Run {info['run_number']}: {info['trigger_number']}",
+        legend=dict(x=0,y=1),
+        width=950
 
-		)
-	fig.update_layout(font_family="Lato", title_font_family="Lato")
-	return fig
+        )
+    fig.update_layout(font_family="Lato", title_font_family="Lato")
+    return fig
 
 
 def waveform_tps(fig,df,channel_num):
-	if not df.empty:
-		# fig=go.Figure()
-		
-		if channel_num in set(df['offline_ch']):			
-			
-			new=(df[df['offline_ch'] == channel_num])
-			rich.print("Dataframe used for TPs (with similar offline channels)")
-			rich.print(new)	
-			rich.print("TPs time over threshold (in order of appearance):")					
-			for i in range(len(new)):
-																				
-				time_start = new.iloc[i]['start_time']
-				time_over_threshold = new.iloc[i]["time_over_threshold"]
-				time_end = (new.iloc[i]["start_time"]+new.iloc[i]["time_over_threshold"])
-				time_peak = new.iloc[i]["peak_time"]
-				channel =new.iloc[i]["offline_ch"]
-				adc_peak = new.iloc[i]["peak_adc"]
-				rich.print(time_over_threshold)
-									
-				fig.add_vrect((time_start-time_peak)+time_start, (time_end-time_peak)+time_start, line_color="red")
-						
-	else:
-		fig = go.Scatter()
-		
-	return fig
+    if not df.empty:
+        # fig=go.Figure()
+        
+        if channel_num in set(df['offline_ch']):            
+            
+            new=(df[df['offline_ch'] == channel_num])
+            rich.print("Dataframe used for TPs (with similar offline channels)")
+            rich.print(new) 
+            rich.print("TPs time over threshold (in order of appearance):")                 
+            for i in range(len(new)):
+                                                                                
+                time_start = new.iloc[i]['start_time']
+                time_over_threshold = new.iloc[i]["time_over_threshold"]
+                time_end = (new.iloc[i]["start_time"]+new.iloc[i]["time_over_threshold"])
+                time_peak = new.iloc[i]["peak_time"]
+                channel =new.iloc[i]["offline_ch"]
+                adc_peak = new.iloc[i]["peak_adc"]
+                rich.print(time_over_threshold)
+                                    
+                fig.add_vrect(time_start, time_end, line_width=0, fillcolor="red", opacity=0.2)
+                fig.add_vline(x=time_peak, line_width=1, line_dash="dash", line_color="red")    
+    else:
+        fig = go.Scatter()
+        
+    return fig
 
 
 
 def nothing_to_plot():
 
-	return "Nothing to plot"
+    return "Nothing to plot"

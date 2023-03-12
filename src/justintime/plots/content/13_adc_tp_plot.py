@@ -60,7 +60,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 
-				rich.print("Initial Time Stamp:",data.t0_min)
+				rich.print("Initial Time Stamp:",data.ts_min)
 				rich.print(" ")
 				rich.print("Initial Dataframe:")
 				rich.print(data.df_tsoff)
@@ -152,7 +152,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						add_dunedaq_annotation(fig)
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
-							html.B(f"ADC Counts: Z-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)}"),
+							html.B(f"ADC Counts: Z-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)}"),
 							#html.Hr(),
 							dcc.Graph(figure=fig),
 						]
@@ -237,7 +237,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						add_dunedaq_annotation(fig)
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
-							html.B(f"ADC Counts: V-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)}"),
+							html.B(f"ADC Counts: V-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)}"),
 						#	html.Hr(),
 							dcc.Graph(figure=fig),
 						]
@@ -321,7 +321,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						add_dunedaq_annotation(fig)
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
 						children += [
-							html.B(f"ADC Counts: U-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)}"),
+							html.B(f"ADC Counts: U-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)}"),
 							#html.Hr(),
 							dcc.Graph(figure=fig),
 						]

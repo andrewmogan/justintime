@@ -134,7 +134,7 @@ def graph(partition,run,raw_data_file, trigger_record,data,offset,plane,overlay_
 
         fig.update_layout(xaxis_title="Time Ticks", yaxis_title="ADC Waveform",
                                             #height=fig_h,
-                                            title_text=f"Run {data.info['run_number']}: {data.info['trigger_number']}, Channel {channel_num}",
+                                            title_text=f"Run {data.info['run_number']}: {data.info['trigger_number']} - Channel {channel_num}",
                                             legend=dict(x=0,y=1),
                                             width=950,
 
