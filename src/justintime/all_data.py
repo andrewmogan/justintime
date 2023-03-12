@@ -35,7 +35,7 @@ class trigger_record_data:
 	def __init__(self, engine, trigger_record, raw_data_file):
 		self.engine = engine
 		self.info, self.df, self.tp_df, self.fwtp_df = engine.load_entry(raw_data_file, int(trigger_record))
-		
+
 		self.tr_ts = self.info['trigger_timestamp']
 		self.tr_ts_sec = self.tr_ts/int(62e6) 
 		logging.info(f"Trigger timestamp (ticks): {self.tr_ts}")
@@ -44,12 +44,23 @@ class trigger_record_data:
 			self.tr_ts_date = datetime.datetime.fromtimestamp(self.tr_ts_sec).strftime('%c')
 		except ValueError:
 			self.tr_ts_date = 'Invalid'
+		logging.info(f"Trigger date: {self.tr_ts_date}")
 
-		self.t0_min = self.df.index.min()
-		self.ts_off = self.t0_min
+
+		self.ts_min = self.df.index.min()
+		self.ts_max = self.df.index.max()
+
+		if self.tr_ts != 0xffffffff:
+			self.ts_off = self.tr_ts 
+		else:
+			logging.warning("Invalid trigger TS detected!!!")
+			logging.info("Using tmax-tmin as trigger timestamp")
+			self.ts_off = ((self.ts_max+self.ts_min)//2)
+			
+		logging.info(f"Timestamp offset: {self.ts_off}")
 
 		self.df_tsoff = self.df.copy()		
-		self.df_tsoff.index=self.df_tsoff.index-self.ts_off
+		self.df_tsoff.index=self.df_tsoff.index.astype('int64')-self.ts_off
 		self.channels = list(self.df_tsoff.columns)
 		#rich.print(self.channels[0])
 		self.group_planes = groupby(self.channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
