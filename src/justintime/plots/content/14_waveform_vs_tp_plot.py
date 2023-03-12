@@ -19,7 +19,6 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("07_refresh_ctrl")
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
-
 	plot.add_ctrl("06_trigger_record_select_ctrl")
 	plot.add_ctrl("09_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("16_channel_number_ctrl")
@@ -58,7 +57,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 
-				rich.print("Initial Time Stamp:",data.t0_min)
+				rich.print("Initial Time Stamp:",data.ts_min)
 				rich.print(" ")
 				rich.print("Initial Dataframe:")
 				rich.print(data.df_tsoff)
@@ -79,22 +78,22 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 									rich.print(data.df_Z.T.loc[channel_num])
 									fig=px.line((data.df_Z - data.df_Z_mean),y=channel_num)
 									if  "tp_overlay" in overlay_tps :
-										waveform_tps(fig,data.tp_df_Z,channel_num)
+										waveform_tps(fig, data.tp_df_Z, channel_num)
 
 									
 								if "V" in plane:
-									rich.print("Dataframe for V-Plane for channel",channel_num,":")
+									rich.print("Dataframe for V-Plane for channel", channel_num,":")
 									rich.print(data.df_V.T.loc[channel_num])
 									fig=px.line((data.df_V - data.df_V_mean),y=channel_num)
 									if  "tp_overlay" in overlay_tps :
-										waveform_tps(fig,data.tp_df_V,channel_num)
-										rich.print(waveform_tps(fig,data.tp_df_V,channel_num))
+										waveform_tps(fig, data.tp_df_V, channel_num)
+										rich.print(waveform_tps(fig,data.tp_df_V, channel_num))
 								if "U" in plane:
-									rich.print("Dataframe for U-Plane for channel",channel_num,":")
+									rich.print("Dataframe for U-Plane for channel", channel_num,":")
 									rich.print(data.df_U.T.loc[channel_num])
 									fig=px.line((data.df_U - data.df_U_mean),y=channel_num)
 									if  "tp_overlay" in overlay_tps :
-										waveform_tps(fig,data.tp_df_U,channel_num)
+										waveform_tps(fig, data.tp_df_U, channel_num)
 								
 							#print(set(data.tp_df_tsoff['offline_ch']))
 							#rich.print()
@@ -102,7 +101,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 
 								fig=px.line(data.df_tsoff,y=channel_num)
 								if  "tp_overlay" in overlay_tps :
-									waveform_tps(data.tp_df_tsoff,channel_num)
+									waveform_tps(fig, data.tp_df_tsoff, channel_num)
 
 						
 
@@ -110,7 +109,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 								xaxis_title="Time Ticks",
 								yaxis_title="ADC Waveform",
 								#height=fig_h,
-								title_text=f"Run {data.info['run_number']}: {data.info['trigger_number']}",
+								title_text=f"Run {data.info['run_number']}: {data.info['trigger_number']} - Channel {channel_num}",
 								legend=dict(x=0,y=1),
 								width=950,
 

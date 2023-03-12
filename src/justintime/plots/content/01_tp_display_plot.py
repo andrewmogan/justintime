@@ -57,7 +57,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 				
-				rich.print("Initial Time Stamp:",data.t0_min)
+				rich.print("Initial Time Stamp:",data.ts_min)
 				rich.print(" ")
 				rich.print("Initial Dataframe:")
 				rich.print(data.df_tsoff)
@@ -78,25 +78,25 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						if "Z" in adcmap:
 							fig = tp_density(data.tp_df_Z,data.xmin_Z, data.xmax_Z,fzmin,fzmax,fig_w, fig_h, data.info)
 							children += [
-								html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 								#html.Hr(),
 								dcc.Graph(figure=fig)]
 						if "V" in adcmap:
 							fig = tp_density(data.tp_df_V,data.xmin_V, data.xmax_V,fzmin,fzmax,fig_w, fig_h, data.info)
 							children += [
-							html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+							html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 							#html.Hr(),
 							dcc.Graph(figure=fig)]
 						if "U" in adcmap:
 							fig = tp_density(data.tp_df_U,data.xmin_U, data.xmax_U,fzmin,fzmax,fig_w, fig_h, data.info)
 							children += [
-								html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 								#html.Hr(),
 								dcc.Graph(figure=fig)]
 
 						fig = tp_density(data.tp_df_O,data.xmin_O, data.xmax_O,fzmin,fzmax,fig_w, fig_h, data.info)
 						children += [
-							html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+							html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 							#html.Hr(),
 							dcc.Graph(figure=fig)]
 					else:
@@ -104,25 +104,25 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						if "Z" in adcmap:
 							fig = make_tp_plot(data.tp_df_Z,data.xmin_Z,data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info)
 							children += [
-								html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 								#html.Hr(),
 								dcc.Graph(figure=fig),]
 						if "V" in adcmap:
 							fig = make_tp_plot(data.tp_df_V, data.xmin_V,data.xmax_V, fzmin, fzmax, fig_w, fig_h, data.info)
 							children += [
-								html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 								#html.Hr(),
 								dcc.Graph(figure=fig)]
 						if "U" in adcmap:
 							fig = make_tp_plot(data.tp_df_U, data.xmin_U,data.xmax_U, fzmin, fzmax, fig_w, fig_h, data.info)
 							children += [
-								html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+								html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 								#html.Hr(),
 								dcc.Graph(figure=fig)]
 
 						fig = make_tp_plot(data.tp_df_O,data.xmin_O,data.xmax_O, fzmin, fzmax, fig_w, fig_h, data.info)
 						children += [
-							html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).t0_min)),
+							html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 							#html.Hr(),
 							dcc.Graph(figure=fig)]
 					add_dunedaq_annotation(fig)

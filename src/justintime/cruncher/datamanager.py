@@ -341,7 +341,6 @@ class DataManager:
 
                 ts = self.frag_unpack.np_array_timestamp(frag)
                 adcs = self.frag_unpack.np_array_adc(frag)
-                #ts = (ts - en_ts).astype('int64')
                 logging.debug(f"Unpacking Subsys={sid.subsystem}, id={sid.id} completed")
 
                 df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(256)]))

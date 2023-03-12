@@ -7,6 +7,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import numpy as np
 import rich
+import logging
 
 from ... all_data import trigger_record_data
 from ... plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
@@ -48,26 +49,26 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 					except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 					
-					rich.print("Initial Time Stamp:",data.t0_min)
-					rich.print(" ")
-					rich.print("Initial Dataframe:")
-					rich.print(data.df_tsoff)
+					logging.info(f"Initial Time Stamp: {data.ts_min}")
+					logging.info(" ")
+					logging.info("Initial Dataframe:")
+					logging.info(data.df_tsoff)
 
 					if len(data.df)!=0 and len(data.df.index!=0):
 
-						rich.print("Dataframe in Z-Plane:")
-						rich.print(data.df_Z)
-						rich.print("Dataframe in V-Plane:")
-						rich.print(data.df_V)
-						rich.print("Dataframe in U-Plane:")
-						rich.print(data.df_U)
+						logging.info("Dataframe in Z-Plane:")
+						logging.info(data.df_Z)
+						logging.info("Dataframe in V-Plane:")
+						logging.info(data.df_V)
+						logging.info("Dataframe in U-Plane:")
+						logging.info(data.df_U)
 
-						rich.print("Mean Z-Plane")
-						rich.print(data.df_Z_mean)
-						rich.print("Mean V-Plane")
-						rich.print(data.df_V_mean)
-						rich.print("Mean U-Plane")
-						rich.print(data.df_U_mean)
+						logging.info("Mean Z-Plane")
+						logging.info(data.df_Z_mean)
+						logging.info("Mean V-Plane")
+						logging.info(data.df_V_mean)
+						logging.info("Mean U-Plane")
+						logging.info(data.df_U_mean)
 
 						fig_mean = make_subplots(rows=1, cols=3,
 							subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
