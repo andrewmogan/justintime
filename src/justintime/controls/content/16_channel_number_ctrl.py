@@ -7,8 +7,10 @@ from ... all_data import trigger_record_data
 def return_obj(dash_app, engine):
 	ctrl_id = "16_channel_number_ctrl"
     
-	ctrl_div = html.Div([dcc.Dropdown(placeholder="Select Channel Number",
-		id=ctrl_id,multi=True)],style={"marginBottom":"1em","marginTop":"1em"},)
+	ctrl_div =html.Div([
+		html.Div([
+		html.Label("Select a Channel Number : ",style={"fontSize":"12px"}), html.Div([dcc.Dropdown(placeholder="Channel",
+		id="channel_number_ctrl",multi=True)],style={"marginBottom":"1em","marginTop":"1em"},)])],id=ctrl_id)
     
 	ctrl = ctrl_class.ctrl("channel_num", ctrl_id, ctrl_div, engine)
 	ctrl.add_ctrl("08_adc_map_selection_ctrl")
@@ -20,7 +22,7 @@ def return_obj(dash_app, engine):
 
 def init_callbacks(dash_app,engine):
 	@dash_app.callback(
-		Output('16_channel_number_ctrl', 'options'),
+		Output('channel_number_ctrl', 'options'),
 		Input('adc_map_selection_ctrl', 'value'),Input("trigger_record_select_ctrl", 'value'),Input('file_select_ctrl', 'value')
 		)
 	def update_select(plane,trigger_record,raw_data_file):

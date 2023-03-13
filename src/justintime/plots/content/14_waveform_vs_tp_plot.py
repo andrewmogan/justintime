@@ -41,7 +41,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
         State("partition_select_ctrl","value"),
         State("run_select_ctrl","value"),
         State("adc_map_selection_ctrl", "value"),
-        State('16_channel_number_ctrl',"value"),
+        State('channel_number_ctrl',"value"),
         State('17_offset_ctrl',"value"),
         State('19_tp_overlay_ctrl',"value"),
         State("10_tr_colour_range_slider_comp", "value"),
