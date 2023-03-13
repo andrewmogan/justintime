@@ -18,7 +18,7 @@ def add_dunedaq_annotation(figure):
 		# x=1,
 		# y=-0.20,
 		x=1,
-		y=1.15,
+		y=1.14,
 		showarrow=False,
 		align="right",
 		text='Powered by DUNE-DAQ',
@@ -179,7 +179,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
         yaxis = dict(autorange="reversed"),
         title_text=f"Run {info['run_number']}: {info['trigger_number']}",
         #legend=dict(x=0,y=1),
-        width=950
+       # width=950
 
         )
 
@@ -202,10 +202,8 @@ def tp_for_adc(df, cmin, cmax,colorscale):
                     
                     
                     ),
-                )
-                
+                )          
     
-
     else:
         fig =go.Scatter()
     
@@ -233,7 +231,7 @@ def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
         yaxis = dict(autorange="reversed"),
         title_text=f"Run {info['run_number']}: {info['trigger_number']}",
         legend=dict(x=0,y=1),
-        width=950
+      #  width=950
 
         )
     fig.update_layout(font_family="Lato", title_font_family="Lato")

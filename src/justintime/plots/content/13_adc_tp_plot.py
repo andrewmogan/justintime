@@ -25,7 +25,7 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("08_adc_map_selection_ctrl")
 	plot.add_ctrl("09_colorscale_ctrl")
 	plot.add_ctrl("10_tr_colour_range_slider_ctrl")
-	plot.add_ctrl("11_static_image_ctrl")
+	plot.add_ctrl("12_static_image_ctrl")
 	plot.add_ctrl("19_tp_overlay_ctrl")
 	plot.add_ctrl("17_offset_ctrl")
 	#plot.add_ctrl("18_cnr_ctrl")
@@ -48,7 +48,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		State("adc_map_selection_ctrl", "value"),
 		State("colorscale_ctrl", "value"),
 		State("10_tr_colour_range_slider_comp", "value"),
-		State("11_static_image_ctrl", "value"),
+		State("12_static_image_ctrl", "value"),
 		State("17_offset_ctrl", "value"),
 		#State("18_cnr_ctrl", "value"),
 		State("19_tp_overlay_ctrl","value"),

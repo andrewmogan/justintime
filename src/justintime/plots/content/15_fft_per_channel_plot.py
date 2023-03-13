@@ -21,7 +21,7 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("run_select_ctrl")
 
 	plot.add_ctrl("06_trigger_record_select_ctrl")
-	plot.add_ctrl("10_tr_colour_range_slider_ctrl")
+	plot.add_ctrl("11_range_slider_pos_ctrl")
 	plot.add_ctrl("16_channel_number_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
@@ -40,7 +40,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		State("run_select_ctrl","value"),
 		State("adc_map_selection_ctrl", "value"),
 		State('channel_number_ctrl',"value"),
-		State("10_tr_colour_range_slider_comp", "value"),
+		State("11_range_slider_pos_comp", "value"),
 		State('file_select_ctrl', "value"),
 		
 		State(plot_id, "children"),
@@ -78,7 +78,6 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 def graph(partition,run,raw_data_file, trigger_record,data,channel_num):
 
 	if int(channel_num) in data.channels:
-
 
 		rich.print("FFT of values:")
 		rich.print(data.df_fft)

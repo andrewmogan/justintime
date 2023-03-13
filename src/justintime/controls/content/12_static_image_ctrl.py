@@ -4,7 +4,7 @@ from dash.dependencies import Input, Output, State
 from .. import ctrl_class
 
 def return_obj(dash_app, engine):
-	ctrl_id = "11_static_image_ctrl"
+	ctrl_id = "12_static_image_ctrl"
 
 	ctrl_div = html.Div([dcc.Checklist(options=["make_static_image"], value = ["make_static_image"],id=ctrl_id)],style={"marginTop":"1em","fontSize": "1.5rem"})
 
