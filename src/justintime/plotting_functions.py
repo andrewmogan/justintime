@@ -42,7 +42,6 @@ def selection_line(partition,run,raw_data_file, trigger_record):
         html.Div(raw_data_file,style={"display":"inline-block"})]),
 
 		html.Div([
-		
 		html.B("Trigger Record: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
 		html.Div(trigger_record,style={"display":"inline-block"})])
 		,html.Hr()
@@ -186,7 +185,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 
     return fig
 
-def tp_for_adc(df, cmin, cmax):
+def tp_for_adc(df, cmin, cmax,colorscale):
     if not df.empty:
         # fig=go.Figure()
         fig=go.Scattergl(
@@ -196,7 +195,7 @@ def tp_for_adc(df, cmin, cmax):
                 marker=dict(
                     size=4.5,
                     color=df['peak_adc'], #set color equal to a variable
-                    colorscale="delta", # one of plotly colorscales
+                    colorscale=colorscale, # one of plotly colorscales
                     cmin = cmin,
                     cmax = cmax,
                     showscale=True,

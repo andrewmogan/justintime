@@ -22,7 +22,7 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("run_select_ctrl")
 
 	plot.add_ctrl("06_trigger_record_select_ctrl")
-	plot.add_ctrl("11_fft_phase_fmin_fmax_ctrl")
+	plot.add_ctrl("12_fft_phase_fmin_fmax_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
 	init_callbacks(dash_app, storage, plot_id, engine,theme)
@@ -40,8 +40,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		State("partition_select_ctrl","value"),
 		State("run_select_ctrl","value"),
 	
-		State('11_fft_phase_fmin_comp', "value"),
-		State('11_fft_phase_fmax_comp', "value"),
+		State('12_fft_phase_fmin_comp', "value"),
+		State('12_fft_phase_fmax_comp', "value"),
 		State(plot_id, "children"),
 	)
 	def plot_fft_phase_graph(n_clicks,refresh, trigger_record, raw_data_file,partition,run, fmin, fmax, original_state):

@@ -21,7 +21,7 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("run_select_ctrl")
 
 	plot.add_ctrl("06_trigger_record_select_ctrl")
-	plot.add_ctrl("09_tr_colour_range_slider_ctrl")
+	plot.add_ctrl("10_tr_colour_range_slider_ctrl")
 	plot.add_ctrl("16_channel_number_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
@@ -40,7 +40,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		State("run_select_ctrl","value"),
 		
 		State('16_channel_number_ctrl',"value"),
-		State("09_tr_colour_range_slider_comp", "value"),
+		State("10_tr_colour_range_slider_comp", "value"),
 		State('file_select_ctrl', "value"),
 		
 		State(plot_id, "children"),

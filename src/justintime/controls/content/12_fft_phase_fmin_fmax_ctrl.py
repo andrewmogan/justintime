@@ -4,9 +4,9 @@ from dash.dependencies import Input, Output, State
 from .. import ctrl_class
 
 def return_obj(dash_app, engine):
-	ctrl_id = "11_fft_phase_fmin_fmax_ctrl"
-	comp_id_fmin = "11_fft_phase_fmin_comp"
-	comp_id_fmax = "11_fft_phase_fmax_comp"
+	ctrl_id = "12_fft_phase_fmin_fmax_ctrl"
+	comp_id_fmin = "12_fft_phase_fmin_comp"
+	comp_id_fmax = "12_fft_phase_fmax_comp"
 
 	ctrl_div = html.Div([
 		html.Div("fmin"),
