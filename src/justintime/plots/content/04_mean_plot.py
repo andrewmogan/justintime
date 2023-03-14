@@ -8,7 +8,6 @@ from plotly.subplots import make_subplots
 import numpy as np
 import rich
 import logging
-
 from ... all_data import trigger_record_data
 from ... plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
 from .. import plot_class
@@ -31,7 +30,6 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 	
 	@dash_app.callback(
 		Output(plot_id, "children"),
-		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('07_refresh_ctrl', "value"),
 		State('trigger_record_select_ctrl', "value"),

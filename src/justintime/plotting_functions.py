@@ -48,7 +48,7 @@ def selection_line(partition,run,raw_data_file, trigger_record):
 	]))
 
 
-def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
+def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",colorscale:str="plasma"):
 	
 	if not df.empty:
 		
@@ -68,7 +68,7 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
 
 		# Some normalization from matplotlib
 		col_norm = Normalize(vmin=amin, vmax=amax)
-		scalarMap  = cm.ScalarMappable(norm=col_norm, cmap='plasma' )
+		scalarMap  = cm.ScalarMappable(norm=col_norm, cmap=colorscale )
 		seg_colors = scalarMap.to_rgba(a) 
 		img = Image.fromarray(np.uint8(seg_colors*255))
 
@@ -84,7 +84,7 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
 				y=[ymin, ymax],
 				mode="markers",
 				marker={"color":[amin, amax],
-						"colorscale":'Plasma',
+						"colorscale":colorscale,
 						"showscale":True,
 						"colorbar":{
 							# "title":"Counts",
@@ -185,7 +185,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 
     return fig
 
-def tp_for_adc(df, cmin, cmax,colorscale):
+def tp_for_adc(df, cmin, cmax):
     if not df.empty:
         # fig=go.Figure()
         fig=go.Scattergl(
@@ -195,7 +195,7 @@ def tp_for_adc(df, cmin, cmax,colorscale):
                 marker=dict(
                     size=4.5,
                     color=df['peak_adc'], #set color equal to a variable
-                    colorscale=colorscale, # one of plotly colorscales
+                    colorscale="delta", # one of plotly colorscales
                     cmin = cmin,
                     cmax = cmax,
                     showscale=True,

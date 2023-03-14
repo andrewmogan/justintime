@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import numpy as np
 import rich
 import pandas as pd
-
+import logging
 from .. import plot_class
 from ... all_data import trigger_record_data
 from ... plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot,make_tp_plot,tp_for_adc
@@ -37,14 +37,12 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 
 	@dash_app.callback(
 		Output(plot_id, "children"),
-		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('07_refresh_ctrl', "value"),
 		State('trigger_record_select_ctrl', "value"),
 		State('file_select_ctrl', "value"),
 		State("partition_select_ctrl","value"),
 		State("run_select_ctrl","value"),
-
 		State("adc_map_selection_ctrl", "value"),
 		State("colorscale_ctrl", "value"),
 		State("10_tr_colour_range_slider_comp", "value"),
@@ -62,10 +60,10 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 
-				rich.print("Initial Time Stamp:",data.ts_min)
-				rich.print(" ")
-				rich.print("Initial Dataframe:")
-				rich.print(data.df_tsoff)
+				logging.info(f"Initial Time Stamp: {data.ts_min}")
+				logging.info(" ")
+				logging.info("Initial Dataframe:")
+				logging.info(data.df_tsoff)
 				
 				if len(data.df)!=0 and len(data.df.index!=0):
 					data.init_tp()
@@ -101,51 +99,51 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 										xaxis_title="Time ticks",showlegend=True
 										) 
 						else:"""
-						rich.print("Z Plane selected")
+						logging.info("Z Plane selected")
 						if "offset_removal" in offset:
-							rich.print("Offset removal selected")
-							rich.print("Raw ADCs in Z-Plane after offset removal:")
-							rich.print((data.df_Z - data.df_Z_mean).T)
+							logging.info("Offset removal selected")
+							logging.info("Raw ADCs in Z-Plane after offset removal:")
+							logging.info((data.df_Z - data.df_Z_mean).T)
 								
 							title = f"Z-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							if "make_static_image" in static_image:
-								fig = make_static_img((data.df_Z - data.df_Z_mean).T, zmin = fzmin, zmax = fzmax,title=title)
+								fig = make_static_img((data.df_Z - data.df_Z_mean).T, zmin = fzmin, zmax = fzmax,title=title,colorscale=colorscale)
 								if "tp_overlay" in overlay_tps:
-									rich.print("TPs in Z-Plane:")
-									rich.print(data.tp_df_Z)
-									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax,colorscale))
+									logging.info("TPs in Z-Plane:")
+									logging.info(data.tp_df_Z)
+									fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 				
 							else:
 																		
-								fig = px.imshow((data.df_Z - data.df_Z_mean).T, zmin=fzmin, zmax=fzmax, title=title,color_continuous_scale='plasma',aspect="auto")
+								fig = px.imshow((data.df_Z - data.df_Z_mean).T, zmin=fzmin, zmax=fzmax, title=title,color_continuous_scale=colorscale,aspect="auto")
 								if "tp_overlay" in overlay_tps:
-										rich.print("TPs in Z-Plane:")
-										rich.print(data.tp_df_Z)
-										fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax,colorscale))
+										logging.info("TPs in Z-Plane:")
+										logging.info(data.tp_df_Z)
+										fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 										fig.update_layout(
 										height=600,yaxis_title="Offline Channel",
 										xaxis_title="Time ticks",showlegend=True
 										)
 
 						else:
-								rich.print("Raw ADCs in Z-Plane:")
-								rich.print(data.df_Z)
+								logging.info("Raw ADCs in Z-Plane:")
+								logging.info(data.df_Z)
 								
 								title = f"Z-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							
 								if "make_static_image" in static_image:
-									fig = make_static_img(data.df_Z.T,zmin = fzmin, zmax = fzmax, title = title)
+									fig = make_static_img(data.df_Z.T,zmin = fzmin, zmax = fzmax, title = title,colorscale=colorscale)
 									if "tp_overlay" in overlay_tps:	
-										rich.print("TPs in Z-Plane:")
-										rich.print(data.tp_df_Z)
-										fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax,colorscale))
+										logging.info("TPs in Z-Plane:")
+										logging.info(data.tp_df_Z)
+										fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 									
 								else:
-									fig = px.imshow(data.df_Z.T,  zmin=fzmin, zmax=fzmax,title=title, color_continuous_scale='plasma',aspect='auto')
+									fig = px.imshow(data.df_Z.T,  zmin=fzmin, zmax=fzmax,title=title, color_continuous_scale=colorscale,aspect='auto')
 									if "tp_overlay" in overlay_tps:
-										rich.print("TPs in Z-Plane:")
-										rich.print(data.tp_df_Z)
-										fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax,colorscale))
+										logging.info("TPs in Z-Plane:")
+										logging.info(data.tp_df_Z)
+										fig.add_trace(tp_for_adc(data.tp_df_Z, fzmin,fzmax))
 									fig.update_layout(
 										
 										height=600,yaxis_title="Offline Channel",
@@ -161,7 +159,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					
 					if 'V' in adcmap_selection:
-						rich.print("V Plane selected")
+						logging.info("V Plane selected")
 						"""if "cnr_removal" in cnr:
 							rich.print("CNR selected")
 							rich.print("Raw ADCs in V-Plane after CNR:")
@@ -188,23 +186,23 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 										)
 							else:"""
 						if "offset_removal" in offset:
-								rich.print("Offset removal selected")
-								rich.print("Raw ADCs in V-Plane after offset removal:")
-								rich.print((data.df_V - data.df_V_mean).T)
-								rich.print("TPs in V-Plane:")
-								rich.print(data.tp_df_V)
+								logging.info("Offset removal selected")
+								logging.info("Raw ADCs in V-Plane after offset removal:")
+								logging.info((data.df_V - data.df_V_mean).T)
+								logging.info("TPs in V-Plane:")
+								logging.info(data.tp_df_V)
 								title = f"V-plane offset removal,  Run {data.info['run_number']}: {data.info['trigger_number']}"
 								if "make_static_image" in static_image:
-									fig = make_static_img((data.df_V - data.df_V_mean).T, zmin = fzmin, zmax = fzmax,title=title)
+									fig = make_static_img((data.df_V - data.df_V_mean).T, zmin = fzmin, zmax = fzmax,title=title,colorscale=colorscale)
 									if "tp_overlay" in overlay_tps:
-										fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax,colorscale))
+										fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 				
 								else:
-									fig = px.imshow((data.df_V - data.df_V_mean).T, zmin=fzmin, zmax=fzmax, title=title,color_continuous_scale='plasma',aspect="auto")
+									fig = px.imshow((data.df_V - data.df_V_mean).T, zmin=fzmin, zmax=fzmax, title=title,color_continuous_scale=colorscale,aspect="auto")
 									if "tp_overlay" in overlay_tps:
-										rich.print("TPs in V-Plane:")
-										rich.print(data.tp_df_V)
-										fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax,colorscale))
+										logging.info("TPs in V-Plane:")
+										logging.info(data.tp_df_V)
+										fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 									fig.update_layout(
 										
 										height=600,yaxis_title="Offline Channel",
@@ -212,24 +210,24 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 										)
 
 						else:
-								rich.print("Raw ADCs in V-Plane:")
-								rich.print(data.df_V)
+								logging.info("Raw ADCs in V-Plane:")
+								logging.info(data.df_V)
 								
 								title = f"V-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							
 								if "make_static_image" in static_image:
-									fig = make_static_img(data.df_V.T,zmin = fzmin, zmax = fzmax, title = title)
+									fig = make_static_img(data.df_V.T,zmin = fzmin, zmax = fzmax, title = title,colorscale=colorscale)
 									if "tp_overlay" in overlay_tps:
-										rich.print("TPs in V-Plane:")
-										rich.print(data.tp_df_V)
-										fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax,colorscale))
+										logging.info("TPs in V-Plane:")
+										logging.info(data.tp_df_V)
+										fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 									
 								else:
-									fig = px.imshow(data.df_V.T,  zmin=fzmin, zmax=fzmax,title=title, color_continuous_scale='plasma',aspect='auto')
+									fig = px.imshow(data.df_V.T,  zmin=fzmin, zmax=fzmax,title=title, color_continuous_scale=colorscale,aspect='auto')
 									if "tp_overlay" in overlay_tps:
-										rich.print("TPs in V-Plane:")
-										rich.print(data.tp_df_V)
-										fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax,colorscale))
+										logging.info("TPs in V-Plane:")
+										logging.info(data.tp_df_V)
+										fig.add_trace(tp_for_adc(data.tp_df_V, fzmin,fzmax))
 									fig.update_layout(
 										
 										height=600,yaxis_title="Offline Channel",
@@ -245,7 +243,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						]
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					if 'U' in adcmap_selection:
-						rich.print("U Plane selected")
+						logging.info("U Plane selected")
 						"""if "cnr_removal" in cnr:
 							rich.print("CNR selected")
 							rich.print("Raw ADCs in U-Plane after CNR:")
@@ -272,24 +270,24 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 										)
 						else:"""
 						if "offset_removal" in offset:
-								rich.print("Offset removal selected")
-								rich.print("Raw ADCs in U-Plane after offset removal:")
-								rich.print((data.df_U - data.df_U_mean).T)
+								logging.info("Offset removal selected")
+								logging.info("Raw ADCs in U-Plane after offset removal:")
+								logging.info((data.df_U - data.df_U_mean).T)
 								
 								title = f"U-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
 								if "make_static_image" in static_image:
-									fig = make_static_img((data.df_U - data.df_U_mean).T, zmin = fzmin, zmax = fzmax,title=title)
+									fig = make_static_img((data.df_U - data.df_U_mean).T, zmin = fzmin, zmax = fzmax,title=title,colorscale=colorscale)
 									if "tp_overlay" in overlay_tps:
-										rich.print("TPs in U-Plane:")
-										rich.print(data.tp_df_U)
-										fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax,colorscale))
+										logging.info("TPs in U-Plane:")
+										logging.info(data.tp_df_U)
+										fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 				
 								else:
-									fig = px.imshow((data.df_U - data.df_U_mean).T, zmin=fzmin, zmax=fzmax, title=title,color_continuous_scale='plasma',aspect="auto")
+									fig = px.imshow((data.df_U - data.df_U_mean).T, zmin=fzmin, zmax=fzmax, title=title,color_continuous_scale=colorscale,aspect="auto")
 									if "tp_overlay" in overlay_tps:
-										rich.print("TPs in U-Plane:")
-										rich.print(data.tp_df_U)
-										fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax,colorscale))
+										logging.info("TPs in U-Plane:")
+										logging.info(data.tp_df_U)
+										fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 									fig.update_layout(
 									
 										height=600,yaxis_title="Offline Channel",
@@ -297,24 +295,24 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 										)
 
 						else:
-								rich.print("Raw ADCs in U-Plane:")
-								rich.print(data.df_U)
+								logging.info("Raw ADCs in U-Plane:")
+								logging.info(data.df_U)
 								
 								title = f"U-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
 							
 								if "make_static_image" in static_image:
-									fig = make_static_img(data.df_U.T,zmin = fzmin, zmax = fzmax, title = title)
+									fig = make_static_img(data.df_U.T,zmin = fzmin, zmax = fzmax, title = title,colorscale=colorscale)
 									if "tp_overlay" in overlay_tps:
-										rich.print("TPs in U-Plane:")
-										rich.print(data.tp_df_U)
-										fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax,colorscale))
+										logging.info("TPs in U-Plane:")
+										logging.info(data.tp_df_U)
+										fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 									
 								else:
-									fig = px.imshow(data.df_U.T, zmin=fzmin, zmax=fzmax, title=title, color_continuous_scale='plasma',aspect='auto')
+									fig = px.imshow(data.df_U.T, zmin=fzmin, zmax=fzmax, title=title, color_continuous_scale=colorscale,aspect='auto')
 									if "tp_overlay" in overlay_tps:
-										rich.print("TPs in U-Plane:")
-										rich.print(data.tp_df_U)
-										fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax,colorscale))
+										logging.info("TPs in U-Plane:")
+										logging.info(data.tp_df_U)
+										fig.add_trace(tp_for_adc(data.tp_df_U, fzmin,fzmax))
 									fig.update_layout(
 									
 										height=600,yaxis_title="Offline Channel",

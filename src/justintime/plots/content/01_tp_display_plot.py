@@ -6,6 +6,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import numpy as np
 import rich
+import logging
 import pandas as pd
 from .. import plot_class
 from ... cruncher import datamanager
@@ -36,13 +37,11 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 	
 	@dash_app.callback(
 		Output(plot_id, "children"),
-		#Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('07_refresh_ctrl', "value"),
 		State('trigger_record_select_ctrl', "value"),
 		State("partition_select_ctrl","value"),
 		State("run_select_ctrl","value"),
-	
 		State('file_select_ctrl', "value"),
 		State("adc_map_selection_ctrl","value"),
 		State("11_range_slider_pos_comp", "value"),
@@ -51,30 +50,30 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 		State(plot_id, "children"),
 	)
 	def plot_tp_graph(n_clicks, refresh,trigger_record,partition,run, raw_data_file,adcmap, tr_color_range, density,description,original_state):
-		load_figure_template(str(theme))
+		load_figure_template(theme)
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 				
-				rich.print("Initial Time Stamp:",data.ts_min)
-				rich.print(" ")
-				rich.print("Initial Dataframe:")
-				rich.print(data.df_tsoff)
+				logging.info(f"Initial Time Stamp: {data.ts_min}")
+				logging.info(" ")
+				logging.info("Initial Dataframe:")
+				logging.info(data.df_tsoff)
 				if len(data.df)!=0 and len(data.df.index!=0):
 
 					data.init_tp()
 					fzmin, fzmax = tr_color_range
 					fig_w, fig_h = 2600, 600
 					children = []
-					rich.print("TPs for Z plane:")
-					rich.print(data.tp_df_Z)
-					rich.print("TPs for V plane:")
-					rich.print(data.tp_df_V)
-					rich.print("TPs for U plane:")
-					rich.print(data.tp_df_U)
+					logging.info("TPs for Z plane:")
+					logging.info(data.tp_df_Z)
+					logging.info("TPs for V plane:")
+					logging.info(data.tp_df_V)
+					logging.info("TPs for U plane:")
+					logging.info(data.tp_df_U)
 					if "density_plot" in density:
-						rich.print("2D Density plot chosen")
+						logging.info("2D Density plot chosen")
 						if "Z" in adcmap:
 							fig = tp_density(data.tp_df_Z,data.xmin_Z, data.xmax_Z,fzmin,fzmax,fig_w, fig_h, data.info)
 							add_dunedaq_annotation(fig)
@@ -104,7 +103,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 							dcc.Graph(figure=fig)]
 						add_dunedaq_annotation(fig)
 					else:
-						rich.print("Scatter Plot Chosen")
+						logging.info("Scatter Plot Chosen")
 						if "Z" in adcmap:
 							fig = make_tp_plot(data.tp_df_Z,data.xmin_Z,data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info)
 							add_dunedaq_annotation(fig)

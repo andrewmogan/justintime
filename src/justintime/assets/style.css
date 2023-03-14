@@ -719,7 +719,7 @@ a {
 
 /* width */
 ::-webkit-scrollbar {
-  width: 10px !important;
+  width: 0px !important;
   display: block !important;
 }
 

@@ -4,11 +4,10 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
-
 import numpy as np
 import rich
+import logging
 import pandas as pd
-
 from ... plotting_functions import add_dunedaq_annotation, selection_line, nothing_to_plot
 from .. import plot_class
 
@@ -46,20 +45,20 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
-				rich.print("Initial Time Stamp:",data.ts_min)
-				rich.print(" ")
-				rich.print("Initial Dataframe:")
-				rich.print(data.df_tsoff)
+				logging.info(f"Initial Time Stamp: {data.ts_min}")
+				logging.info(" ")
+				logging.info("Initial Dataframe:")
+				logging.info(data.df_tsoff)
 				if len(data.df)!=0 and len(data.df.index!=0):
 					
 					data.init_fft2()
 
-					rich.print("FFT Z-Plane")
-					rich.print(data.df_Z_plane)
-					rich.print("FFT V-Plane")
-					rich.print(data.df_V_plane)
-					rich.print("FFT U-Plane")
-					rich.print(data.df_U_plane)
+					logging.info("FFT Z-Plane")
+					logging.info(data.df_Z_plane)
+					logging.info("FFT V-Plane")
+					logging.info(data.df_V_plane)
+					logging.info("FFT U-Plane")
+					logging.info(data.df_U_plane)
 
 					title_U=f"FFT U-plane: Run {data.info['run_number']}: {data.info['trigger_number']}" 
 					title_V=f"FFT V-plane: Run {data.info['run_number']}: {data.info['trigger_number']}" 

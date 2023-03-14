@@ -11,11 +11,11 @@ def return_obj(dash_app, engine):
 
 	ctrl_div = html.Div([
 		html.Div([
-		html.Label("Select a Colorscale for TPs: ",style={"fontSize":"12px"}),
+		html.Label("Select a Colorscale for ADC Map: ",style={"fontSize":"12px"}),
 		html.Div([
 		
-		dcc.Dropdown(options=px.colors.named_colorscales(),placeholder="Colorscale",
-			id="colorscale_ctrl",value='delta'
+		dcc.Dropdown(options=["plasma","RdBu_r"],value=['plasma'],placeholder="Colorscale",
+			id="colorscale_ctrl", clearable=False
 		),
        
 	],style={"marginBottom":"1.0em"})])],id=ctrl_id)

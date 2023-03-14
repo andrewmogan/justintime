@@ -8,7 +8,7 @@ from plotly.subplots import make_subplots
 import numpy as np
 import rich
 import pandas as pd
-
+import logging
 from ... plotting_functions import add_dunedaq_annotation, selection_line,waveform_tps,nothing_to_plot
 
 
@@ -19,9 +19,7 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("07_refresh_ctrl")
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
-
 	plot.add_ctrl("06_trigger_record_select_ctrl")
-	plot.add_ctrl("11_range_slider_pos_ctrl")
 	plot.add_ctrl("16_channel_number_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
@@ -32,7 +30,6 @@ def return_obj(dash_app, engine, storage,theme):
 def init_callbacks(dash_app, storage, plot_id,theme):
 	@dash_app.callback(
 		Output(plot_id, "children"),
-		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('07_refresh_ctrl', "value"),
 		State('trigger_record_select_ctrl', "value"),
@@ -40,25 +37,23 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		State("run_select_ctrl","value"),
 		State("adc_map_selection_ctrl", "value"),
 		State('channel_number_ctrl',"value"),
-		State("11_range_slider_pos_comp", "value"),
 		State('file_select_ctrl', "value"),
 		
 		State(plot_id, "children"),
 	)
-	def plot_fft_graph(n_clicks, refresh,trigger_record,partition,run,plane,channel_num,tr_color_range,raw_data_file, original_state):
+	def plot_fft_graph(n_clicks, refresh,trigger_record,partition,run,plane,channel_num,raw_data_file, original_state):
 	
 		load_figure_template(theme)
-	
 
 		if trigger_record and raw_data_file:
 			if plot_id in storage.shown_plots:
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 
-				rich.print("Initial Time Stamp:",data.ts_min)
-				rich.print(" ")
-				rich.print("Initial Dataframe:")
-				rich.print(data.df_tsoff)
+				logging.info(f"Initial Time Stamp: {data.ts_min}")
+				logging.info(" ")
+				logging.info("Initial Dataframe:")
+				logging.info(data.df_tsoff)
 				
 				if len(data.df)!=0 and len(data.df.index!=0):
 					data.init_fft()
@@ -79,11 +74,11 @@ def graph(partition,run,raw_data_file, trigger_record,data,channel_num):
 
 	if int(channel_num) in data.channels:
 
-		rich.print("FFT of values:")
-		rich.print(data.df_fft)
-		rich.print("Channel number selected: ",channel_num)
+		logging.info("FFT of values:")
+		logging.info(data.df_fft)
+		logging.info(f"Channel number selected: {channel_num}")
 		fig=px.line(data.df_fft,y=channel_num)
-		rich.print("FFT for the selected channel values:")
+		logging.info("FFT for the selected channel values:")
 		print(data.df_fft[channel_num])
 		fig.update_layout(
 		xaxis_title="Frequency",
