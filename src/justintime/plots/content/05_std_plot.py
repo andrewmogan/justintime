@@ -5,8 +5,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
 import rich
+import logging
 import numpy as np
-
 from .. import plot_class
 from ... plotting_functions import add_dunedaq_annotation, selection_line, nothing_to_plot
 
@@ -30,7 +30,6 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 	
 	@dash_app.callback(
 		Output(plot_id, "children"),
-	##	Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('07_refresh_ctrl', "value"),
 		State("partition_select_ctrl","value"),
@@ -48,12 +47,12 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 				except RuntimeError: return(html.Div(""))
 				
 				if len(data.df)!=0 and len(data.df.index!=0):
-					rich.print("STD Z-Plane")
-					rich.print(data.df_Z_std)
-					rich.print("STD V-Plane")
-					rich.print(data.df_V_std)
-					rich.print("STD U-Plane")
-					rich.print(data.df_U_std)
+					logging.info("STD Z-Plane")
+					logging.info(data.df_Z_std)
+					logging.info("STD V-Plane")
+					logging.info(data.df_V_std)
+					logging.info("STD U-Plane")
+					logging.info(data.df_U_std)
 					fig_std = make_subplots(rows=1, cols=3,
 						subplot_titles=("STD U-Plane", "STD V-Plane", "STD Z-Plane"))
 					fig_std.add_trace(
@@ -84,6 +83,8 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					)
 					add_dunedaq_annotation(fig_std)
 					fig_std.update_layout(font_family="Lato", title_font_family="Lato")
+					if theme=="lightly":
+						fig_std.update_layout(plot_bgcolor='lightgrey')
 					return(html.Div([html.B("STD by plane"),dcc.Graph(figure=fig_std)]))
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))

@@ -13,121 +13,119 @@ import rich
 from . all_data import trigger_record_data
 
 def add_dunedaq_annotation(figure):
-    figure.add_annotation(dict(font=dict(color="black",size=12),
-        #x=x_loc,
-        # x=1,
-        # y=-0.20,
-        x=1,
-        y=1.10,
-        showarrow=False,
-        align="right",
-        text='Powered by DUNE-DAQ',
-        textangle=0,
-        xref="paper",
-        yref="paper"
-        ))
+	figure.add_annotation(dict(font=dict(color="black",size=12),
+		#x=x_loc,
+		# x=1,
+		# y=-0.20,
+		x=1,
+		y=1.14,
+		showarrow=False,
+		align="right",
+		text='Powered by DUNE-DAQ',
+		textangle=0,
+		xref="paper",
+		yref="paper"
+		))
 
-def selection_line(partition, run, raw_data_file, trigger_record):
-    return(html.Div([
-        html.Div([
-            html.Div("Partition: ",style={"display":"inline-block","margin-right":"0.4rem"}),
-            html.B(partition,style={"display":"inline-block","margin-right":"2rem"}),
-            html.Div("Run: ",style={"display":"inline-block","margin-right":"0.4rem"}),
-            html.B(run,style={"display":"inline-block","margin-right":"2rem"}),
-            html.Div("Trigger Record: ",style={"display":"inline-block","margin-right":"0.4rem"}),
-            html.B(trigger_record,style={"display":"inline-block","margin-right":"2rem"})
-        ]),
+def selection_line(partition,run,raw_data_file, trigger_record):
+	return(html.Div([
+		html.Div([
+        html.B("Partition: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+        html.Div(partition,style={"display":"inline-block"})]),
+	
+		html.Div([
+        html.B("Run: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+        html.Div(run,style={"display":"inline-block"})]),
+	
+		html.Div([
+        html.B("Raw Data File: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+        html.Div(raw_data_file,style={"display":"inline-block"})]),
 
-        # html.Div([
-        #     html.Div("Trigger Time: ",style={"display":"inline-block","margin-right":"0.4rem"}),
-        #     html.B(time,style={"display":"inline-block","margin-right":"2rem"})
-        # ])
-        html.Div([
-            html.Div("Raw data file: ",style={"display":"inline-block","margin-right":"0.4rem"}),
-            html.B(raw_data_file,style={"display":"inline-block","margin-right":"2rem"})
-        ])
-        ,html.Hr()
-    ]))
+		html.Div([
+		html.B("Trigger Record: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
+		html.Div(trigger_record,style={"display":"inline-block"})])
+		,html.Hr()
+	]))
 
 
-def make_static_img(df,zmin: int = None, zmax: int = None, title: str = ""):
-    
-    if not df.empty:
-        
-        xmin, xmax = min(df.columns), max(df.columns)
-        #ymin, ymax = min(df.index), max(df.index)
-        ymin, ymax = max(df.index), min(df.index)
-        col_range = list(range(ymax, ymin))
-        
-        df = df.reindex(index=col_range, fill_value=0)
+def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",colorscale:str="plasma"):
+	
+	if not df.empty:
+		
+		xmin, xmax = min(df.columns), max(df.columns)
+		#ymin, ymax = min(df.index), max(df.index)
+		ymin, ymax = max(df.index), min(df.index)
+		col_range = list(range(ymax, ymin))
+		
+		df = df.reindex(index=col_range, fill_value=0)
 
-        img_width = df.columns.size
-        img_height = df.index.size
+		img_width = df.columns.size
+		img_height = df.index.size
 
-        a = df.to_numpy()
-        amin = zmin if zmin is not None else np.min(a)
-        amax = zmax if zmax is not None else np.max(a)
+		a = df.to_numpy()
+		amin = zmin if zmin is not None else np.min(a)
+		amax = zmax if zmax is not None else np.max(a)
 
-        # Some normalization from matplotlib
-        col_norm = Normalize(vmin=amin, vmax=amax)
-        scalarMap  = cm.ScalarMappable(norm=col_norm, cmap='plasma' )
-        seg_colors = scalarMap.to_rgba(a) 
-        img = Image.fromarray(np.uint8(seg_colors*255))
+		# Some normalization from matplotlib
+		col_norm = Normalize(vmin=amin, vmax=amax)
+		scalarMap  = cm.ScalarMappable(norm=col_norm, cmap=colorscale )
+		seg_colors = scalarMap.to_rgba(a) 
+		img = Image.fromarray(np.uint8(seg_colors*255))
 
-        # Create figure
-        fig = go.Figure()
+		# Create figure
+		fig = go.Figure()
 
-    # Add invisible scatter trace.
-    # This trace is added to help the autoresize logic work.
-    # We also add a color to the scatter points so we can have a colorbar next to our image
-        fig.add_trace(
-            go.Scatter(
-                x=[xmin, xmax],
-                y=[ymin, ymax],
-                mode="markers",
-                marker={"color":[amin, amax],
-                        "colorscale":'Plasma',
-                        "showscale":True,
-                        "colorbar":{
-                            # "title":"Counts",
-                            "titleside": "right"
-                        },
-                        "opacity": 0
-                    }
-            )
-        )
-    
+	# Add invisible scatter trace.
+	# This trace is added to help the autoresize logic work.
+	# We also add a color to the scatter points so we can have a colorbar next to our image
+		fig.add_trace(
+			go.Scatter(
+				x=[xmin, xmax],
+				y=[ymin, ymax],
+				mode="markers",
+				marker={"color":[amin, amax],
+						"colorscale":colorscale,
+						"showscale":True,
+						"colorbar":{
+							# "title":"Counts",
+							"titleside": "right"
+						},
+						"opacity": 0
+					}
+			)
+		)
+	
 
-        # Add image
+		# Add image
 
 
-        fig.update_layout(
-            images=[go.layout.Image(
-                x=xmin,
-                sizex=xmax-xmin,
-                y=ymax,
-                sizey=ymax-ymin,
-                xref="x",
-                yref="y",
-                opacity=1.0,
-                layer="below",
-                sizing="stretch",
-                source=img)]
-        )
+		fig.update_layout(
+			images=[go.layout.Image(
+				x=xmin,
+				sizex=xmax-xmin,
+				y=ymax,
+				sizey=ymax-ymin,
+				xref="x",
+				yref="y",
+				opacity=1.0,
+				layer="below",
+				sizing="stretch",
+				source=img)]
+		)
 
-        # Configure other layout
-        fig.update_layout(
-            title=title,
-            xaxis=dict(showgrid=False, zeroline=False, range=[xmin, xmax]),
-            yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
-            yaxis_title="Offline Channel",
-            xaxis_title="Time ticks",
-            height=500)
-    else:
-        
-        fig=go.Figure()
-    # fig.show(config={'doubleClick': 'reset'})
-    return fig
+		# Configure other layout
+		fig.update_layout(
+			title=title,
+			xaxis=dict(showgrid=False, zeroline=False, range=[xmin, xmax]),
+			yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
+			yaxis_title="Offline Channel",
+			xaxis_title="Time ticks",
+			height=600)
+	else:
+		
+		fig=go.Figure()
+	# fig.show(config={'doubleClick': 'reset'})
+	return fig
 
 
 def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
@@ -181,7 +179,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
         yaxis = dict(autorange="reversed"),
         title_text=f"Run {info['run_number']}: {info['trigger_number']}",
         #legend=dict(x=0,y=1),
-        width=950
+       # width=950
 
         )
 
@@ -204,10 +202,8 @@ def tp_for_adc(df, cmin, cmax):
                     
                     
                     ),
-                )
-                
+                )          
     
-
     else:
         fig =go.Scatter()
     
@@ -235,7 +231,7 @@ def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
         yaxis = dict(autorange="reversed"),
         title_text=f"Run {info['run_number']}: {info['trigger_number']}",
         legend=dict(x=0,y=1),
-        width=950
+      #  width=950
 
         )
     fig.update_layout(font_family="Lato", title_font_family="Lato")

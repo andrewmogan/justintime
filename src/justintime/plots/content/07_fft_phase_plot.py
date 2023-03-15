@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import numpy as np
 import pandas as pd
 import rich
-
+import logging
 from .. import plot_class
 from ... plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
 
@@ -22,7 +22,7 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("run_select_ctrl")
 
 	plot.add_ctrl("06_trigger_record_select_ctrl")
-	plot.add_ctrl("11_fft_phase_fmin_fmax_ctrl")
+	plot.add_ctrl("13_fft_phase_fmin_fmax_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 
 	init_callbacks(dash_app, storage, plot_id, engine,theme)
@@ -32,16 +32,14 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 
 	@dash_app.callback(
 		Output(plot_id, "children"),
-		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('07_refresh_ctrl', "n_clicks"),
 		State('trigger_record_select_ctrl', "value"),
 		State('file_select_ctrl', "value"),
 		State("partition_select_ctrl","value"),
 		State("run_select_ctrl","value"),
-	
-		State('11_fft_phase_fmin_comp', "value"),
-		State('11_fft_phase_fmax_comp', "value"),
+		State('13_fft_phase_fmin_comp', "value"),
+		State('13_fft_phase_fmax_comp', "value"),
 		State(plot_id, "children"),
 	)
 	def plot_fft_phase_graph(n_clicks,refresh, trigger_record, raw_data_file,partition,run, fmin, fmax, original_state):
@@ -52,10 +50,10 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 				try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
 				except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 
-				rich.print("Initial Time Stamp:",data.ts_min)
-				rich.print(" ")
-				rich.print("Initial Dataframe:")
-				rich.print(data.df_tsoff)
+				logging.info(f"Initial Time Stamp: {data.ts_min}")
+				logging.info(" ")
+				logging.info("Initial Dataframe:")
+				logging.info(data.df_tsoff)
 				
 				if len(data.df)!=0 and len(data.df.index!=0):
 					

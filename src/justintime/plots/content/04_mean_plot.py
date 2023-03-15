@@ -8,7 +8,6 @@ from plotly.subplots import make_subplots
 import numpy as np
 import rich
 import logging
-
 from ... all_data import trigger_record_data
 from ... plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
 from .. import plot_class
@@ -31,7 +30,6 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 	
 	@dash_app.callback(
 		Output(plot_id, "children"),
-		##Input(ThemeSwitchAIO.ids.switch("theme"), "value"),
 		Input("90_plot_button_ctrl", "n_clicks"),
 		State('07_refresh_ctrl', "value"),
 		State('trigger_record_select_ctrl', "value"),
@@ -84,7 +82,8 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 							go.Scattergl(x=data.df_Z_mean.index.astype(int), y=data.df_Z_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
 							row=1, col=3
 						)
-
+					#	fig_mean.update_xaxes(mirror=True,showline=True,linecolor='black',)
+					#	fig_mean.update_yaxes(mirror=True,showline=True,linecolor='black',)
 						fig_mean.update_layout(
 							# autosize=False,
 							# width=1200,
@@ -100,6 +99,8 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 						)
 						add_dunedaq_annotation(fig_mean)
 						fig_mean.update_layout(font_family="Lato", title_font_family="Lato")
+						if theme=="lightly":
+							fig_mean.update_layout(plot_bgcolor='lightgrey')
 						return(html.Div([selection_line(partition,run,raw_data_file, trigger_record),html.B("Mean by plane"),dcc.Graph(figure=fig_mean)]))
 			else:
 				return(html.Div(html.H6(nothing_to_plot())))
