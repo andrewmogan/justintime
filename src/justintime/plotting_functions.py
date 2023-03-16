@@ -94,11 +94,8 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",color
 					}
 			)
 		)
-	
 
 		# Add image
-
-
 		fig.update_layout(
 			images=[go.layout.Image(
 				x=xmin,
@@ -180,14 +177,12 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
         title_text=f"Run {info['run_number']}: {info['trigger_number']}",
         #legend=dict(x=0,y=1),
        # width=950
-
         )
 
     return fig
 
 def tp_for_adc(df, cmin, cmax):
     if not df.empty:
-        # fig=go.Figure()
         fig=go.Scattergl(
                 y=df['offline_ch'],
                 x=df['peak_time'],
@@ -199,8 +194,6 @@ def tp_for_adc(df, cmin, cmax):
                     cmin = cmin,
                     cmax = cmax,
                     showscale=True,
-                    
-                    
                     ),
                 )          
     
@@ -208,7 +201,6 @@ def tp_for_adc(df, cmin, cmax):
         fig =go.Scatter()
     
     return fig
-
 
 def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
     if not df.empty:
@@ -264,8 +256,6 @@ def waveform_tps(fig,df,channel_num):
         fig = go.Scatter()
         
     return fig
-
-
 
 def nothing_to_plot():
 

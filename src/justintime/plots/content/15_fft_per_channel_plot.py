@@ -38,7 +38,6 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 		State("adc_map_selection_ctrl", "value"),
 		State('channel_number_ctrl',"value"),
 		State('file_select_ctrl', "value"),
-		
 		State(plot_id, "children"),
 	)
 	def plot_fft_graph(n_clicks, refresh,trigger_record,partition,run,plane,channel_num,raw_data_file, original_state):

@@ -19,7 +19,6 @@ def return_obj(dash_app, engine, storage,theme):
 	plot.add_ctrl("07_refresh_ctrl")
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
-
 	plot.add_ctrl("06_trigger_record_select_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")
 

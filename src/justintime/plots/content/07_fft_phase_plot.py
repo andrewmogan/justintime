@@ -11,16 +11,13 @@ import logging
 from .. import plot_class
 from ... plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
 
-
 def return_obj(dash_app, engine, storage,theme):
 	plot_id = "07_fft_phase_plot"
 	plot_div = html.Div(id = plot_id)
 	plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
 	plot.add_ctrl("07_refresh_ctrl")
-	
 	plot.add_ctrl("partition_select_ctrl")
 	plot.add_ctrl("run_select_ctrl")
-
 	plot.add_ctrl("06_trigger_record_select_ctrl")
 	plot.add_ctrl("13_fft_phase_fmin_fmax_ctrl")
 	plot.add_ctrl("90_plot_button_ctrl")

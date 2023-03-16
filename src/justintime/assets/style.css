@@ -29,8 +29,6 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
   width: 100%;
   float: left;
   box-sizing: border-box;
-
-
  
 }
 
@@ -39,8 +37,6 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
   flex-wrap: nowrap;
  
 }
-
-
 
 /* For devices larger than 400px */
 @media (min-width: 400px) {
@@ -52,13 +48,10 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
 /* For devices larger than 550px */
 @media (min-width: 550px) {
   
-  
 .container {
   display: table;
   flex-wrap: nowrap;
 
-  
-      
  }
   .column, .columns {
       margin-left: 2%;
@@ -96,7 +89,6 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
       height:fit-content;
       min-height:1px ;*/
 
-
  }
   .six.columns {
       width: 48%;
@@ -120,10 +112,6 @@ Taken from https://codepen.io/chriddyp/pen/bWLwgP.css
       left: 0px;
       border: 0px solid #484848;
       min-block-size: 1000px;*/
-      
-     
-  
-      
 
        }
   .nine.columns {
