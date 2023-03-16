@@ -14,7 +14,7 @@ def return_obj(dash_app, engine):
 		html.Label("Select a Colorscale for ADC Map: ",style={"fontSize":"12px"}),
 		html.Div([
 		
-		dcc.Dropdown(options=["plasma","RdBu_r"],value=['plasma'],placeholder="Colorscale",
+		dcc.Dropdown(options=["plasma","RdBu_r"],value='plasma',
 			id="colorscale_ctrl", clearable=False
 		),
        

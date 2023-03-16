@@ -47,8 +47,7 @@ def selection_line(partition,run,raw_data_file, trigger_record):
 		,html.Hr()
 	]))
 
-
-def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",colorscale:str="plasma"):
+def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",colorscale:str=""):
 	
 	if not df.empty:
 		
@@ -186,17 +185,22 @@ def tp_for_adc(df, cmin, cmax):
         fig=go.Scattergl(
                 y=df['offline_ch'],
                 x=df['peak_time'],
+                error_x=dict(
+                type='data',
+                symmetric=False,
+                array=df['peak_time']-df["start_time"],
+                arrayminus=df["time_over_threshold"]-(df['peak_time']-df["start_time"])),
                 mode='markers',name="TP Trace",
                 marker=dict(
                     size=4.5,
                     color=df['peak_adc'], #set color equal to a variable
                     colorscale="delta", # one of plotly colorscales
-                    cmin = cmin,
+                    cmin = 0,
                     cmax = cmax,
-                    showscale=True,
+                    showscale=True,colorbar=dict( x=1.12 
+                  )
                     ),
-                )          
-    
+                )   
     else:
         fig =go.Scatter()
     
@@ -228,7 +232,6 @@ def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
         )
     fig.update_layout(font_family="Lato", title_font_family="Lato")
     return fig
-
 
 def waveform_tps(fig,df,channel_num):
     if not df.empty:
