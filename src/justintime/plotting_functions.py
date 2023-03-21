@@ -182,6 +182,8 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 
 def tp_for_adc(df, cmin, cmax):
     if not df.empty:
+        rich.print(2.*max(df['sum_adc'])/(10**2))
+        rich.print(max(df['sum_adc']))
         fig=go.Scattergl(
                 y=df['offline_ch'],
                 x=df['peak_time'],
@@ -191,15 +193,17 @@ def tp_for_adc(df, cmin, cmax):
                 array=df['peak_time']-df["start_time"],
                 arrayminus=df["time_over_threshold"]-(df['peak_time']-df["start_time"])),
                 mode='markers',name="TP Trace",
-                marker=dict(
-                    size=4.5,
+                
+                marker=dict(size=df["sum_adc"],
+                    sizemode='area',
+                    sizeref=2.*max(df['sum_adc'])/(12**2),sizemin=3,
                     color=df['peak_adc'], #set color equal to a variable
                     colorscale="delta", # one of plotly colorscales
                     cmin = 0,
                     cmax = cmax,
                     showscale=True,colorbar=dict( x=1.12 
                   )
-                    ),
+                    )
                 )   
     else:
         fig =go.Scatter()
@@ -241,7 +245,7 @@ def waveform_tps(fig,df,channel_num):
             
             new=(df[df['offline_ch'] == channel_num])
             rich.print("Dataframe used for TPs (with similar offline channels)")
-            rich.print(new) 
+            rich.print(new)
             rich.print("TPs time over threshold (in order of appearance):")                 
             for i in range(len(new)):
                                                                                 

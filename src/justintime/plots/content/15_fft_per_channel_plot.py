@@ -58,7 +58,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					data.init_fft()
 					if channel_num:
 						
-						return(html.Div([graph(partition,run,raw_data_file, trigger_record,data,val) for val in channel_num]
+						return(html.Div(selection_line(partition,run,raw_data_file, trigger_record)),html.Div([graph(partition,run,raw_data_file, trigger_record,data,val) for val in channel_num]
                                             ))
 						
 					else:
@@ -90,10 +90,9 @@ def graph(partition,run,raw_data_file, trigger_record,data,channel_num):
 								
 		add_dunedaq_annotation(fig)
 		fig.update_layout(font_family="Lato", title_font_family="Lato")
-		return(html.Div([selection_line(partition,run,raw_data_file, trigger_record),
-				html.B(f"FFT for channel {channel_num}"),#html.Hr(),
-				dcc.Graph(figure=fig),
-										]))
+		return(html.Div([
+				html.B(f"FFT for channel {channel_num}",style={"marginTop":"10px"}),#html.Hr(),
+				dcc.Graph(id='graph-{}'.format(channel_num), figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]))
 	
 	else:
 		return(html.Div())  

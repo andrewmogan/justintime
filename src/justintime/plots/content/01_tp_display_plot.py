@@ -75,32 +75,33 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						
 						if "density_plot" in density:
 							logging.info("2D Density plot chosen")
+							
 							if "Z" in adcmap:
 								fig = tp_density(data.tp_df_Z,data.xmin_Z, data.xmax_Z,fzmin,fzmax,fig_w, fig_h, data.info)
 								add_dunedaq_annotation(fig)
 								children += [
 									html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 									#html.Hr(),
-									dcc.Graph(figure=fig)]
+									dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
 							if "V" in adcmap:
 								fig = tp_density(data.tp_df_V,data.xmin_V, data.xmax_V,fzmin,fzmax,fig_w, fig_h, data.info)
 								add_dunedaq_annotation(fig)
 								children += [
 								html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 								#html.Hr(),
-								dcc.Graph(figure=fig)]
+								dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
 							if "U" in adcmap:
 								fig = tp_density(data.tp_df_U,data.xmin_U, data.xmax_U,fzmin,fzmax,fig_w, fig_h, data.info)
 								add_dunedaq_annotation(fig)
 								children += [
 									html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 									#html.Hr(),
-									dcc.Graph(figure=fig)]
+									dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
 							fig = tp_density(data.tp_df_O,data.xmin_O, data.xmax_O,fzmin,fzmax,fig_w, fig_h, data.info)
 							children += [
 								html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 								#html.Hr(),
-								dcc.Graph(figure=fig)]
+								dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
 							add_dunedaq_annotation(fig)
 						else:
 							logging.info("Scatter Plot Chosen")
@@ -110,27 +111,27 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 								children += [
 									html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 									#html.Hr(),
-									dcc.Graph(figure=fig),]
+									dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"}),]
 							if "V" in adcmap:
 								fig = make_tp_plot(data.tp_df_V, data.xmin_V,data.xmax_V, fzmin, fzmax, fig_w, fig_h, data.info)
 								add_dunedaq_annotation(fig)
 								children += [
 									html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 									#html.Hr(),
-									dcc.Graph(figure=fig)]
+									dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
 							if "U" in adcmap:
 								fig = make_tp_plot(data.tp_df_U, data.xmin_U,data.xmax_U, fzmin, fzmax, fig_w, fig_h, data.info)
 								add_dunedaq_annotation(fig)
 								children += [
 									html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 									#html.Hr(),
-									dcc.Graph(figure=fig)]
+									dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
 							fig = make_tp_plot(data.tp_df_O,data.xmin_O,data.xmax_O, fzmin, fzmax, fig_w, fig_h, data.info)
 							add_dunedaq_annotation(fig)
 							children += [
 								html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
 								#html.Hr(),
-								dcc.Graph(figure=fig)]
+								dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
 						
 						if adcmap:
 							return(html.Div([

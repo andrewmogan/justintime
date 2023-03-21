@@ -153,7 +153,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 						children += [
 							html.B(f"ADC Counts: Z-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)}"),
 							#html.Hr(),
-							dcc.Graph(figure=fig),
+							dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"}),
 						]
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					
@@ -235,10 +235,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 				
 						add_dunedaq_annotation(fig)
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
-						children += [
-							html.B(f"ADC Counts: V-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)}"),
-						#	html.Hr(),
-							dcc.Graph(figure=fig),
+						children += [html.B(f"ADC Counts: V-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)}"),
+							dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"}),
 						]
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					if 'U' in adcmap_selection:
@@ -319,10 +317,8 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
 									)
 						add_dunedaq_annotation(fig)
 						fig.update_layout(font_family="Lato", title_font_family="Lato")
-						children += [
-							html.B(f"ADC Counts: U-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)}"),
-							#html.Hr(),
-							dcc.Graph(figure=fig),
+						children += [html.B(f"ADC Counts: U-plane, Initial TS: {str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)}"),
+							dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"}),
 						]
 						fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 					if adcmap_selection:

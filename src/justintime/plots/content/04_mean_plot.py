@@ -99,9 +99,9 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 						)
 						add_dunedaq_annotation(fig_mean)
 						fig_mean.update_layout(font_family="Lato", title_font_family="Lato")
-						if theme=="lightly":
+						if theme=="flatly":
 							fig_mean.update_layout(plot_bgcolor='lightgrey')
-						return(html.Div([selection_line(partition,run,raw_data_file, trigger_record),html.B("Mean by plane"),dcc.Graph(figure=fig_mean)]))
+						return(html.Div([selection_line(partition,run,raw_data_file, trigger_record),html.B("Mean by plane"),dcc.Graph(figure=fig_mean,style={"marginTop":"10px"})]))
 			else:
 				return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)

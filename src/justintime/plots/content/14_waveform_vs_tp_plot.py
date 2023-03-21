@@ -125,7 +125,7 @@ def graph(partition,run,raw_data_file, trigger_record,data,offset,plane,overlay_
                                         
         add_dunedaq_annotation(fig)
         fig.update_layout(font_family="Lato", title_font_family="Lato")
-        return(html.Div([html.B(f"Waveform and TPs for channel {channel_num}"),dcc.Graph(id='graph-{}'.format(channel_num), figure=fig)]))
+        return(html.Div([html.B(f"Waveform and TPs for channel {channel_num}"),dcc.Graph(id='graph-{}'.format(channel_num), figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]))
     else:
         return(html.Div())   
                                             

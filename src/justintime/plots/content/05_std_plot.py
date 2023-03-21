@@ -82,9 +82,9 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					)
 					add_dunedaq_annotation(fig_std)
 					fig_std.update_layout(font_family="Lato", title_font_family="Lato")
-					if theme=="lightly":
+					if theme=="flatly":
 						fig_std.update_layout(plot_bgcolor='lightgrey')
-					return(html.Div([html.B("STD by plane"),dcc.Graph(figure=fig_std)]))
+					return(html.Div([html.Br(),html.B("STD by plane"),dcc.Graph(figure=fig_std,style={"marginTop":"10px"})]))
 				else:
 					return(html.Div(html.H6(nothing_to_plot())))
 			return(original_state)
