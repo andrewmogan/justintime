@@ -90,7 +90,7 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",color
 							"titleside": "right"
 						},
 						"opacity": 0
-					}
+					},showlegend=False,
 			)
 		)
 
@@ -116,6 +116,7 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",color
 			yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
 			yaxis_title="Offline Channel",
 			xaxis_title="Time ticks",
+
 			height=600)
 	else:
 		
