@@ -192,7 +192,7 @@ def tp_for_adc(df, cmin, cmax):
                 symmetric=False,
                 array=df['peak_time']-df["start_time"],
                 arrayminus=df["time_over_threshold"]-(df['peak_time']-df["start_time"])),
-                mode='markers',name="TP Trace",
+                mode='markers',name="Trigger Primitives",
                 
                 marker=dict(size=df["sum_adc"],
                     sizemode='area',
@@ -270,7 +270,6 @@ def tp_hist_for_mean_std(df, xmin, xmax, info):
 
     else:
         fig = go.Scatter()
- 
 
     return fig
 
