@@ -9,7 +9,7 @@ import numpy as np
 import rich
 import logging
 from ... all_data import trigger_record_data
-from ... plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot
+from ... plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot,tp_hist_for_mean_std
 from .. import plot_class
 
 
@@ -67,21 +67,27 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 						logging.info(data.df_V_mean)
 						logging.info("Mean U-Plane")
 						logging.info(data.df_U_mean)
-
-						fig_mean = make_subplots(rows=1, cols=3,
+						data.init_tp()
+						fig_mean = make_subplots(rows=2, cols=3,shared_xaxes=True,row_heights=[0.4,1.4],
+            			vertical_spacing=0.005,
 							subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
 						fig_mean.add_trace(
 							go.Scattergl(x=data.df_U_mean.index.astype(int), y=data.df_U_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-							row=1, col=1
+							row=2, col=1
 						)
+						fig_mean.add_trace(tp_hist_for_mean_std(data.tp_df_U,data.xmin_U,data.xmax_U,  data.info),row=1,col=1)
+						
 						fig_mean.add_trace(
 							go.Scattergl(x=data.df_V_mean.index.astype(int), y=data.df_V_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-							row=1, col=2
+							row=2, col=2
 						)
+						fig_mean.add_trace(tp_hist_for_mean_std(data.tp_df_V,data.xmin_V,data.xmax_V,  data.info),row=1,col=2)
+
 						fig_mean.add_trace(
 							go.Scattergl(x=data.df_Z_mean.index.astype(int), y=data.df_Z_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-							row=1, col=3
+							row=2, col=3
 						)
+						fig_mean.add_trace(tp_hist_for_mean_std(data.tp_df_Z,data.xmin_Z,data.xmax_Z,  data.info),row=1,col=3)
 					#	fig_mean.update_xaxes(mirror=True,showline=True,linecolor='black',)
 					#	fig_mean.update_yaxes(mirror=True,showline=True,linecolor='black',)
 						fig_mean.update_layout(
@@ -91,8 +97,8 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 							margin=dict(
 								l=50,
 								r=50,
-								b=100,
-								t=100,
+								b=60,
+								t=60,
 								pad=4
 							)
 							# showlegend=False

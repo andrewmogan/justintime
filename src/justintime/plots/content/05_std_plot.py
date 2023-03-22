@@ -8,7 +8,7 @@ import rich
 import logging
 import numpy as np
 from .. import plot_class
-from ... plotting_functions import add_dunedaq_annotation, selection_line, nothing_to_plot
+from ... plotting_functions import add_dunedaq_annotation, selection_line, tp_hist_for_mean_std,nothing_to_plot
 
 
 def return_obj(dash_app, engine, storage,theme):
@@ -52,20 +52,27 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 					logging.info(data.df_V_std)
 					logging.info("STD U-Plane")
 					logging.info(data.df_U_std)
-					fig_std = make_subplots(rows=1, cols=3,
+					data.init_tp()
+					fig_std = make_subplots(rows=2, cols=3,shared_xaxes=True,row_heights=[0.4,1.4],
+            			vertical_spacing=0.005,
 						subplot_titles=("STD U-Plane", "STD V-Plane", "STD Z-Plane"))
 					fig_std.add_trace(
 						go.Scattergl(x=data.df_U_std.index.astype(int), y=data.df_U_std, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-						row=1, col=1
+						row=2, col=1
 					)
+					fig_std.add_trace(tp_hist_for_mean_std(data.tp_df_U,data.xmin_U,data.xmax_U,  data.info),row=1,col=1)
+
 					fig_std.add_trace(
 						go.Scattergl(x=data.df_V_std.index.astype(int), y=data.df_V_std, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-						row=1, col=2
+						row=2, col=2
 					)
+					fig_std.add_trace(tp_hist_for_mean_std(data.tp_df_V,data.xmin_V,data.xmax_V,  data.info),row=1,col=2)
+
 					fig_std.add_trace(
 						go.Scattergl(x=data.df_Z_std.index.astype(int), y=data.df_Z_std, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-						row=1, col=3
+						row=2, col=3
 					)
+					fig_std.add_trace(tp_hist_for_mean_std(data.tp_df_Z,data.xmin_Z,data.xmax_Z,  data.info),row=1,col=3)
 
 					fig_std.update_layout(
 						# autosize=False,
@@ -74,8 +81,8 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 						margin=dict(
 							l=50,
 							r=50,
-							b=100,
-							t=100,
+							b=60,
+							t=60,
 							pad=4
 						)
 						# showlegend=False

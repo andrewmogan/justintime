@@ -264,6 +264,16 @@ def waveform_tps(fig,df,channel_num):
         
     return fig
 
+def tp_hist_for_mean_std(df, xmin, xmax, info):
+    if not df.empty:
+        fig=go.Histogram(x=df["offline_ch"],name='TP Multiplicity per channel', nbinsx=(xmax-xmin))
+
+    else:
+        fig = go.Scatter()
+ 
+
+    return fig
+
 def nothing_to_plot():
 
     return "Nothing to plot"
