@@ -47,7 +47,7 @@ def selection_line(partition,run,raw_data_file, trigger_record):
 		,html.Hr()
 	]))
 
-def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",colorscale:str=""):
+def make_static_img(df, zmin: int = None, zmax: int = None, title: str = "",colorscale:str="", height:int=600):
 	
 	if not df.empty:
 		
@@ -90,7 +90,8 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",color
 							"titleside": "right"
 						},
 						"opacity": 0
-					},showlegend=False,
+					},
+                showlegend=False
 			)
 		)
 
@@ -116,8 +117,7 @@ def make_static_img(df,zmin: int = None, zmax: int = None, title: str = "",color
 			yaxis=dict(showgrid=False, zeroline=False, range=[ymin, ymax]),
 			yaxis_title="Offline Channel",
 			xaxis_title="Time ticks",
-
-			height=600)
+			height=height)
 	else:
 		
 		fig=go.Figure()
@@ -142,7 +142,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
             go.Scattergl(
                 y=df['offline_ch'],
                 x=df['peak_time'],
-                mode='markers',name="TP Trace",
+                mode='markers',name="Trigger Primitives",
                 marker=dict(
                     size=10,
                     color=df['peak_adc'], #set color equal to a variable
@@ -181,18 +181,29 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 
     return fig
 
-def tp_for_adc(df, cmin, cmax):
+def tp_for_adc(df, cmin, cmax, orientation):
+
+    if orientation == 'hd':
+        x_label = 'peak_time'
+        y_label = 'offline_ch'
+    elif orientation == 'vd':
+        x_label = 'offline_ch'
+        y_label = 'peak_time'
+    else:
+        raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [hd, vd]")
+
     if not df.empty:
         rich.print(2.*max(df['sum_adc'])/(10**2))
         rich.print(max(df['sum_adc']))
         fig=go.Scattergl(
-                y=df['offline_ch'],
-                x=df['peak_time'],
-                error_x=dict(
-                type='data',
-                symmetric=False,
-                array=df['peak_time']-df["start_time"],
-                arrayminus=df["time_over_threshold"]-(df['peak_time']-df["start_time"])),
+                x=df[x_label],
+                y=df[y_label],
+                # error_x=dict(
+                # 	type='data',
+                # 	symmetric=False,
+                # 	array=df['peak_time']-df["start_time"],
+                # 	arrayminus=df["time_over_threshold"]-(df['peak_time']-df["start_time"])
+                # ),
                 mode='markers',name="Trigger Primitives",
                 
                 marker=dict(size=df["sum_adc"],
@@ -202,13 +213,16 @@ def tp_for_adc(df, cmin, cmax):
                     colorscale="delta", # one of plotly colorscales
                     cmin = 0,
                     cmax = cmax,
-                    showscale=True,colorbar=dict( x=1.12 
-                  )
-                    )
+                    showscale=True,colorbar=dict( x=1.12 )
+                    ),
+                text=[
+                    f"start : {row['start_time']}<br>peak : {row['peak_time']}<br>end : {row['start_time']+row['time_over_threshold']}<br>tot : {row['time_over_threshold']}<br>offline ch: {row['offline_ch']}<br>sum adc : {row['sum_adc']}<br>peak adc : {row['peak_adc']}"
+                        for index, row in df.iterrows()
+                    ],
                 )   
     else:
         fig =go.Scatter()
-    
+
     return fig
 
 def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
@@ -271,6 +285,7 @@ def tp_hist_for_mean_std(df, xmin, xmax, info):
 
     else:
         fig = go.Scatter()
+ 
 
     return fig
 
