@@ -50,12 +50,12 @@ class trigger_record_data:
 		self.ts_min = self.df.index.min()
 		self.ts_max = self.df.index.max()
 
-		if self.tr_ts != 0xffffffff:
+		if self.tr_ts != 0xffffffffffffffff:
 			self.ts_off = self.tr_ts 
 		else:
 			logging.warning("Invalid trigger TS detected!!!")
 			logging.info("Using tmax-tmin as trigger timestamp")
-			self.ts_off = ((self.ts_max+self.ts_min)//2)
+			self.ts_off = int((self.ts_max+self.ts_min)//2)
 			
 		logging.info(f"Timestamp offset: {self.ts_off}")
 
