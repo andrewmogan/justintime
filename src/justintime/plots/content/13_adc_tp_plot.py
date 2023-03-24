@@ -34,12 +34,11 @@ def return_obj(dash_app, engine, storage,theme):
 
 def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offset, overlay_tps, orientation, static_img_height=600):
     fzmin, fzmax = tr_color_range
-
+    ts_title =  'DTS time ticks (16ns)'
+    och_title = 'Offline Channel'
     if "offset_removal" in offset:
         
         df_adc = (getattr(data, f'df_{plane_id}') - getattr(data,f'df_{plane_id}_mean'))
-        ts_title =  'DTS time ticks (16ns)'
-        och_title = 'Offline Channel'
         
         if orientation == 'hd':
             df_adc = df_adc.T
@@ -66,18 +65,20 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
                 logging.info(f"TPs in {plane_id}-Plane:")
                 logging.info(df_tps)
                 fig.add_trace(tp_for_adc(df_tps, fzmin, fzmax, orientation))
+                rich.print(fzmin,fzmax)    
 
-        else:                                     
+        else:
+            rich.print(fzmin,fzmax)                                     
             fig = px.imshow(df_adc, zmin=fzmin, zmax=fzmax, title=title, color_continuous_scale=colorscale, aspect="auto")
             if "tp_overlay" in overlay_tps:
                     logging.info(f"TPs in {plane_id}-Plane:")
                     logging.info(df_tps)
                     fig.add_trace(tp_for_adc(df_tps, fzmin,fzmax, orientation))
-                    fig.update_layout(
-                        height=static_img_height,
-                        yaxis_title=yaxis_title,
-                        xaxis_title=xaxis_title,
-                        showlegend=True
+        fig.update_layout(
+                    height=static_img_height,
+                    yaxis_title=yaxis_title,
+                    xaxis_title=xaxis_title,
+                    showlegend=True
                     )
 
     else:
@@ -88,9 +89,11 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
                 df_adc = df_adc.T
                 xaxis_title = ts_title
                 yaxis_title = och_title
+                static_img_height = 600
             elif orientation == 'vd':
                 xaxis_title = och_title
                 yaxis_title = ts_title
+                static_img_height = 1200
             else:
                 raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [hd, vd]")
             
@@ -111,7 +114,7 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
                     logging.info(f"TPs in {plane_id}-Plane:")
                     logging.info(df_tps)
                     fig.add_trace(tp_for_adc(df_tps, fzmin,fzmax, orientation))
-                fig.update_layout(
+            fig.update_layout(
                         height=static_img_height,
                         yaxis_title=yaxis_title,
                         xaxis_title=xaxis_title,
