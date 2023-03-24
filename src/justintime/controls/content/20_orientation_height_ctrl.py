@@ -29,7 +29,7 @@ def return_obj(dash_app, engine):
                         id="height_select_ctrl",value=600,
                     ),
                     ],style={"marginBottom":"1.0em"}))
-                ])]),
+                ])],style={"marginTop":"1.0em","marginBottom":"0.2em"}),
         id=ctrl_id
     )
     

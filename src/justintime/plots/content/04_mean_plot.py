@@ -68,26 +68,26 @@ def init_callbacks(dash_app, storage, plot_id,theme):
                         logging.info("Mean U-Plane")
                         logging.info(data.df_U_mean)
                         data.init_tp()
-                        fig_mean = make_subplots(rows=2, cols=3,shared_xaxes=True,row_heights=[0.4,1.4],
-                        vertical_spacing=0.005,
+                        fig_mean = make_subplots(rows=2, cols=3,shared_xaxes=True,row_heights=[1.4,0.4],
+                        vertical_spacing=0.04,
                             subplot_titles=("Mean U-Plane", "Mean V-Plane", "Mean Z-Plane"))
                         fig_mean.add_trace(
                             go.Scattergl(x=data.df_U_mean.index.astype(int), y=data.df_U_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-                            row=2, col=1
+                            row=1, col=1
                         )
-                        fig_mean.add_trace(tp_hist_for_mean_std(data.tp_df_U,data.xmin_U,data.xmax_U,  data.info),row=1,col=1)
+                        fig_mean.add_trace(tp_hist_for_mean_std(data.tp_df_U,data.xmin_U,data.xmax_U,  data.info),row=2,col=1)
                         
                         fig_mean.add_trace(
                             go.Scattergl(x=data.df_V_mean.index.astype(int), y=data.df_V_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-                            row=2, col=2
+                            row=1, col=2
                         )
-                        fig_mean.add_trace(tp_hist_for_mean_std(data.tp_df_V,data.xmin_V,data.xmax_V,  data.info),row=1,col=2)
+                        fig_mean.add_trace(tp_hist_for_mean_std(data.tp_df_V,data.xmin_V,data.xmax_V,  data.info),row=2,col=2)
 
                         fig_mean.add_trace(
                             go.Scattergl(x=data.df_Z_mean.index.astype(int), y=data.df_Z_mean, mode='markers', name=f"Run {data.info['run_number']}: {data.info['trigger_number']}"),
-                            row=2, col=3
+                            row=1, col=3
                         )
-                        fig_mean.add_trace(tp_hist_for_mean_std(data.tp_df_Z,data.xmin_Z,data.xmax_Z,  data.info),row=1,col=3)
+                        fig_mean.add_trace(tp_hist_for_mean_std(data.tp_df_Z,data.xmin_Z,data.xmax_Z,  data.info),row=2,col=3)
                     #    fig_mean.update_xaxes(mirror=True,showline=True,linecolor='black',)
                     #    fig_mean.update_yaxes(mirror=True,showline=True,linecolor='black',)
                         fig_mean.update_layout(
