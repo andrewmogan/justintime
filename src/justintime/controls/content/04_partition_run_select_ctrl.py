@@ -34,15 +34,11 @@ def return_obj(dash_app, engine):
                 ])]),
         id=ctrl_id
     )
-    
 
     ctrl = ctrl_class.ctrl("name", ctrl_id, ctrl_div, engine)
     
     init_callbacks(dash_app,engine)
-    return(ctrl)
-
-
-    
+    return(ctrl) 
     
 def init_callbacks(dash_app, engine):
 

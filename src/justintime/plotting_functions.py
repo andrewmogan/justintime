@@ -47,7 +47,7 @@ def selection_line(partition,run,raw_data_file, trigger_record):
         ,html.Hr()
     ]))
 
-def make_static_img(df, zmin: int = None, zmax: int = None, title: str = "",colorscale:str="", height:int=600):
+def make_static_img(df, zmin: int = None, zmax: int = None, title: str = "",colorscale:str="", height:int=None,orientation: str = ""):
     
     if not df.empty:
         rich.print(df)
@@ -58,11 +58,18 @@ def make_static_img(df, zmin: int = None, zmax: int = None, title: str = "",colo
         xmin, xmax = min(df.columns), max(df.columns)
         #ymin, ymax = min(df.index), max(df.index)
         ymin, ymax = max(df.index), min(df.index)
-        col_range = list(range(xmin, xmax))
-        rich.print(ymax,ymin) #in hd channel
-        rich.print(xmax,xmin) #in vd ts
-        df = df.reindex(columns=col_range, fill_value=0)
 
+        if orientation=="horizontal":
+            col_range = list(range(ymax, ymin))
+            df = df.reindex(index=col_range, fill_value=0)
+            
+        elif orientation=="vertical":
+            col_range = list(range(xmin, xmax))
+            df = df.reindex(columns=col_range, fill_value=0)
+
+        else:
+            raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertical]")
+        
         img_width = df.columns.size
         img_height = df.index.size
 
@@ -188,14 +195,14 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 
 def tp_for_adc(df, cmin, cmax, orientation):
 
-    if orientation == 'hd':
+    if orientation == 'horizontal':
         x_label = 'peak_time'
         y_label = 'offline_ch'
-    elif orientation == 'vd':
+    elif orientation == 'vertical':
         x_label = 'offline_ch'
         y_label = 'peak_time'
     else:
-        raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [hd, vd]")
+        raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertical]")
 
     if not df.empty:
         rich.print(2.*max(df['sum_adc'])/(10**2))

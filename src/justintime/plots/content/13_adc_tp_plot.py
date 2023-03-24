@@ -27,12 +27,13 @@ def return_obj(dash_app, engine, storage,theme):
     plot.add_ctrl("12_static_image_ctrl")
     plot.add_ctrl("19_tp_overlay_ctrl")
     plot.add_ctrl("17_offset_ctrl")
+    plot.add_ctrl("20_orientation_height_ctrl")
     #plot.add_ctrl("18_cnr_ctrl")
 
     init_callbacks(dash_app, storage, plot_id, engine,theme)
     return(plot)
 
-def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offset, overlay_tps, orientation, static_img_height=600):
+def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offset, overlay_tps, orientation, height):
     fzmin, fzmax = tr_color_range
     ts_title =  'DTS time ticks (16ns)'
     och_title = 'Offline Channel'
@@ -40,17 +41,17 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
         
         df_adc = (getattr(data, f'df_{plane_id}') - getattr(data,f'df_{plane_id}_mean'))
         
-        if orientation == 'hd':
+        if orientation == 'horizontal':
             df_adc = df_adc.T
             xaxis_title = ts_title
             yaxis_title = och_title
-            static_img_height = 600
-        elif orientation == 'vd':
+           
+        elif orientation == 'vertical':
             xaxis_title = och_title
             yaxis_title = ts_title
-            static_img_height = 1200
+           
         else:
-            raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [hd, vd]")
+            raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertica]")
 
         df_tps = getattr(data, f'tp_df_{plane_id}')
 
@@ -60,7 +61,7 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
             
         title = f"{plane_id}-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
         if "make_static_image" in static_image:
-            fig = make_static_img(df_adc, zmin = fzmin, zmax = fzmax, title=title, colorscale=colorscale, height=static_img_height)
+            fig = make_static_img(df_adc, zmin = fzmin, zmax = fzmax, title=title, colorscale=colorscale, height=height,orientation=orientation)
             if "tp_overlay" in overlay_tps:
                 logging.info(f"TPs in {plane_id}-Plane:")
                 logging.info(df_tps)
@@ -75,7 +76,7 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
                     logging.info(df_tps)
                     fig.add_trace(tp_for_adc(df_tps, fzmin,fzmax, orientation))
         fig.update_layout(
-                    height=static_img_height,
+                    height=height,
                     yaxis_title=yaxis_title,
                     xaxis_title=xaxis_title,
                     showlegend=True
@@ -85,24 +86,24 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
             logging.info("Raw ADCs in Z-Plane:")
             df_adc = getattr(data, f"df_{plane_id}")
 
-            if orientation == 'hd':
+            if orientation == 'horizontal':
                 df_adc = df_adc.T
                 xaxis_title = ts_title
                 yaxis_title = och_title
-                static_img_height = 600
-            elif orientation == 'vd':
+               
+            elif orientation == 'vertica':
                 xaxis_title = och_title
                 yaxis_title = ts_title
-                static_img_height = 1200
+               
             else:
-                raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [hd, vd]")
+                raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertical]")
             
             df_tps = getattr(data, f'tp_df_{plane_id}')
             
             title = f"{plane_id}-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
         
             if "make_static_image" in static_image:
-                fig = make_static_img(df_adc,zmin = fzmin, zmax = fzmax, title = title, colorscale=colorscale, height=static_img_height)
+                fig = make_static_img(df_adc,zmin = fzmin, zmax = fzmax, title = title, colorscale=colorscale, height=height,orientation=orientation)
                 if "tp_overlay" in overlay_tps: 
                     logging.info(f"TPs in {plane_id}-Plane:")
                     logging.info(df_tps)
@@ -115,7 +116,7 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
                     logging.info(df_tps)
                     fig.add_trace(tp_for_adc(df_tps, fzmin,fzmax, orientation))
             fig.update_layout(
-                        height=static_img_height,
+                        height=height,
                         yaxis_title=yaxis_title,
                         xaxis_title=xaxis_title,
                         showlegend=True
@@ -150,12 +151,14 @@ def init_callbacks(dash_app, storage, plot_id, engine, theme):
         State("17_offset_ctrl", "value"),
         #State("18_cnr_ctrl", "value"),
         State("19_tp_overlay_ctrl","value"),
+        State("orientation_ctrl","value"),
+        State("height_select_ctrl","value"),
         State(plot_id, "children"),
     )
-    def plot_trd_graph(n_clicks, refresh,trigger_record, raw_data_file, partition, run, adcmap_selection, colorscale, tr_color_range, static_image, offset, overlay_tps, original_state):
+    def plot_trd_graph(n_clicks, refresh,trigger_record, raw_data_file, partition, run, adcmap_selection, colorscale, tr_color_range, static_image, offset, overlay_tps,orientation,height,original_state):
         
         load_figure_template(theme)
-        orientation = 'vd'
+        orientation = orientation
         if trigger_record and raw_data_file:
             if plot_id in storage.shown_plots:
                 try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
@@ -173,13 +176,13 @@ def init_callbacks(dash_app, storage, plot_id, engine, theme):
                     children = []
                     if 'Z' in adcmap_selection:
                         logging.info("Z Plane selected")
-                        children += plot_adc_map(data, 'Z', colorscale, tr_color_range, static_image, offset, overlay_tps, orientation)
+                        children += plot_adc_map(data, 'Z', colorscale, tr_color_range, static_image, offset, overlay_tps, orientation,height)
                     if 'U' in adcmap_selection:
                         logging.info("U Plane selected")
-                        children += plot_adc_map(data, 'U', colorscale, tr_color_range, static_image, offset, overlay_tps, orientation)
+                        children += plot_adc_map(data, 'U', colorscale, tr_color_range, static_image, offset, overlay_tps, orientation,height)
                     if 'V' in adcmap_selection:
                         logging.info("V Plane selected")
-                        children += plot_adc_map(data, 'V', colorscale, tr_color_range, static_image, offset, overlay_tps, orientation)
+                        children += plot_adc_map(data, 'V', colorscale, tr_color_range, static_image, offset, overlay_tps, orientation,height)
 
                     # if 'Z' in adcmap_selection:
                         
