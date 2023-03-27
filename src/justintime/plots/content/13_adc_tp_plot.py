@@ -51,7 +51,7 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
             yaxis_title = ts_title
            
         else:
-            raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertica]")
+            raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertical]")
 
         df_tps = getattr(data, f'tp_df_{plane_id}')
 
@@ -91,7 +91,7 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
                 xaxis_title = ts_title
                 yaxis_title = och_title
                
-            elif orientation == 'vertica':
+            elif orientation == 'vertical':
                 xaxis_title = och_title
                 yaxis_title = ts_title
                
@@ -172,7 +172,7 @@ def init_callbacks(dash_app, storage, plot_id, engine, theme):
                 if len(data.df)!=0 and len(data.df.index!=0):
                     data.init_tp()
                     # data.init_cnr()
-
+                    rich.print(static_image,offset,overlay_tps,orientation,height)
                     children = []
                     if 'Z' in adcmap_selection:
                         logging.info("Z Plane selected")
