@@ -1,7 +1,7 @@
 
 DCKR_MAKE_HERE:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 DCKR_BASE_IMG=ghcr.io/dune-daq/c8-minimal:latest
-DUNEDAQ_RELEASE=rc-v4.0.0-1
+# DUNEDAQ_RELEASE=rc-v4.0.0-1
 JINT_ROOT=$(shell git rev-parse --show-toplevel)
 JINT_BRANCH=$(shell git describe --tags --exact-match 2> /dev/null \
   || git symbolic-ref -q --short HEAD \
@@ -37,6 +37,7 @@ all: connection-check  workarea gits dunedaq justintime image ## Build all targe
 
 .PHONY: workarea 
 workarea: ## Create dunedaq work area
+	@[ "${DUNEDAQ_RELEASE}" ] || ( echo ">> DUNEDAQ_RELEASE is not set. Usage: make $@ DUNEDAQ_RELEASE=<version>"; exit 1 )
 	@echo "------------------------------------------"
 	@echo "🚧 Creating new workarea 🚧"
 	@echo "------------------------------------------"
