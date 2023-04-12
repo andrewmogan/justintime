@@ -35,8 +35,8 @@ connection-check: ## Check that GPN connection is available
 .PHONY: all
 all: connection-check  workarea gits dunedaq justintime image ## Build all targets
 
-.PHONY: workarea ## Create dunedaq work area
-workarea:
+.PHONY: workarea 
+workarea: ## Create dunedaq work area
 	@echo "------------------------------------------"
 	@echo "🚧 Creating new workarea 🚧"
 	@echo "------------------------------------------"
