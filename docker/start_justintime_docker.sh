@@ -1,7 +1,25 @@
+#!/bin/bash
 
+VOLUME_ID=1
+IS_TEST=false
 
-VOLUME_ID=2
-IS_TEST=true
+usage() { echo "Usage: $0 [-v <data volume id>] [-t]" 1>&2; exit 1; }
+
+while getopts "v:t" o; do
+    case "${o}" in
+        v)
+            VOLUME_ID=${OPTARG}
+            ;;
+        t)
+            IS_TEST=true
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
 BASE_PORT=18000
 JINT_TAG=$(git describe --tags --exact-match 2> /dev/null \
   || git symbolic-ref -q --short HEAD \
