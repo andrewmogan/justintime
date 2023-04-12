@@ -5,7 +5,7 @@ import plotly.express as px
 from .. import ctrl_class
 from ... cruncher.datamanager import DataManager
 
-def return_obj(dash_app, engine):
+def return_obj(dash_app, engine, storage):
 
     ctrl_id = "09_colorscale_ctrl"
 

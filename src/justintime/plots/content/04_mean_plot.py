@@ -8,7 +8,6 @@ from plotly.subplots import make_subplots
 import numpy as np
 import rich
 import logging
-from ... all_data import trigger_record_data
 from ... plotting_functions import add_dunedaq_annotation, selection_line,nothing_to_plot,tp_hist_for_mean_std
 from .. import plot_class
 

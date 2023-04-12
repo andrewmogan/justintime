@@ -10,7 +10,7 @@ import logging
 import pandas as pd
 from .. import plot_class
 from ... cruncher import datamanager
-from ... all_data import trigger_record_data
+from ... all_data import TriggerRecordData
 from ... plotting_functions import add_dunedaq_annotation, selection_line, make_static_img, make_tp_plot,tp_density,nothing_to_plot
 
 
@@ -48,7 +48,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
         State('02_description_ctrl',"style"),
         State(plot_id, "children"),
     )
-    def plot_tp_graph(n_clicks, refresh,trigger_record,partition,run, raw_data_file,adcmap, tr_color_range, density,description,original_state):
+    def plot_tp_graph(n_clicks, refresh, trigger_record, partition, run, raw_data_file,adcmap, tr_color_range, density,description,original_state):
         load_figure_template(theme)
         if trigger_record and raw_data_file:
             if plot_id in storage.shown_plots:
@@ -80,26 +80,26 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
                                 fig = tp_density(data.tp_df_Z,data.xmin_Z, data.xmax_Z,fzmin,fzmax,fig_w, fig_h, data.info)
                                 add_dunedaq_annotation(fig)
                                 children += [
-                                    html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
+                                    html.B("TPs: Z-plane, Initial TS:"+str(data.ts_min)),
                                     #html.Hr(),
                                     dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
                             if "V" in adcmap:
                                 fig = tp_density(data.tp_df_V,data.xmin_V, data.xmax_V,fzmin,fzmax,fig_w, fig_h, data.info)
                                 add_dunedaq_annotation(fig)
                                 children += [
-                                html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
+                                html.B("TPs: V-plane, Initial TS:"+str(data.ts_min)),
                                 #html.Hr(),
                                 dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
                             if "U" in adcmap:
                                 fig = tp_density(data.tp_df_U,data.xmin_U, data.xmax_U,fzmin,fzmax,fig_w, fig_h, data.info)
                                 add_dunedaq_annotation(fig)
                                 children += [
-                                    html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
+                                    html.B("TPs: U-plane,Initial TS:"+str(data.ts_min)),
                                     #html.Hr(),
                                     dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
                             fig = tp_density(data.tp_df_O,data.xmin_O, data.xmax_O,fzmin,fzmax,fig_w, fig_h, data.info)
                             children += [
-                                html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
+                                html.B("TPs: Others, Initial TS:"+str(data.ts_min)),
                                 #html.Hr(),
                                 dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
                             add_dunedaq_annotation(fig)
@@ -109,27 +109,27 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
                                 fig = make_tp_plot(data.tp_df_Z,data.xmin_Z,data.xmax_Z, fzmin, fzmax, fig_w, fig_h, data.info)
                                 add_dunedaq_annotation(fig)
                                 children += [
-                                    html.B("TPs: Z-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
+                                    html.B("TPs: Z-plane, Initial TS:"+str(data.ts_min)),
                                     #html.Hr(),
                                     dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"}),]
                             if "V" in adcmap:
                                 fig = make_tp_plot(data.tp_df_V, data.xmin_V,data.xmax_V, fzmin, fzmax, fig_w, fig_h, data.info)
                                 add_dunedaq_annotation(fig)
                                 children += [
-                                    html.B("TPs: V-plane, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
+                                    html.B("TPs: V-plane, Initial TS:"+str(data.ts_min)),
                                     #html.Hr(),
                                     dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
                             if "U" in adcmap:
                                 fig = make_tp_plot(data.tp_df_U, data.xmin_U,data.xmax_U, fzmin, fzmax, fig_w, fig_h, data.info)
                                 add_dunedaq_annotation(fig)
                                 children += [
-                                    html.B("TPs: U-plane,Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
+                                    html.B("TPs: U-plane,Initial TS:"+str(data.ts_min)),
                                     #html.Hr(),
                                     dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
                             fig = make_tp_plot(data.tp_df_O,data.xmin_O,data.xmax_O, fzmin, fzmax, fig_w, fig_h, data.info)
                             add_dunedaq_annotation(fig)
                             children += [
-                                html.B("TPs: Others, Initial TS:"+str(trigger_record_data(engine,trigger_record,raw_data_file).ts_min)),
+                                html.B("TPs: Others, Initial TS:"+str(data.ts_min)),
                                 #html.Hr(),
                                 dcc.Graph(figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]
                         

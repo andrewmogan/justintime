@@ -3,7 +3,7 @@ from dash.dependencies import Input, Output, State
 
 from .. import ctrl_class
 
-def return_obj(dash_app, engine):
+def return_obj(dash_app, engine, storage):
     ctrl_id = "11_range_slider_pos_ctrl"
     comp_id = "11_range_slider_pos_comp"
 

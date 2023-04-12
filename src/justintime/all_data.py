@@ -5,7 +5,7 @@ import numpy as np
 import logging
 from .cruncher import signal
 
-class all_data_storage:
+class TriggerRecordCache:
     def __init__(self, engine):
         self.engine = engine
         self.raw_data_files = {}
@@ -22,14 +22,15 @@ class all_data_storage:
         return(self.add_file(trigger_record, raw_data_file))
 
     def add_trigger_record_to_file(self, trigger_record, raw_data_file):
-        self.raw_data_files[raw_data_file][trigger_record] = trigger_record_data(self.engine, trigger_record, raw_data_file)
+        self.raw_data_files[raw_data_file][trigger_record] = TriggerRecordData(self.engine, trigger_record, raw_data_file)
         return(self.raw_data_files[raw_data_file][trigger_record])
 
     def add_file(self, trigger_record, raw_data_file):
         self.raw_data_files[raw_data_file] = {}
         return(self.add_trigger_record_to_file(trigger_record, raw_data_file))
 
-class trigger_record_data:
+
+class TriggerRecordData:
     
     def __init__(self, engine, trigger_record, raw_data_file):
         self.engine = engine

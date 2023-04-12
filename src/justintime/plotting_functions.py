@@ -10,8 +10,6 @@ from matplotlib import cm
 import numpy as np
 import rich
 
-from . all_data import trigger_record_data
-
 def add_dunedaq_annotation(figure):
     figure.add_annotation(dict(font=dict(color="black",size=12),
         #x=x_loc,

@@ -3,7 +3,7 @@ from dash.dependencies import Input, Output, State
 
 from .. import ctrl_class
 
-def return_obj(dash_app, engine):
+def return_obj(dash_app, engine, storage):
     ctrl_id = "14_density_plot_ctrl"
 
     ctrl_div = html.Div([dcc.Checklist(options=[{"label":"Density Plot","value":"density_plot"}], value = ["density_plot"],id=ctrl_id)],style={"fontSize": "1.5rem"})

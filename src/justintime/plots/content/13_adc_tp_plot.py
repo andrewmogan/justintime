@@ -9,7 +9,6 @@ import rich
 import pandas as pd
 import logging
 from .. import plot_class
-from ... all_data import trigger_record_data
 from ... plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot,make_tp_plot,tp_for_adc
 
 def return_obj(dash_app, engine, storage,theme):

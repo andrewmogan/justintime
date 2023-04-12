@@ -3,7 +3,7 @@ from dash.dependencies import Input, Output, State
 
 from .. import ctrl_class
 
-def return_obj(dash_app, engine):
+def return_obj(dash_app, engine, storage):
     ctrl_id = "17_offset_ctrl"
 
     ctrl_div = html.Div([dcc.Checklist(options=[{"label":"Offset Removal","value":"offset_removal"}], value = ["offset_removal"],id=ctrl_id)],style={"marginBottom":"0.2em","fontSize": "1.5rem"})
