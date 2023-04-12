@@ -2,13 +2,17 @@
 
 VOLUME_ID=1
 IS_TEST=false
+CHANNEL_MAP_NAME=VDColdbox
 
-usage() { echo "Usage: $0 [-v <data volume id>] [-t]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-v <data volume id>] [-c <channel map>?]] [-t]" 1>&2; exit 1; }
 
-while getopts "v:t" o; do
+while getopts "v:c:t" o; do
     case "${o}" in
         v)
             VOLUME_ID=${OPTARG}
+            ;;
+        c)
+            CHANNEL_MAP_NAME=${OPTARG}
             ;;
         t)
             IS_TEST=true
@@ -25,7 +29,6 @@ JINT_TAG=$(git describe --tags --exact-match 2> /dev/null \
   || git symbolic-ref -q --short HEAD \
   || git rev-parse --short HEAD)
 DCKR_IMG=justintime:${JINT_TAG}
-CHANNEL_MAP_NAME=VDColdbox
 
 DATA_PATH="/data${VOLUME_ID}"
 INSTANCE_NAME="justintime-data${VOLUME_ID}"
