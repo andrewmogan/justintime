@@ -9,7 +9,7 @@ from .. import ctrl_class
 from ... cruncher.datamanager import DataManager
 
 
-def return_obj(dash_app, engine):
+def return_obj(dash_app, engine, storage):
     ctrl_id = "04_partition_run_select_ctrl"
     data=engine.get_session_run_files_map()
     ctrl_div = html.Div(
@@ -34,15 +34,11 @@ def return_obj(dash_app, engine):
                 ])]),
         id=ctrl_id
     )
-    
 
     ctrl = ctrl_class.ctrl("name", ctrl_id, ctrl_div, engine)
     
     init_callbacks(dash_app,engine)
-    return(ctrl)
-
-
-    
+    return(ctrl) 
     
 def init_callbacks(dash_app, engine):
 

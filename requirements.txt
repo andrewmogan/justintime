@@ -6,7 +6,7 @@ numpy>=1.23.0
 pandas>=1.4.3
 datetime==4.4
 pathlib2>=2.3.7
-rich==12.4.4
+rich
 watchdog==2.1.9
 scipy==1.8.1
 werkzeug

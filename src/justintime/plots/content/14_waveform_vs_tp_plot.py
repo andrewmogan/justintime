@@ -43,7 +43,6 @@ def init_callbacks(dash_app, storage, plot_id,theme):
         State('17_offset_ctrl',"value"),
         State('19_tp_overlay_ctrl',"value"),
         State('file_select_ctrl', "value"),
-        
         State(plot_id, "children"),
     )
     def plot_fft_graph(n_clicks,refresh, trigger_record,partition,run,plane,channel_num,offset,overlay_tps,raw_data_file,original_state):
@@ -66,7 +65,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
                     
                     if channel_num:
                         
-                        return(html.Div([graph(partition,run,raw_data_file, trigger_record,data,offset,plane,overlay_tps,val) for val in channel_num]
+                        return(html.Div(selection_line(partition,run,raw_data_file, trigger_record)),html.Div([graph(partition,run,raw_data_file, trigger_record,data,offset,plane,overlay_tps,val) for val in channel_num]
                                             ))
                             
                     else:
@@ -78,12 +77,10 @@ def init_callbacks(dash_app, storage, plot_id,theme):
         return(html.Div())
 
 def graph(partition,run,raw_data_file, trigger_record,data,offset,plane,overlay_tps,channel_num):
-   
-                            
+                   
     if int(channel_num) in data.channels:
         logging.info(f"Channel number selected: {channel_num}")
 
-       
         if "offset_removal" in offset:
                                         
             if "Z" in plane:
@@ -128,8 +125,7 @@ def graph(partition,run,raw_data_file, trigger_record,data,offset,plane,overlay_
                                         
         add_dunedaq_annotation(fig)
         fig.update_layout(font_family="Lato", title_font_family="Lato")
-        return(html.Div([selection_line(partition,run,raw_data_file, trigger_record),
-                                                html.B(f"Waveform and TPs for channel {channel_num}"),dcc.Graph(id='graph-{}'.format(channel_num), figure=fig)]))
+        return(html.Div([html.B(f"Waveform and TPs for channel {channel_num}"),dcc.Graph(id='graph-{}'.format(channel_num), figure=fig,style={"marginTop":"10px","marginBottom":"10px"})]))
     else:
         return(html.Div())   
                                             

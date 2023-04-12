@@ -5,22 +5,22 @@ import plotly.express as px
 from .. import ctrl_class
 from ... cruncher.datamanager import DataManager
 
-def return_obj(dash_app, engine):
+def return_obj(dash_app, engine, storage):
 
-	ctrl_id = "09_colorscale_ctrl"
+    ctrl_id = "09_colorscale_ctrl"
 
-	ctrl_div = html.Div([
-		html.Div([
-		html.Label("Select a Colorscale for ADC Map: ",style={"fontSize":"12px"}),
-		html.Div([
-		
-		dcc.Dropdown(options=["plasma","RdBu_r"],value=['plasma'],placeholder="Colorscale",
-			id="colorscale_ctrl", clearable=False
-		),
+    ctrl_div = html.Div([
+        html.Div([
+        html.Label("Select a Colorscale for ADC Map: ",style={"fontSize":"12px"}),
+        html.Div([
+        
+        dcc.Dropdown(options=["plasma","RdBu_r"],value='plasma',
+            id="colorscale_ctrl", clearable=False
+        ),
        
-	],style={"marginBottom":"1.0em"})])],id=ctrl_id)
+    ],style={"marginBottom":"1.0em"})])],id=ctrl_id)
 
-	ctrl = ctrl_class.ctrl("colorscale_select", ctrl_id, ctrl_div, engine)
+    ctrl = ctrl_class.ctrl("colorscale_select", ctrl_id, ctrl_div, engine)
 
 
-	return(ctrl)
+    return(ctrl)

@@ -5,7 +5,7 @@ from dash import Input, Output, State, html
 from .. import ctrl_class
 
 
-def return_obj(dash_app, engine):
+def return_obj(dash_app, engine, storage):
     
     ctrl_id = "02_description_ctrl"
     ctrl_div =   html.Div(

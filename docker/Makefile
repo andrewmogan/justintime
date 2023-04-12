@@ -21,77 +21,77 @@ DCKR_OPTS=--user $(shell id -u):$(shell id -g) \
 
 .PHONY: info
 info: 
-	@echo just-in-time root: ${JINT_ROOT}
-	@echo just-in-time tag/branch/hash: ${JINT_BRANCH}
-	@echo build area: ${BUILD_AREA}
-	@echo run area: ${RUN_AREA}
-	@echo docker tag: ${DCKR_TAG}
-	@echo docker version: ${DCKR_VERSION}
+    @echo just-in-time root: ${JINT_ROOT}
+    @echo just-in-time tag/branch/hash: ${JINT_BRANCH}
+    @echo build area: ${BUILD_AREA}
+    @echo run area: ${RUN_AREA}
+    @echo docker tag: ${DCKR_TAG}
+    @echo docker version: ${DCKR_VERSION}
 
 connection-check: ## Check that GPN connection is available
-	@curl  --connect-timeout 1 github.com &> /dev/null
-	
+    @curl  --connect-timeout 1 github.com &> /dev/null
+    
 
 .PHONY: all
 all: connection-check  workarea gits dunedaq justintime image ## Build all targets
 
 .PHONY: workarea ## Create dunedaq work area
 workarea:
-	@echo "------------------------------------------"
-	@echo "🚧 Creating new workarea 🚧"
-	@echo "------------------------------------------"
-	mkdir -p ${RUN_AREA}
-	docker run ${DCKR_OPTS} \
-	    -v /nfs:/nfs:ro \
-	    -v ${RUN_AREA}:/dunedaq/run:z \
-	    -v ${DCKR_MAKE_HERE}/create_workarea.sh:/dunedaq/bin/create_workarea.sh \
-	    ${DCKR_BASE_IMG} \
-	    -c "export PATH=\"/dunedaq/bin/:$$PATH\"; cd /dunedaq/run; create_workarea.sh ${DUNEDAQ_RELEASE}"
+    @echo "------------------------------------------"
+    @echo "🚧 Creating new workarea 🚧"
+    @echo "------------------------------------------"
+    mkdir -p ${RUN_AREA}
+    docker run ${DCKR_OPTS} \
+        -v /nfs:/nfs:ro \
+        -v ${RUN_AREA}:/dunedaq/run:z \
+        -v ${DCKR_MAKE_HERE}/create_workarea.sh:/dunedaq/bin/create_workarea.sh \
+        ${DCKR_BASE_IMG} \
+        -c "export PATH=\"/dunedaq/bin/:$$PATH\"; cd /dunedaq/run; create_workarea.sh ${DUNEDAQ_RELEASE}"
 
 ${RUN_AREA}/dunedaq-area/sourcecode/detchannelmaps: connection-check
-	git -C ${RUN_AREA}/dunedaq-area/sourcecode/ clone https://github.com/DUNE-DAQ/detchannelmaps.git -b thea/inverse_map
+    git -C ${RUN_AREA}/dunedaq-area/sourcecode/ clone https://github.com/DUNE-DAQ/detchannelmaps.git -b thea/inverse_map
 
 
 .PHONY: dunedaq 
 dunedaq: ## Build extra dunedaq packages
-	@echo "------------------------------------------"
-	@echo "🛠 Building work area 🛠"
-	@echo "------------------------------------------"
-	docker run ${DCKR_OPTS} \
-		-v ${RUN_AREA}:/dunedaq/run:z \
-		-w /dunedaq/run/dunedaq-area \
-		${DCKR_BASE_IMG} \
-		-c "source ./quick_env.sh; dbt-build"
+    @echo "------------------------------------------"
+    @echo "🛠 Building work area 🛠"
+    @echo "------------------------------------------"
+    docker run ${DCKR_OPTS} \
+        -v ${RUN_AREA}:/dunedaq/run:z \
+        -w /dunedaq/run/dunedaq-area \
+        ${DCKR_BASE_IMG} \
+        -c "source ./quick_env.sh; dbt-build"
 
 .PHONY: justintime
 justintime: ## Install just-in-time extra python packages
-	@echo "------------------------------------------"
-	@echo "🐍 Installing extra python packages 🐍"
-	@echo "------------------------------------------"
-	cp -r ${JINT_ROOT}/ ${RUN_AREA}/justintime
-	@docker run ${DCKR_OPTS} \
-		-v /nfs:/nfs:ro \
-		-v ${RUN_AREA}:/dunedaq/run:z \
-		--env HTTP_PROXY=${HTTP_PROXY} \
-		--env HTTPS_PROXY=${HTTPS_PROXY} \
-		--env NO_PROXY=${NO_PROXY} \
-		-w /dunedaq/ \
-		${DCKR_BASE_IMG} \
-		-c "cd run/dunedaq-area; source quick_env.sh; cd ../justintime; pip install -r requirements.txt"
+    @echo "------------------------------------------"
+    @echo "🐍 Installing extra python packages 🐍"
+    @echo "------------------------------------------"
+    cp -r ${JINT_ROOT}/ ${RUN_AREA}/justintime
+    @docker run ${DCKR_OPTS} \
+        -v /nfs:/nfs:ro \
+        -v ${RUN_AREA}:/dunedaq/run:z \
+        --env HTTP_PROXY=${HTTP_PROXY} \
+        --env HTTPS_PROXY=${HTTPS_PROXY} \
+        --env NO_PROXY=${NO_PROXY} \
+        -w /dunedaq/ \
+        ${DCKR_BASE_IMG} \
+        -c "cd run/dunedaq-area; source quick_env.sh; cd ../justintime; pip install -r requirements.txt"
 
 image: ## Build docker image
-	@echo "------------------------------------------"
-	@echo "📦 Building image 📦"
-	@echo "------------------------------------------"
-	cp ${DCKR_MAKE_HERE}/{Dockerfile,entrypoint.sh} ${BUILD_AREA}
-	docker buildx build --tag ${DCKR_TAG}:${DCKR_VERSION} --tag ${DCKR_TAG}:latest ${BUILD_AREA}
+    @echo "------------------------------------------"
+    @echo "📦 Building image 📦"
+    @echo "------------------------------------------"
+    cp ${DCKR_MAKE_HERE}/{Dockerfile,entrypoint.sh} ${BUILD_AREA}
+    docker buildx build --tag ${DCKR_TAG}:${DCKR_VERSION} --tag ${DCKR_TAG}:latest ${BUILD_AREA}
 
 .PHONY: clean
 clean: ## Clean the build area
-	@echo "------------------------------------------"
-	@echo "🧹 Clearing old workarea 🧹"
-	@echo "------------------------------------------"
-	rm -rf ${BUILD_AREA}
+    @echo "------------------------------------------"
+    @echo "🧹 Clearing old workarea 🧹"
+    @echo "------------------------------------------"
+    rm -rf ${BUILD_AREA}
 
 .PHONY: gits
 gits: ${RUN_AREA}/dunedaq-area/sourcecode/detchannelmaps 
@@ -99,9 +99,9 @@ gits: ${RUN_AREA}/dunedaq-area/sourcecode/detchannelmaps
 
 .PHONY: help
 help: ## Display this help
-	@IFS=$$'\n'; for line in `grep -h -E '^[a-zA-Z_#-]+:?.*?## .*$$' $(MAKEFILE_LIST)`; do if [ "$${line:0:2}" = "##" ]; then \
-	echo $$line | awk 'BEGIN {FS = "## "}; {printf "\n\033[33m%s\033[0m\n", $$2}'; else \
-	echo $$line | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'; fi; \
-	done; unset IFS;
+    @IFS=$$'\n'; for line in `grep -h -E '^[a-zA-Z_#-]+:?.*?## .*$$' $(MAKEFILE_LIST)`; do if [ "$${line:0:2}" = "##" ]; then \
+    echo $$line | awk 'BEGIN {FS = "## "}; {printf "\n\033[33m%s\033[0m\n", $$2}'; else \
+    echo $$line | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'; fi; \
+    done; unset IFS;
 
 

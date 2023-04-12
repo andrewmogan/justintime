@@ -3,7 +3,7 @@ from dash.dependencies import Input, Output, State
 import logging
 from .. import ctrl_class
 
-def return_obj(dash_app, engine):
+def return_obj(dash_app, engine, storage):
     ctrl_id = "07_refresh_ctrl"
    
     ctrl_div = html.Div([html.Button('Refresh Files', id=ctrl_id, n_clicks=0)],style={"marginBottom":"1.0em"})
