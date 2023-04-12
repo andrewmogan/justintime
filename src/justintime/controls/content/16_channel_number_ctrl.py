@@ -28,6 +28,10 @@ def init_callbacks(dash_app, engine, storage):
     def update_select(plane, trigger_record, raw_data_file):
         if not plane:
             return [""]
+
+        if not trigger_record or not raw_data_file:
+            return [""]
+            
         try: 
             data = storage.get_trigger_record_data(trigger_record, raw_data_file)
         except RuntimeError:

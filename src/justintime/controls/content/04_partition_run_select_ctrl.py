@@ -15,11 +15,11 @@ def return_obj(dash_app, engine, storage):
     ctrl_div = html.Div(
         html.Div([
             dcc.Store("session_run_files_map", data=data),
-            html.Label("Select Partition and Run Number: ",style={"fontSize":"12px"}),
+            html.Label("Select Op. Environment and Run Number: ",style={"fontSize":"12px"}),
             dbc.Row([
                 dbc.Col(html.Div([
-                    # dcc.Dropdown(options=list(data.keys()),placeholder="Partition",
-                    dcc.Dropdown(placeholder="Partition",
+                    # dcc.Dropdown(options=list(data.keys()),placeholder="Op Environment",
+                    dcc.Dropdown(placeholder="Op. Environment",
                         id="partition_select_ctrl"),
 
                     dcc.Store("partition_storage_id")
