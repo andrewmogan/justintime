@@ -3,31 +3,58 @@ import datetime
 import rich
 import numpy as np
 import logging
+import collections
 from .cruncher import signal
 
 class TriggerRecordCache:
+    
+    max_cache_size = 100
+    
     def __init__(self, engine):
         self.engine = engine
         self.raw_data_files = {}
+        self.tr_age = []
         self.shown_plots = []
 
     def update_shown_plots(self, new_shown_plots):
         self.shown_plots = new_shown_plots
 
     def get_trigger_record_data(self, trigger_record, raw_data_file):
-        if raw_data_file in self.raw_data_files:
-            if trigger_record in self.raw_data_files[raw_data_file]:
-                return(self.raw_data_files[raw_data_file][trigger_record])
-            return(self.add_trigger_record_to_file(trigger_record, raw_data_file))
-        return(self.add_file(trigger_record, raw_data_file))
+        print(dir(self))
+        try:
+            tr = self.raw_data_files[raw_data_file][trigger_record]
+            # Mark tr as fresh
+            i = self.tr_age.index( (raw_data_file, trigger_record) )
+            self.tr_age.insert(0, self.tr_age.pop(i))
+            return tr
+        except KeyError:
+            pass
+
+        return self.add_trigger_record_to_file(trigger_record, raw_data_file)
+            
 
     def add_trigger_record_to_file(self, trigger_record, raw_data_file):
-        self.raw_data_files[raw_data_file][trigger_record] = TriggerRecordData(self.engine, trigger_record, raw_data_file)
-        return(self.raw_data_files[raw_data_file][trigger_record])
+        logging.debug(f"Adding {raw_data_file} {trigger_record}")
 
-    def add_file(self, trigger_record, raw_data_file):
-        self.raw_data_files[raw_data_file] = {}
-        return(self.add_trigger_record_to_file(trigger_record, raw_data_file))
+        self.raw_data_files.setdefault(raw_data_file,{})[trigger_record] = TriggerRecordData(self.engine, trigger_record, raw_data_file)
+
+        self.tr_age.insert(0, (raw_data_file, trigger_record) )
+        # Clear the cache if needed
+        logging.debug(f"Current cache size = {len(self.tr_age)}, watermark = {self.max_cache_size}")
+        if len(self.tr_age) > self.max_cache_size:
+            old_rdf, old_tr = self.tr_age.pop()
+            logging.debug(f"Clearing cache {old_rdf}, {old_tr}")
+
+            del self.raw_data_files[old_rdf][old_tr]
+            if len(self.raw_data_files[old_rdf]) == 0:
+                del self.raw_data_files[old_rdf]
+
+        l = 0
+        for f in self.raw_data_files.values():
+            l += len(f)
+        logging.debug(f"Current Cache size: {l}")
+        return self.raw_data_files[raw_data_file][trigger_record]
+
 
 
 class TriggerRecordData:
