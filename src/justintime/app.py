@@ -1,16 +1,11 @@
 from dash import Dash, html, dcc, callback_context
 from dash.dependencies import Input, Output, State
-from dash_bootstrap_templates import ThemeSwitchAIO,load_figure_template
 import dash_bootstrap_components as dbc
 import click
 import rich
-import os.path
-from PIL import Image
 
 import logging
 from rich.logging import RichHandler
-
-
 
 # just in time  imports
 from . import load_all as ld
@@ -67,7 +62,8 @@ def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,template)
                         html.H2("(Proto)DUNE Prompt-Feedback: Just-in-Time",style={"fontSize":"12px","marginBottom":"2em"}),
                     
                         html.H2("   "),
-                        html.H2(id="text_page"),
+                       # html.H2('id=text_page'),
+                        
                         # html.P( id = "pages_div",style={'fontSize': '12px '}),
                         html.Div([ctrl.div for ctrl in ctrls], id = "ctrls_div",style={'fontSize': '12px '}),
                         
@@ -123,21 +119,18 @@ def init_page_callback(dash_app, storge):
     plot_outputs = [Output(plot.id, "style") for plot in plots]
     ctrl_outputs = [Output(ctrl.id, "style") for ctrl in ctrls]
 
-    @dash_app.callback(page_output,[Input('url', 'pathname')])
+    @dash_app.callback(Output("01_clickable_title_ctrl","children"),[Input('url', 'pathname')])
 
     def show_page(pathname):
         pages, plots, ctrls = ld.get_elements()
         for page in pages:
             
             if pathname:
-                
-                if f"/{page.id}" in pathname:
-                    
-                    return([page.name])
-            if pathname=='/':
-                return(["Select a plot from the menu above"])
 
-                
+                if f"/{page.id}" in pathname or pathname=="/":
+
+                    return([page.name])
+                 
     @dash_app.callback(*ctrl_outputs,*plot_outputs,[Input('url', 'pathname')])
     
     def page_button_callback(pathname):
@@ -149,19 +142,12 @@ def init_page_callback(dash_app, storge):
             
             if pathname:
                 
-                if f"/{page.id}" in pathname:
+                if f"/{page.id}" in pathname or pathname=="/":
                     page_output=page.name
                     return(calculate_page_style_list(page, plots, ctrls, style_list, storge))
                     
         return(style_list)    
 
-    @dash_app.callback(Output("02_description_ctrl", "is_open"),Input("open", "n_clicks"), Input("close", "n_clicks"),[State("02_description_ctrl", "is_open")],)
-    
-    def toggle_modal(n1, n2, is_open):
-
-        if n1 or n2:
-            return not is_open
-        return is_open
 
     @dash_app.callback([Output("plot_description","children")],[Input('url', 'pathname')])
     
@@ -171,12 +157,10 @@ def init_page_callback(dash_app, storge):
             
             if pathname:
                 
-                if f"/{page.id}" in pathname:
+                if f"/{page.id}" in pathname or pathname=="/":
                     
                     return([page.text])
-            if pathname=='/':
-                return(["Just-in-Time is a prompt feedback tool designed for ProtoDune. It assesses recorded data coming from detector and trigger, with plots that extract complicated information to examine data quality and fragility. Particularly, trigger record displays are provided that allow users to choose run files and trigger records to analyze and compare. A variety of plots is included, which can be found on the navigation bar. "])
-
+          
 def calculate_page_style_list(page, plots, ctrls, style_list, storge):
     needed_plots = []
     needed_ctrls = []

@@ -15,10 +15,10 @@ from ... plotting_functions import add_dunedaq_annotation, selection_line, make_
 
 
 def return_obj(dash_app, engine, storage,theme):
-    plot_id = "01_tp_display_plot"
+    plot_id = "02_tp_display_plot"
     plot_div = html.Div(id = plot_id)
     plot = plot_class.plot("tp_plot", plot_id, plot_div, engine, storage,theme)
-    
+    plot.add_ctrl("01_clickable_title_ctrl")
     plot.add_ctrl("07_refresh_ctrl")
     plot.add_ctrl("partition_select_ctrl")
     plot.add_ctrl("run_select_ctrl")
@@ -37,6 +37,7 @@ def init_callbacks(dash_app, storage, plot_id, engine,theme):
     @dash_app.callback(
         Output(plot_id, "children"),
         Input("90_plot_button_ctrl", "n_clicks"),
+        
         State('07_refresh_ctrl', "value"),
         State('trigger_record_select_ctrl', "value"),
         State("partition_select_ctrl","value"),

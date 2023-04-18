@@ -27,22 +27,12 @@ def add_dunedaq_annotation(figure):
 
 def selection_line(partition,run,raw_data_file, trigger_record):
     return(html.Div([
-        html.Div([
-        html.B("Partition: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
-        html.Div(partition,style={"display":"inline-block"})]),
-    
-        html.Div([
-        html.B("Run: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
-        html.Div(run,style={"display":"inline-block"})]),
-    
+
+        html.H6([f"{partition}: Run {run}, Trigger Record {trigger_record}"]),
         html.Div([
         html.B("Raw Data File: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
         html.Div(raw_data_file,style={"display":"inline-block"})]),
-
-        html.Div([
-        html.B("Trigger Record: ",style={"display":"inline-block",'marginRight':"0.4rem"}),
-        html.Div(trigger_record,style={"display":"inline-block"})])
-        ,html.Hr()
+        html.Hr()
     ]))
 
 def make_static_img(df, zmin: int = None, zmax: int = None, title: str = "",colorscale:str="", height:int=None,orientation: str = ""):

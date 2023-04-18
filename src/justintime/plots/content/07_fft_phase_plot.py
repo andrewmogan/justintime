@@ -15,6 +15,7 @@ def return_obj(dash_app, engine, storage,theme):
     plot_id = "07_fft_phase_plot"
     plot_div = html.Div(id = plot_id)
     plot = plot_class.plot("fft_plot", plot_id, plot_div, engine, storage,theme)
+    plot.add_ctrl("01_clickable_title_ctrl")
     plot.add_ctrl("07_refresh_ctrl")
     plot.add_ctrl("partition_select_ctrl")
     plot.add_ctrl("run_select_ctrl")

@@ -21,8 +21,8 @@ def create_navbar(pages):
                     # In this part of the code we create the items that will appear in the dropdown menu on the right
                     # side of the Navbar.  The first parameter is the text that appears and the second parameter 
                     # is the URL extension.
-                    dbc.DropdownMenuItem("Home", href='/',style={'fontSize': '14px '}), # Hyperlink item that appears in the dropdown menu
-                    html.Div([dbc.DropdownMenuItem(page.name, href=f"/{page.id}") for page in pages],style={'fontSize': '14px '}),
+                   # dbc.DropdownMenuItem("Home", href='/01_home_page',style={'fontSize': '14px '}), # Hyperlink item that appears in the dropdown menu
+                    html.Div([dbc.DropdownMenuItem(page.name, href=f"/{page.id}") for page in pages[1:]],style={'fontSize': '14px '}),
    
         ] 
             ),
