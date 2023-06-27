@@ -10,7 +10,7 @@ def return_obj(dash_app, engine, storage):
     ctrl_id = "02_description_ctrl"
     ctrl_div =   html.Div(
     [
-        dbc.Button("Description", id="open", n_clicks=0),
+       # dbc.Button("Description", id="open", n_clicks=0),
         dbc.Modal(
             [
                 dbc.ModalHeader(dbc.ModalTitle("Page Information")),
@@ -28,6 +28,4 @@ def return_obj(dash_app, engine, storage):
 )
     
     ctrl = ctrl_class.ctrl("description", ctrl_id, ctrl_div, engine)
-   
     return(ctrl)
-
