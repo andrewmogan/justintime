@@ -123,26 +123,25 @@ class WIBEthFragmentUnpacker(FragmentUnpacker):
 
         # use instead
         # self.chan_map.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, c) for c in range(n_chan_per_stream)
+        off_chans = [self.chan_map.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, c) for c in range(n_chan_per_stream)]
+        # link_no = stream_no >> 6;
+        # substream_no = stream_no & 0x3f;
 
-
-        link_no = stream_no >> 6;
-        substream_no = stream_no & 0x3f;
-
-        first_chan = n_chan_per_stream*substream_no
-        if self.chan_map:
-            off_chans = [self.chan_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(first_chan,first_chan+n_chan_per_stream)]
-        else:
-            first_chan += link_no*n_chan_per_stream*n_streams_per_link
-            off_chans = [c for c in range(first_chan,first_chan+n_chan_per_stream)]
+        # first_chan = n_chan_per_stream*substream_no
+        # if self.chan_map:
+        #     off_chans = [self.chan_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(first_chan,first_chan+n_chan_per_stream)]
+        # else:
+        #     first_chan += link_no*n_chan_per_stream*n_streams_per_link
+        #     off_chans = [c for c in range(first_chan,first_chan+n_chan_per_stream)]
 
         ts = wibeth_unpack.np_array_timestamp(frag)
         adcs = wibeth_unpack.np_array_adc(frag)
-        print(f"adcs {len(adcs)}")
+        # print(f"adcs {len(adcs)}")
 
-        df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(64)]))
+        df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(n_chan_per_stream)]))
         df = df.set_index('ts')
 
-        print(f" df len : {len(df)}")
+        # print(f" df len : {len(df)}")
 
         return df
 
@@ -168,14 +167,15 @@ class WIBFragmentUnpacker(FragmentUnpacker):
         det_id, crate_no, slot_no, link_no = (wh.detector_id, wh.crate, wh.slot, wh.link)
 
         logging.debug(f"crate: {crate_no}, slot: {slot_no}, fibre: {link_no}")
+        n_chan_per_link = 256
 
-        off_chans = [self.chan_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(256)]
+        off_chans = [self.chan_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(n_chan_per_link)]
 
         ts = wib_unpack.np_array_timestamp(frag)
         adcs = wib_unpack.np_array_adc(frag)
 
 
-        df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(256)]))
+        df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(n_chan_per_link)]))
         df = df.set_index('ts')
 
         return df

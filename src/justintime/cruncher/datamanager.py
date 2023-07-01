@@ -318,8 +318,8 @@ class DataManager:
 
         # Assembling BDE dataframes
         tpc_dfs = {}
-        fwtp_df = pd.DataFrame( columns=['ts'])
-        tp_df = pd.DataFrame( columns=['ts'])
+        fwtp_df = pd.DataFrame( columns=['ts'] )
+        tp_df = pd.DataFrame( columns=['ts'] )
 
         if 'bde_eth' in unpacked_tr:
             dfs = {k:v for k,v in unpacked_tr['bde_eth'].items() if not v is None}
@@ -334,6 +334,7 @@ class DataManager:
         for df in tpc_dfs.values():
             idx = idx.union(df.index)
 
+
         tpc_df = pd.DataFrame(index=idx, dtype='uint16')
         for df in tpc_dfs.values():
             tpc_df = tpc_df.join(df)
@@ -347,6 +348,16 @@ class DataManager:
             tp_df = pd.concat(unpacked_tr['tp'].values())
             tp_df = tp_df.sort_values(by=['time_start', 'channel'])
             print(f"TPs dataframe assembled {len(tp_df)}")
+        else:
+            tp_df = pd.DataFrame(np.empty(0, dtype=[
+                ('time_start', np.uint64), 
+                ('time_peak', np.uint64), 
+                ('time_over_threshold', np.uint64), 
+                ('channel',np.uint32),
+                ('adc_integral', np.uint32), 
+                ('adc_peak', np.uint16), 
+                ('flag', np.uint16),
+            ]))
 
 
 
