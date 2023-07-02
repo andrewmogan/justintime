@@ -140,12 +140,12 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
         )
         fig.add_trace(
             go.Scattergl(
-                y=df['offline_ch'],
-                x=df['peak_time'],
+                y=df['channel'],
+                x=df['time_peak'],
                 mode='markers',name="Trigger Primitives",
                 marker=dict(
                     size=10,
-                    color=df['peak_adc'], #set color equal to a variable
+                    color=df['adc_peak'], #set color equal to a variable
                     colorscale='Plasma', # one of plotly colorscales
                     cmin = cmin,
                     cmax = cmax,
@@ -155,7 +155,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
                 row=1, col=2
             )
         fig.add_trace(
-        go.Histogram(y=df["offline_ch"],name='channel', nbinsy=(xmax-xmin)), 
+        go.Histogram(y=df["channel"],name='channel', nbinsy=(xmax-xmin)), 
         row=1, col=1,
         )
         
@@ -184,39 +184,39 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 def tp_for_adc(df, cmin, cmax, orientation):
 
     if orientation == 'horizontal':
-        x_label = 'peak_time'
-        y_label = 'offline_ch'
+        x_label = 'time_peak'
+        y_label = 'channel'
     elif orientation == 'vertical':
-        x_label = 'offline_ch'
-        y_label = 'peak_time'
+        x_label = 'channel'
+        y_label = 'time_peak'
     else:
         raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertical]")
 
     if not df.empty:
-        rich.print(2.*max(df['sum_adc'])/(10**2))
-        rich.print(max(df['sum_adc']))
+        rich.print(2.*max(df['adc_integral'])/(10**2))
+        rich.print(max(df['adc_integral']))
         fig=go.Scattergl(
                 x=df[x_label],
                 y=df[y_label],
                 # error_x=dict(
                 #     type='data',
                 #     symmetric=False,
-                #     array=df['peak_time']-df["start_time"],
-                #     arrayminus=df["time_over_threshold"]-(df['peak_time']-df["start_time"])
+                #     array=df['time_peak']-df["time_start"],
+                #     arrayminus=df["time_over_threshold"]-(df['time_peak']-df["time_start"])
                 # ),
                 mode='markers',name="Trigger Primitives",
                 
-                marker=dict(size=df["sum_adc"],
+                marker=dict(size=df["adc_integral"],
                     sizemode='area',
-                    sizeref=2.*max(df['sum_adc'])/(12**2),sizemin=3,
-                    color=df['peak_adc'], #set color equal to a variable
+                    sizeref=2.*max(df['adc_integral'])/(12**2),sizemin=3,
+                    color=df['adc_peak'], #set color equal to a variable
                     colorscale="delta", # one of plotly colorscales
                     cmin = 0,
                     cmax = cmax,
                     showscale=True,colorbar=dict( x=1.12 )
                     ),
                 text=[
-                    f"start : {row['start_time']}<br>peak : {row['peak_time']}<br>end : {row['start_time']+row['time_over_threshold']}<br>tot : {row['time_over_threshold']}<br>offline ch: {row['offline_ch']}<br>sum adc : {row['sum_adc']}<br>peak adc : {row['peak_adc']}"
+                    f"start : {row['time_start']}<br>peak : {row['time_peak']}<br>end : {row['time_start']+row['time_over_threshold']}<br>tot : {row['time_over_threshold']}<br>offline ch: {row['channel']}<br>sum adc : {row['adc_integral']}<br>peak adc : {row['adc_peak']}"
                         for index, row in df.iterrows()
                     ],
                 )   
@@ -228,9 +228,9 @@ def tp_for_adc(df, cmin, cmax, orientation):
 def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
     if not df.empty:
         # fig=go.Figure()
-        fig=px.density_heatmap(df,y=df['offline_ch'],
-            x=df['peak_time'],nbinsy=200,nbinsx=200,
-                z=df['peak_adc'],histfunc="count",
+        fig=px.density_heatmap(df,y=df['channel'],
+            x=df['time_peak'],nbinsy=200,nbinsx=200,
+                z=df['adc_peak'],histfunc="count",
                 color_continuous_scale="Plasma")
 
         fig.update_layout(
@@ -256,20 +256,20 @@ def waveform_tps(fig,df,channel_num):
     if not df.empty:
         # fig=go.Figure()
         
-        if channel_num in set(df['offline_ch']):            
+        if channel_num in set(df['channel']):            
             
-            new=(df[df['offline_ch'] == channel_num])
+            new=(df[df['channel'] == channel_num])
             rich.print("Dataframe used for TPs (with similar offline channels)")
             rich.print(new)
             rich.print("TPs time over threshold (in order of appearance):")                 
             for i in range(len(new)):
                                                                                 
-                time_start = new.iloc[i]['start_time']
+                time_start = new.iloc[i]['time_start']
                 time_over_threshold = new.iloc[i]["time_over_threshold"]
-                time_end = (new.iloc[i]["start_time"]+new.iloc[i]["time_over_threshold"])
-                time_peak = new.iloc[i]["peak_time"]
-                channel =new.iloc[i]["offline_ch"]
-                adc_peak = new.iloc[i]["peak_adc"]
+                time_end = (new.iloc[i]["time_start"]+new.iloc[i]["time_over_threshold"])
+                time_peak = new.iloc[i]["time_peak"]
+                channel =new.iloc[i]["channel"]
+                adc_peak = new.iloc[i]["adc_peak"]
                 rich.print(time_over_threshold)
                                     
                 fig.add_vrect(time_start, time_end, line_width=0, fillcolor="red", opacity=0.2)
@@ -281,7 +281,7 @@ def waveform_tps(fig,df,channel_num):
 
 def tp_hist_for_mean_std(df, xmin, xmax, info):
     if not df.empty:
-        fig=go.Histogram(x=df["offline_ch"],name='TP Multiplicity per channel', nbinsx=(xmax-xmin))
+        fig=go.Histogram(x=df["channel"],name='TP Multiplicity per channel', nbinsx=(xmax-xmin))
 
     else:
         fig = go.Scatter()

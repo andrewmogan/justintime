@@ -154,14 +154,14 @@ class TriggerRecordData:
     def init_tp(self):
         #rich.print(self.tp_df)
         self.tp_df_tsoff = self.tp_df.copy()
-        # self.ts_min = self.tp_df_tsoff['start_time'].min()
-        self.tp_df_tsoff['peak_time'] = (self.tp_df_tsoff['peak_time']-self.ts_off)
-        self.tp_df_tsoff['start_time'] = (self.tp_df_tsoff['start_time']-self.ts_off)
+        # self.ts_min = self.tp_df_tsoff['time_start'].min()
+        self.tp_df_tsoff['time_peak'] = (self.tp_df_tsoff['time_peak']-self.ts_off)
+        self.tp_df_tsoff['time_start'] = (self.tp_df_tsoff['time_start']-self.ts_off)
 
-        self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(0, {}))]
-        self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(1, {}))]
-        self.tp_df_Z = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(2, {}))]
-        self.tp_df_O = self.tp_df_tsoff[self.tp_df_tsoff['offline_ch'].isin(self.planes.get(9999, {}))]
+        self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(0, {}))]
+        self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(1, {}))]
+        self.tp_df_Z = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(2, {}))]
+        self.tp_df_O = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(9999, {}))]
         
 
 

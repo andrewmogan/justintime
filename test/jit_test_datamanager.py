@@ -11,13 +11,13 @@ from pathlib import Path
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST']))
-@click.argument('frame_type', type=click.Choice(['ProtoWIB', 'WIB']))
+# @click.argument('frame_type', type=click.Choice(['ProtoWIB', 'WIB']))
 @click.option('-i', '--interactive', is_flag=True, default=False)
 @click.argument('file_path', type=click.Path(exists=True))
 
-def cli(channel_map_id: str, frame_type: str, interactive: bool, file_path: str) -> None:
+def cli(channel_map_id: str, interactive: bool, file_path: str) -> None:
 
-    channel_map_id += 'ChannelMap'
+    # channel_map_id += 'ChannelMap'
 
     dp = Path(file_path)
     print(dp.parent)
@@ -25,7 +25,7 @@ def cli(channel_map_id: str, frame_type: str, interactive: bool, file_path: str)
 
 
     # rdm = DataManager(dp.parent, 'ProtoWIB', 'VDColdbox')
-    rdm = DataManager(dp.parent, frame_type, channel_map_id)
+    rdm = DataManager(dp.parent, channel_map_id)
     # data_files = sorted(rdm.list_files(), reverse=True)
     # rich.print(data_files)
     f = dp.name

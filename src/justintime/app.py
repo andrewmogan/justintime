@@ -19,26 +19,20 @@ from .all_data import TriggerRecordCache
 @click.option('-p', '--port', type=int, default=8001)
 @click.argument('raw_data_path', type=click.Path(exists=True, file_okay=False))
 @click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST']))
-@click.argument('frame_type', type=click.Choice(['ProtoWIB', 'WIB']))
 @click.argument("template",type=click.Choice(['flatly','darkly']),default='flatly')
+def main(raw_data_path: str, port: int, channel_map_id: str, template: str):
 
-
-def main(raw_data_path :str, port: int, channel_map_id:str, frame_type: str,template:str):
-
-    channel_map_id += 'ChannelMap'
     theme=([dbc.themes.FLATLY if template=='flatly' else dbc.themes.DARKLY])
     rich.print("Light mode" if theme==[dbc.themes.FLATLY] else "Dark mode")
     dash_app = Dash(__name__,external_stylesheets=theme)
 
-    init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,template)
+    init_dashboard(dash_app, raw_data_path, channel_map_id,template)
     debug=True
     dash_app.run_server(debug=debug, host='0.0.0.0', port=port)
 
 
-def init_dashboard(dash_app, raw_data_path, frame_type, channel_map_id,template):
-    # pil_image = Image.open(os.path.join(os.path.dirname(__file__),"assets","image3.png")
-    #engine = DataManager("/home/gkokkoro/git/About_time_workarea/sourcecode/data/", "ProtoWIB", 'VDColdbox')
-    engine = DataManager(raw_data_path, frame_type, channel_map_id)
+def init_dashboard(dash_app, raw_data_path, channel_map_id,template):
+    engine = DataManager(raw_data_path, channel_map_id)
 
     data_files = engine.list_files()
     logging.debug(data_files)
@@ -194,7 +188,7 @@ def get_ctrl_dependancies(ctrls,needed_ctrls):
 if __name__ == "__main__":
     FORMAT = "%(message)s"
     logging.basicConfig(
-        level="INFO", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+        level="DEBUG", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
     )
 
 

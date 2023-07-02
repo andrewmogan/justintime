@@ -30,7 +30,7 @@ info:
 
 connection-check: ## Check that GPN connection is available
 	@curl  --connect-timeout 1 github.com &> /dev/null
-    
+
 
 .PHONY: all
 all: connection-check  workarea gits dunedaq justintime image ## Build all targets

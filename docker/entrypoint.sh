@@ -9,6 +9,6 @@ cd /dunedaq/run/dunedaq-area
 source quick_env.sh
 cd ../justintime
 source env.sh
-CMD="python -m justintime.app /data ${CHANNEL_MAP_NAME} WIB"
+CMD="python -m justintime.app /data ${CHANNEL_MAP_NAME}"
 echo ${CMD}
 ${CMD}
