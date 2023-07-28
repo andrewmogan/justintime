@@ -1,5 +1,5 @@
 DUNEDAQ_RELEASE=$1
-if [[ "$DUNEDAQ_RELEASE" = "dunedaq-"* ]]; then
+if [[ "$DUNEDAQ_RELEASE" =~ ^(fd|nd)daq-v4.1.0 ]]; then
     DBT_CREATE_OPTS=""
     DBT_VERSION=$DUNEDAQ_RELEASE
 elif [[ "$DUNEDAQ_RELEASE" = "rc-"* ]]; then
@@ -24,7 +24,7 @@ setup_dbt ${DBT_VERSION}
 echo "------------------------------------------"
 echo "Loading daq-release workarea"
 echo "------------------------------------------"
-dbt-create ${DBT_CREATE_OPTS} ${DUNEDAQ_RELEASE} dunedaq-area
+dbt-create -c ${DBT_CREATE_OPTS} ${DUNEDAQ_RELEASE} dunedaq-area
 
 cd dunedaq-area
 source ./env.sh

@@ -2,9 +2,9 @@
 
 VOLUME_ID=1
 IS_TEST=false
-CHANNEL_MAP_NAME=VDColdbox
+CHANNEL_MAP_NAME=PD2HDColdbox
 
-usage() { echo "Usage: $0 [-v <data volume id>] [-c <channel map>?]] [-t]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-v <data volume id>] [-c <channel map>]] [-t]" 1>&2; exit 1; }
 
 while getopts "v:c:t" o; do
     case "${o}" in
