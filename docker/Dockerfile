@@ -5,9 +5,9 @@ SHELL ["/bin/bash", "-c"]
 
 ADD ./workarea /dunedaq/run
 
-COPY ./entrypoint.sh /dunedaq/run
+COPY --chmod=755 ./entrypoint.sh /dunedaq/run
 
-RUN chmod 755 /dunedaq/run/entrypoint.sh
 RUN chmod ug+w /dunedaq/run
 
+USER 10000:0
 ENTRYPOINT [ "/dunedaq/run/entrypoint.sh" ]
