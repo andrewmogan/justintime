@@ -10,7 +10,7 @@ import logging
 import pandas as pd
 from .. import plot_class
 from ... cruncher import datamanager
-from ... all_data import TriggerRecordData
+from ... data_cache import TriggerRecordData
 from ... plotting_functions import add_dunedaq_annotation, selection_line, make_static_img, make_tp_plot,tp_density,nothing_to_plot
 
 

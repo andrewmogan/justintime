@@ -86,18 +86,20 @@ class TriggerRecordData:
             
         logging.info(f"Timestamp offset: {self.ts_off}")
 
-        self.df_tsoff = self.df.copy()        
+        self.df_tsoff = self.df.copy()    
         self.df_tsoff.index=self.df_tsoff.index.astype('int64')-self.ts_off
         self.channels = list(self.df_tsoff.columns)
-        #rich.print(self.channels[0])
-        self.group_planes = groupby(self.channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
-        
-        self.planes = {k: [x for x in d if x] for k,d in self.group_planes}
-        self.self_planes = {k:sorted(set(v) & set(self.df_tsoff.columns)) for k,v in self.planes.items()}
 
-        self.df_U =  self.df_tsoff[self.self_planes.get(0, [])]
-        self.df_V =  self.df_tsoff[self.self_planes.get(1, [])]
-        self.df_Z =  self.df_tsoff[self.self_planes.get(2, [])]
+        self.planes = {}
+        for ch in self.channels:
+            p = engine.ch_map.get_plane_from_offline_channel(int(ch))
+            self.planes.setdefault(p, []).append(ch)
+
+        self.safe_planes = {k:sorted(set(v) & set(self.df_tsoff.columns)) for k,v in self.planes.items()}
+
+        self.df_U =  self.df_tsoff[self.safe_planes.get(0, [])]
+        self.df_V =  self.df_tsoff[self.safe_planes.get(1, [])]
+        self.df_Z =  self.df_tsoff[self.safe_planes.get(2, [])]
 
         self.df_U_mean, self.df_U_std = self.df_U.mean(), self.df_U.std()
         self.df_V_mean, self.df_V_std = self.df_V.mean(), self.df_V.std()

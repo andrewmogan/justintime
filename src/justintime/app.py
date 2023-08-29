@@ -12,15 +12,22 @@ from . import load_all as ld
 from .cruncher.datamanager import DataManager
 from .navbar import create_navbar
 #from header import create_header
-from .all_data import TriggerRecordCache
+from .data_cache import TriggerRecordCache
 
 
 @click.command()
+@click.option('-v', '--verbose', is_flag=True, default=False)
 @click.option('-p', '--port', type=int, default=8001)
 @click.argument('raw_data_path', type=click.Path(exists=True, file_okay=False))
 @click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST']))
 @click.argument("template",type=click.Choice(['flatly','darkly']),default='flatly')
-def main(raw_data_path: str, port: int, channel_map_id: str, template: str):
+def main(verbose: bool, raw_data_path: str, port: int, channel_map_id: str, template: str):
+
+
+    FORMAT = "%(message)s"
+    logging.basicConfig(
+        level="DEBUG" if verbose else "INFO", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
+    )
 
     theme=([dbc.themes.FLATLY if template=='flatly' else dbc.themes.DARKLY])
     rich.print("Light mode" if theme==[dbc.themes.FLATLY] else "Dark mode")
@@ -186,11 +193,6 @@ def get_ctrl_dependancies(ctrls,needed_ctrls):
     return(needed_ctrls)
 
 if __name__ == "__main__":
-    FORMAT = "%(message)s"
-    logging.basicConfig(
-        level="DEBUG", format=FORMAT, datefmt="[%X]", handlers=[RichHandler()]
-    )
-
 
     main()
     
