@@ -36,57 +36,18 @@ DataManager is responsible of raw data information management: discovery, loadin
 
 """
 
-# def get_protowib_header_info( frag ):
-#         wf = detdataformats.wib.WIBFrame(frag.get_data())
-#         wh = wf.get_wib_header()
-
-#         logging.debug(f"detector_id {0}, crate: {wh.crate_no}, slot: {wh.slot_no}, fibre: {wh.fiber_no}")
-
-#         return (0, wh.crate_no, wh.slot_no, wh.fiber_no)
-
-# def get_wib_header_info( frag ):
-#     wf = detdataformats.wib2.WIB2Frame(frag.get_data())
-#     wh = wf.get_header()
-#     logging.debug(f"detector {wh.detector_id}, crate: {wh.crate}, slot: {wh.slot}, fibre: {wh.link}")
-
-#     return (wh.detector_id, wh.crate, wh.slot, wh.link)
-
-# # WARNING: Duplicate from DataManager: factorize!
-# def fwtp_list_to_df(fwtps: list, ch_map):
-#     fwtp_array = []
-
-#     for fwtp in fwtps:
-#         tph = fwtp.get_header()
-#         tpt = fwtp.get_trailer()
-
-#         for j in range(fwtp.get_n_hits()):
-#             tpd = fwtp.get_data(j)
-#             fwtp_array.append((
-#                 tph.get_timestamp(),
-#                 ch_map.get_offline_channel_from_crate_slot_fiber_chan(tph.crate_no, tph.slot_no, tph.fiber_no, tph.wire_no),
-#                 tph.crate_no, 
-#                 tph.slot_no,
-#                 tph.fiber_no,
-#                 tph.wire_no,
-#                 tph.flags,
-#                 tpt.median,
-#                 tpt.accumulator,
-#                 tpd.start_time,
-#                 tpd.end_time,
-#                 tpd.peak_time,
-#                 tpd.peak_adc,
-#                 tpd.hit_continue,
-#                 tpd.tp_flags,
-#                 tpd.sum_adc
-#             ))
-#     #rprint(f"Unpacked {len(fwtp_array)} FW TPs")
-
-#     rtp_df = pd.DataFrame(fwtp_array, columns=['ts', 'offline_ch', 'crate_no', 'slot_no', 'fiber_no', 'wire_no', 'flags', 'median', 'accumulator', 'start_time', 'end_time', 'peak_time', 'peak_adc', 'hit_continue', 'tp_flags', 'sum_adc'])
-
-#     return rtp_df
-
-
 class VSTChannelMap(object):
+
+    @staticmethod
+    def get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, ch_no):
+        
+        n_chan_per_stream = 64
+        n_streams_per_link = 4
+
+        link_no = stream_no >> 6
+        substream_no = stream_no & 0x3f
+        first_chan = n_chan_per_stream*substream_no
+        return VSTChannelMap.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, ch_no+first_chan)
 
     @staticmethod
     def get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, ch_no):
@@ -96,16 +57,30 @@ class VSTChannelMap(object):
     def get_plane_from_offline_channel(ch):
         return 0
 
+# class FiftyLChannelMap(VSTChannelMap):
+
+#     chris_map = [112, 113, 115, 116, 118, 119, 120, 121, 123, 124, 126, 127, 64, 65, 67, 68, 70, 71, 72, 73, 75, 76, 78, 79, 48, 49, 51, 52, 54, 55, 56, 57, 59, 60, 62, 63, 0, 1, 3, 4, 6, 7, 8, 9, 11, 12, 14, 15, 50, 53, 58, 61, 2, 5, 10, 13, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 114, 117, 122, 125, 66, 69, 74, 77]
+
+#     @staticmethod
+#     def get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, ch_no):
+#         el_ch = VSTChannelMap.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, ch_no)
+#         off_ch =  FiftyLChannelMap.chris_map.index(el_ch)
+#         print(el_ch, off_ch)
+#         return off_ch
+
+
+#     @staticmethod
+#     def get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, ch_no):
+#         el_ch = VSTChannelMap.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, ch_no)
+#         off_ch =  FiftyLChannelMap.chris_map.index(el_ch)
+#         print(el_ch, off_ch)
+#         return off_ch
+
 
 class DataManager:
 
-    # match_exprs = ['*.hdf5','*.hdf5.copied']
     match_exprs = ['*.hdf5', '*.hdf5.copied']
     max_cache_size = 100
-    # frametype_map = {
-    #     'ProtoWIB': (get_protowib_header_info, protowib_unpack, daqdataformats.FragmentType.kProtoWIB),
-    #     'WIB': (get_wib_header_info, wib_unpack, daqdataformats.FragmentType.kWIB),
-    # }
 
     @staticmethod 
     def make_channel_map(map_name):
@@ -122,6 +97,8 @@ class DataManager:
                 return detchannelmaps.make_map('HDColdboxChannelMap')
             case 'VSTChannelMap':
                 return VSTChannelMap()
+            case 'FiftyLChannelMap':
+                return detchannelmaps.make_map('FiftyLChannelMap')
             case _:
                 raise RuntimeError(f"Unknown channel map id '{map_name}'")
 
@@ -297,10 +274,14 @@ class DataManager:
             en_ts = 0
 
         logging.info(en_info)
+        print("A")
 
-        wf_up = rdu.WIBFragmentUnpacker(self.ch_map_name)
-        wethf_up = rdu.WIBEthFragmentPandasUnpacker(self.ch_map_name)
-        tp_up = rdu.TPFragmentPandasUnpacker(self.ch_map_name)
+        wf_up = rdu.WIBFragmentUnpacker(self.ch_map)
+        print("B")
+        wethf_up = rdu.WIBEthFragmentPandasUnpacker(self.ch_map)
+        print("C")
+        tp_up = rdu.TPFragmentPandasUnpacker(self.ch_map)
+        print("D")
         logging.debug("Upackers created")
 
         up = rdu.UnpackerService()
@@ -309,9 +290,9 @@ class DataManager:
         up.add_unpacker('bde_eth', wethf_up)
         up.add_unpacker('bde_flx', wf_up)
         up.add_unpacker('tp', tp_up)
+
         # up.add_unpacker('pds', daphne_up)
         logging.debug("Upackers added")
-        print("aaa 3")
 
         unpacked_tr = up.unpack(rdf, entry)
         logging.info("Unpacking completed")

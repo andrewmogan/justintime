@@ -58,7 +58,11 @@ class WIBEthFragmentPandasUnpacker(WIBEthFragmentNumpyUnpacker):
 
     def __init__(self, channel_map):
         super().__init__()
-        self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        # self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        if isinstance(channel_map, str):
+            self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        else:
+            self.chan_map = channel_map
 
     def unpack(self, frag):
 
@@ -75,12 +79,13 @@ class WIBEthFragmentPandasUnpacker(WIBEthFragmentNumpyUnpacker):
 
         logging.info(f"ts: 0x{ts:016x} (15 lsb: 0x{ts&0x7fff:04x}) cd_ts_0: 0x{wh.colddata_timestamp_0:04x} cd_ts_1: 0x{wh.colddata_timestamp_1:04x} crate: {crate_no}, slot: {slot_no}, stream: {stream_no}")
 
-        link_no = stream_no >> 6;
-        substream_no = stream_no & 0x3f;
+        # link_no = stream_no >> 6;
+        # substream_no = stream_no & 0x3f;
 
-        first_chan = n_chan_per_stream*substream_no
+        # first_chan = n_chan_per_stream*substream_no
         if self.chan_map:
-            off_chans = [self.chan_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(first_chan,first_chan+n_chan_per_stream)]
+            # off_chans = [self.chan_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(first_chan,first_chan+n_chan_per_stream)]
+            off_chans = [self.chan_map.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, c) for c in range(n_chan_per_stream)]
         else:
             first_chan += link_no*n_chan_per_stream*n_streams_per_link
             off_chans = [c for c in range(first_chan,first_chan+n_chan_per_stream)]
@@ -99,7 +104,11 @@ class WIBEthFragmentUnpacker(FragmentUnpacker):
     
     def __init__(self, channel_map):
         super().__init__()
-        self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        if isinstance(channel_map, str):
+            self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        else:
+            self.chan_map = channel_map
+        
         # self.dump = True
     
     def match(self, frag_type, subsys):
@@ -121,27 +130,13 @@ class WIBEthFragmentUnpacker(FragmentUnpacker):
 
         logging.info(f"ts: 0x{ts:016x} (15 lsb: 0x{ts&0x7fff:04x}) cd_ts_0: 0x{wh.colddata_timestamp_0:04x} cd_ts_1: 0x{wh.colddata_timestamp_1:04x} crate: {crate_no}, slot: {slot_no}, stream: {stream_no}")
 
-        # use instead
-        # self.chan_map.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, c) for c in range(n_chan_per_stream)
         off_chans = [self.chan_map.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, c) for c in range(n_chan_per_stream)]
-        # link_no = stream_no >> 6;
-        # substream_no = stream_no & 0x3f;
-
-        # first_chan = n_chan_per_stream*substream_no
-        # if self.chan_map:
-        #     off_chans = [self.chan_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(first_chan,first_chan+n_chan_per_stream)]
-        # else:
-        #     first_chan += link_no*n_chan_per_stream*n_streams_per_link
-        #     off_chans = [c for c in range(first_chan,first_chan+n_chan_per_stream)]
 
         ts = wibeth_unpack.np_array_timestamp(frag)
         adcs = wibeth_unpack.np_array_adc(frag)
-        # print(f"adcs {len(adcs)}")
 
         df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(n_chan_per_stream)]))
         df = df.set_index('ts')
-
-        # print(f" df len : {len(df)}")
 
         return df
 
@@ -149,8 +144,12 @@ class WIBFragmentUnpacker(FragmentUnpacker):
     
     def __init__(self, channel_map):
         super().__init__()
-        self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap')
-    
+        # self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap')
+        if isinstance(channel_map, str):
+            self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        else:
+            self.chan_map = channel_map
+
     def match(self, frag_type, subsys):
         return (frag_type == daqdataformats.FragmentType.kWIB) and (subsys == daqdataformats.SourceID.kDetectorReadout)
     
@@ -185,7 +184,10 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
 
     def __init__(self, channel_map):
         super().__init__()
-        self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap')
+        if isinstance(channel_map, str):
+            self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        else:
+            self.chan_map = channel_map
     
     def match(self, frag_type, subsys):
         return (frag_type == daqdataformats.FragmentType.kTriggerPrimitive) and (subsys == daqdataformats.SourceID.kTrigger)

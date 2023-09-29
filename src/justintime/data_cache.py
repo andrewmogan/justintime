@@ -20,7 +20,6 @@ class TriggerRecordCache:
         self.shown_plots = new_shown_plots
 
     def get_trigger_record_data(self, trigger_record, raw_data_file):
-        print(dir(self))
         try:
             tr = self.raw_data_files[raw_data_file][trigger_record]
             # Mark tr as fresh

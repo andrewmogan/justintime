@@ -10,12 +10,13 @@ from pathlib import Path
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST']))
+@click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST', 'FiftyL']))
 # @click.argument('frame_type', type=click.Choice(['ProtoWIB', 'WIB']))
+@click.option('-e', '--entry', 'entry', type=int, default=0)
 @click.option('-i', '--interactive', is_flag=True, default=False)
 @click.argument('file_path', type=click.Path(exists=True))
 
-def cli(channel_map_id: str, interactive: bool, file_path: str) -> None:
+def cli(channel_map_id: str, entry: int, interactive: bool, file_path: str) -> None:
 
     # channel_map_id += 'ChannelMap'
 
@@ -33,8 +34,8 @@ def cli(channel_map_id: str, interactive: bool, file_path: str) -> None:
     trl = rdm.get_entry_list(f)
     rich.print(trl)
 
-    rich.print(f"Reading entry {trl[0]}")
-    info, tpc_df, tp_df, fwtp_df = rdm.load_entry(f, trl[0])
+    rich.print(f"Reading entry {trl[entry]}")
+    info, tpc_df, tp_df, fwtp_df = rdm.load_entry(f, trl[entry])
     rich.print(info)
     rich.print(tpc_df)
     rich.print(tp_df)
