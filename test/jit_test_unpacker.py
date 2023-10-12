@@ -24,8 +24,8 @@ def main(rawfile, interactive, plot, tr_offset, num_trs):
     wf_up = rdu.WIBFragmentUnpacker('PD2HD')
     wethf_up = rdu.WIBEthFragmentPandasUnpacker('PD2HD')
     # wethf_up = rdu.WIBEthFragmentUnpacker('PD2HD')
-    daphne_up = rdu.DAPHNEStreamFragmentUnpacker()
-    # tp_up = rdu.TPFragmentUnpacker('VDColdbox')
+    daphne_up = rdu.DAPHNEStreamFragmentPandasUnpacker()
+    # tp_up = rdu.TPFragmentPandasUnpacker('VDColdbox')
 
     up = rdu.UnpackerService()
 

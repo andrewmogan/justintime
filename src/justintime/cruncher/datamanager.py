@@ -36,56 +36,6 @@ DataManager is responsible of raw data information management: discovery, loadin
 
 """
 
-# def get_protowib_header_info( frag ):
-#         wf = detdataformats.wib.WIBFrame(frag.get_data())
-#         wh = wf.get_wib_header()
-
-#         logging.debug(f"detector_id {0}, crate: {wh.crate_no}, slot: {wh.slot_no}, fibre: {wh.fiber_no}")
-
-#         return (0, wh.crate_no, wh.slot_no, wh.fiber_no)
-
-# def get_wib_header_info( frag ):
-#     wf = detdataformats.wib2.WIB2Frame(frag.get_data())
-#     wh = wf.get_header()
-#     logging.debug(f"detector {wh.detector_id}, crate: {wh.crate}, slot: {wh.slot}, fibre: {wh.link}")
-
-#     return (wh.detector_id, wh.crate, wh.slot, wh.link)
-
-# # WARNING: Duplicate from DataManager: factorize!
-# def fwtp_list_to_df(fwtps: list, ch_map):
-#     fwtp_array = []
-
-#     for fwtp in fwtps:
-#         tph = fwtp.get_header()
-#         tpt = fwtp.get_trailer()
-
-#         for j in range(fwtp.get_n_hits()):
-#             tpd = fwtp.get_data(j)
-#             fwtp_array.append((
-#                 tph.get_timestamp(),
-#                 ch_map.get_offline_channel_from_crate_slot_fiber_chan(tph.crate_no, tph.slot_no, tph.fiber_no, tph.wire_no),
-#                 tph.crate_no, 
-#                 tph.slot_no,
-#                 tph.fiber_no,
-#                 tph.wire_no,
-#                 tph.flags,
-#                 tpt.median,
-#                 tpt.accumulator,
-#                 tpd.start_time,
-#                 tpd.end_time,
-#                 tpd.peak_time,
-#                 tpd.peak_adc,
-#                 tpd.hit_continue,
-#                 tpd.tp_flags,
-#                 tpd.sum_adc
-#             ))
-#     #rprint(f"Unpacked {len(fwtp_array)} FW TPs")
-
-#     rtp_df = pd.DataFrame(fwtp_array, columns=['ts', 'offline_ch', 'crate_no', 'slot_no', 'fiber_no', 'wire_no', 'flags', 'median', 'accumulator', 'start_time', 'end_time', 'peak_time', 'peak_adc', 'hit_continue', 'tp_flags', 'sum_adc'])
-
-#     return rtp_df
-
-
 class VSTChannelMap(object):
 
     @staticmethod
