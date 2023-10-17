@@ -57,25 +57,6 @@ class VSTChannelMap(object):
     def get_plane_from_offline_channel(ch):
         return 0
 
-# class FiftyLChannelMap(VSTChannelMap):
-
-#     chris_map = [112, 113, 115, 116, 118, 119, 120, 121, 123, 124, 126, 127, 64, 65, 67, 68, 70, 71, 72, 73, 75, 76, 78, 79, 48, 49, 51, 52, 54, 55, 56, 57, 59, 60, 62, 63, 0, 1, 3, 4, 6, 7, 8, 9, 11, 12, 14, 15, 50, 53, 58, 61, 2, 5, 10, 13, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 114, 117, 122, 125, 66, 69, 74, 77]
-
-#     @staticmethod
-#     def get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, ch_no):
-#         el_ch = VSTChannelMap.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, ch_no)
-#         off_ch =  FiftyLChannelMap.chris_map.index(el_ch)
-#         print(el_ch, off_ch)
-#         return off_ch
-
-
-#     @staticmethod
-#     def get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, ch_no):
-#         el_ch = VSTChannelMap.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, fiber_no, ch_no)
-#         off_ch =  FiftyLChannelMap.chris_map.index(el_ch)
-#         print(el_ch, off_ch)
-#         return off_ch
-
 
 class DataManager:
 
@@ -328,6 +309,7 @@ class DataManager:
             print("Assembling TPs")
             tp_df = pd.concat(unpacked_tr['tp'].values())
             tp_df = tp_df.sort_values(by=['time_start', 'channel'])
+            tp_df.drop_duplicates()
             print(f"TPs dataframe assembled {len(tp_df)}")
         else:
             tp_df = pd.DataFrame(np.empty(0, dtype=[

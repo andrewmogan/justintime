@@ -156,8 +156,10 @@ class TriggerRecordData:
         #rich.print(self.tp_df)
         self.tp_df_tsoff = self.tp_df.copy()
         # self.ts_min = self.tp_df_tsoff['time_start'].min()
-        self.tp_df_tsoff['time_peak'] = (self.tp_df_tsoff['time_peak']-self.ts_off)
-        self.tp_df_tsoff['time_start'] = (self.tp_df_tsoff['time_start']-self.ts_off)
+        self.tp_df_tsoff['time_peak'] = (self.tp_df_tsoff['time_peak'].astype('int64')
+-self.ts_off)
+        self.tp_df_tsoff['time_start'] = (self.tp_df_tsoff['time_start'].astype('int64')
+-self.ts_off)
 
         self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(0, {}))]
         self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(1, {}))]

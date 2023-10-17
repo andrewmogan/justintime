@@ -224,6 +224,8 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
         # Create the dataframe
         df = pd.DataFrame(tp_array)
 
+        logging.debug(f"TP Dataframe size {len(df)}")
+        # print(df)
         # Add plane information (here or in user code?)
         df['plane'] = df['channel'].apply(lambda x: self.chan_map.get_plane_from_offline_channel(x)).astype(np.uint8)
         return df

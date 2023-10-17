@@ -21,8 +21,10 @@ def cli(channel_map_id: str, entry: int, interactive: bool, file_path: str) -> N
     # channel_map_id += 'ChannelMap'
 
     dp = Path(file_path)
-    print(dp.parent)
-    print(dp.name)
+    rich.print("-"*80)
+    rich.print(f"File directory: {dp.parent}")
+    rich.print(f"File name {dp.name}")
+    rich.print("-"*80)
 
 
     # rdm = DataManager(dp.parent, 'ProtoWIB', 'VDColdbox')
@@ -30,15 +32,33 @@ def cli(channel_map_id: str, entry: int, interactive: bool, file_path: str) -> N
     # data_files = sorted(rdm.list_files(), reverse=True)
     # rich.print(data_files)
     f = dp.name
-    rich.print(f)
+    # rich.print(f)
     trl = rdm.get_entry_list(f)
-    rich.print(trl)
 
-    rich.print(f"Reading entry {trl[entry]}")
+
+    rich.print(f"Found Trigger Records: {trl}")
+
+    rich.print(f"Reading entry {entry}, TR {trl[entry]}")
+    rich.print("-"*80)
+
     info, tpc_df, tp_df, fwtp_df = rdm.load_entry(f, trl[entry])
+    # import pandas as pd
+    # Permanently changes the pandas settings
+    # pd.set_option('display.max_rows', None)
+    # pd.set_option('display.max_columns', None)
+    # pd.set_option('display.width', None)
+    # pd.set_option('display.max_colwidth', None)
+
+    
+    rich.print("-"*80)
     rich.print(info)
+    rich.print("-"*80)
     rich.print(tpc_df)
+    rich.print("-"*80)
+    rich.print(f"Trigger primitives {len(tp_df)}")
+
     rich.print(tp_df)
+    rich.print("-"*80)
     if interactive:
         import IPython
         IPython.embed(colors="neutral")
