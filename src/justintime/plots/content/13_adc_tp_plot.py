@@ -9,7 +9,7 @@ import rich
 import pandas as pd
 import logging
 from .. import plot_class
-from ... plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot,make_tp_plot,tp_for_adc
+from ... plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot,make_tp_plot,make_tp_overlay
 
 def return_obj(dash_app, engine, storage,theme):
     plot_id = "13_adc_tp_plot"
@@ -37,90 +37,79 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
     fzmin, fzmax = tr_color_range
     ts_title =  'DTS time ticks (16ns)'
     och_title = 'Offline Channel'
+
     if "offset_removal" in offset:
-        
         df_adc = (getattr(data, f'df_{plane_id}') - getattr(data,f'df_{plane_id}_mean'))
-        
-        if orientation == 'horizontal':
-            df_adc = df_adc.T
-            xaxis_title = ts_title
-            yaxis_title = och_title
-           
-        elif orientation == 'vertical':
-            xaxis_title = och_title
-            yaxis_title = ts_title
-           
-        else:
-            raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertical]")
-
-        df_tps = getattr(data, f'tp_df_{plane_id}')
-
         logging.info("Offset removal selected")
-        logging.info(f"Raw ADCs in {plane_id}-Plane after offset removal:")
-        logging.info(df_adc)
-            
-        title = f"{plane_id}-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
-        if "make_static_image" in static_image:
-            fig = make_static_img(df_adc, zmin = fzmin, zmax = fzmax, title=title, colorscale=colorscale, height=height,orientation=orientation)
-            if "tp_overlay" in overlay_tps:
-                logging.info(f"TPs in {plane_id}-Plane:")
-                logging.info(df_tps)
-                fig.add_trace(tp_for_adc(df_tps, fzmin, fzmax, orientation))
-                rich.print(fzmin,fzmax)    
-
-        else:
-            rich.print(fzmin,fzmax)                                     
-            fig = px.imshow(df_adc, zmin=fzmin, zmax=fzmax, title=title, color_continuous_scale=colorscale, aspect="auto")
-            if "tp_overlay" in overlay_tps:
-                    logging.info(f"TPs in {plane_id}-Plane:")
-                    logging.info(df_tps)
-                    fig.add_trace(tp_for_adc(df_tps, fzmin,fzmax, orientation))
-        fig.update_layout(
-                    height=height,
-                    yaxis_title=yaxis_title,
-                    xaxis_title=xaxis_title,
-                    showlegend=True
-                    )
-
+        note = "(offset removal)"
     else:
-            logging.info("Raw ADCs in Z-Plane:")
-            df_adc = getattr(data, f"df_{plane_id}")
+        df_adc = getattr(data, f"df_{plane_id}")
+        note = ""
 
-            if orientation == 'horizontal':
-                df_adc = df_adc.T
-                xaxis_title = ts_title
-                yaxis_title = och_title
-               
-            elif orientation == 'vertical':
-                xaxis_title = och_title
-                yaxis_title = ts_title
-               
-            else:
-                raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertical]")
-            
-            df_tps = getattr(data, f'tp_df_{plane_id}')
-            
-            title = f"{plane_id}-plane, Run {data.info['run_number']}: {data.info['trigger_number']}"
+    if orientation == 'horizontal':
+        df_adc = df_adc.T
+        xaxis_title = ts_title
+        yaxis_title = och_title
         
-            if "make_static_image" in static_image:
-                fig = make_static_img(df_adc,zmin = fzmin, zmax = fzmax, title = title, colorscale=colorscale, height=height,orientation=orientation)
-                if "tp_overlay" in overlay_tps: 
-                    logging.info(f"TPs in {plane_id}-Plane:")
-                    logging.info(df_tps)
-                    fig.add_trace(tp_for_adc(df_tps, fzmin, fzmax, orientation))
-                
-            else:
-                fig = px.imshow(df_adc, zmin=fzmin, zmax=fzmax,title=title, color_continuous_scale=colorscale, aspect='auto')
-                if "tp_overlay" in overlay_tps:
-                    logging.info(f"TPs in {plane_id}-Plane:")
-                    logging.info(df_tps)
-                    fig.add_trace(tp_for_adc(df_tps, fzmin,fzmax, orientation))
-            fig.update_layout(
-                        height=height,
-                        yaxis_title=yaxis_title,
-                        xaxis_title=xaxis_title,
-                        showlegend=True
+    elif orientation == 'vertical':
+        xaxis_title = och_title
+        yaxis_title = ts_title
+        
+    else:
+        raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertical]")
+
+    df_tps = getattr(data, f'tp_df_{plane_id}')
+    df_tas = getattr(data, f'ta_df_{plane_id}')
+
+    logging.info(f"Raw ADCs in {plane_id}-Plane {note}:")
+    logging.info(df_adc)
+            
+    title = f"{plane_id}-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
+    if "make_static_image" in static_image:
+        fig = make_static_img(df_adc, zmin = fzmin, zmax = fzmax, title=title, colorscale=colorscale, height=height,orientation=orientation)
+    else:
+        rich.print(fzmin,fzmax)                                     
+        fig = px.imshow(df_adc, zmin=fzmin, zmax=fzmax, title=title, color_continuous_scale=colorscale, aspect="auto")
+
+    if "tp_overlay" in overlay_tps:
+        logging.info(f"TPs in {plane_id}-Plane:")
+        logging.info(df_tps)
+        fig.add_trace(make_tp_overlay(df_tps, fzmin,fzmax, orientation))
+
+
+        logging.info(f"TPs in {plane_id}-Plane:")
+        logging.info(df_tas)
+        for i, ta in df_tas.iterrows():
+            time_points = [
+                        ta['time_start'],
+                        ta['time_start'],
+                        ta['time_end'],
+                        ta['time_end'],
+                        ta['time_start']
+                    ]
+            channel_points = [
+                        ta['channel_start'],
+                        ta['channel_end'],
+                        ta['channel_end'],
+                        ta['channel_start'],
+                        ta['channel_start']
+                    ]
+            fig.add_trace(
+                go.Scatter(
+                    x= channel_points if orientation == 'vertical' else time_points, 
+                    y= time_points if orientation == 'vertical' else channel_points, 
+                    fill="toself"
                 )
+            )
+
+    
+    fig.update_layout(
+        height=height,
+        yaxis_title=yaxis_title,
+        xaxis_title=xaxis_title,
+        showlegend=True
+        )
+
     add_dunedaq_annotation(fig)
     fig.update_layout(font_family="Lato", title_font_family="Lato")
 
@@ -171,6 +160,7 @@ def init_callbacks(dash_app, storage, plot_id, engine, theme):
                 
                 if len(data.df)!=0 and len(data.df.index!=0):
                     data.init_tp()
+                    data.init_ta()
                     # data.init_cnr()
                     rich.print(static_image,offset,overlay_tps,orientation,height)
                     children = []

@@ -255,14 +255,12 @@ class DataManager:
             en_ts = 0
 
         logging.info(en_info)
-        print("A")
 
         wf_up = rdu.WIBFragmentUnpacker(self.ch_map)
-        print("B")
         wethf_up = rdu.WIBEthFragmentPandasUnpacker(self.ch_map)
-        print("C")
         tp_up = rdu.TPFragmentPandasUnpacker(self.ch_map)
-        print("D")
+        ta_up = rdu.TAFragmentPandasUnpacker(self.ch_map)
+
         logging.debug("Upackers created")
 
         up = rdu.UnpackerService()
@@ -271,6 +269,7 @@ class DataManager:
         up.add_unpacker('bde_eth', wethf_up)
         up.add_unpacker('bde_flx', wf_up)
         up.add_unpacker('tp', tp_up)
+        up.add_unpacker('ta', ta_up)
 
         # up.add_unpacker('pds', daphne_up)
         logging.debug("Upackers added")
@@ -323,11 +322,31 @@ class DataManager:
             ]))
 
 
+        # Assembling TPC-TP dataframes
+        if 'ta' in unpacked_tr:
+            print("Assembling TAs")
+            ta_df = pd.concat(unpacked_tr['ta'].values())
+            ta_df = ta_df.sort_values(by=['time_start', 'channel_start'])
+            # ta_df.drop_duplicates()
+            print(f"TAs dataframe assembled {len(ta_df)}")
+        else:
+            ta_df = pd.DataFrame(np.empty(0, dtype=[
+                ('time_start', np.uint64), 
+                ('time_end', np.uint64), 
+                ('time_peak', np.uint64), 
+                ('time_activity', np.uint64), 
+                ('channel_start', np.uint32), 
+                ('channel_end', np.uint32), 
+                ('channel_peak', np.uint32), 
+                ('adc_integral', np.uint32), 
+                ('adc_peak', np.uint16) 
+            ]))
 
-        self.cache[uid] = (en_info, tpc_df, tp_df, fwtp_df)
+
+        self.cache[uid] = (en_info, tpc_df, tp_df, ta_df)
         if len(self.cache) > self.max_cache_size:
             old_uid, _ = self.cache.popitem(False)
             logging.info(f"Removing {old_uid[0]}:{old_uid[1]} from cache")
 
-        return en_info, tpc_df, tp_df, fwtp_df
+        return en_info, tpc_df, tp_df, ta_df
 

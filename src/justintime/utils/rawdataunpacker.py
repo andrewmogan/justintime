@@ -42,12 +42,13 @@ class WIBEthFragmentNumpyUnpacker(FragmentUnpacker):
         if not frag.get_data_size():
             return None, None
         
-        wf = fddetdataformats.WIBEthFrame(frag.get_data())
-        dh = wf.get_daqheader()
-        wh = wf.get_wibheader()
-        ts, det_id, crate_no, slot_no, stream_no = (dh.timestamp, dh.det_id, dh.crate_id, dh.slot_id, dh.stream_id)
+        if True:
+            wf = fddetdataformats.WIBEthFrame(frag.get_data())
+            dh = wf.get_daqheader()
+            wh = wf.get_wibheader()
+            ts, det_id, crate_no, slot_no, stream_no = (dh.timestamp, dh.det_id, dh.crate_id, dh.slot_id, dh.stream_id)
 
-        logging.info(f"ts: 0x{ts:016x} (15 lsb: 0x{ts&0x7fff:04x}) cd_ts_0: 0x{wh.colddata_timestamp_0:04x} cd_ts_1: 0x{wh.colddata_timestamp_1:04x} crate: {crate_no}, slot: {slot_no}, stream: {stream_no}")
+            logging.info(f"ts: 0x{ts:016x} (15 lsb: 0x{ts&0x7fff:04x}) cd_ts_0: 0x{wh.colddata_timestamp_0:04x} cd_ts_1: 0x{wh.colddata_timestamp_1:04x} crate: {crate_no}, slot: {slot_no}, stream: {stream_no}")
 
         ts = wibeth_unpack.np_array_timestamp(frag)
         adcs = wibeth_unpack.np_array_adc(frag)
@@ -67,6 +68,7 @@ class WIBEthFragmentPandasUnpacker(WIBEthFragmentNumpyUnpacker):
     def unpack(self, frag):
 
         payload_size = frag.get_data_size()
+        # print(f"fragment payload size {payload_size}")
         if not payload_size:
             return None
         
@@ -100,45 +102,45 @@ class WIBEthFragmentPandasUnpacker(WIBEthFragmentNumpyUnpacker):
 
         return df
 
-class WIBEthFragmentUnpacker(FragmentUnpacker):
+# class WIBEthFragmentUnpacker(FragmentUnpacker):
     
-    def __init__(self, channel_map):
-        super().__init__()
-        if isinstance(channel_map, str):
-            self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
-        else:
-            self.chan_map = channel_map
+#     def __init__(self, channel_map):
+#         super().__init__()
+#         if isinstance(channel_map, str):
+#             self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+#         else:
+#             self.chan_map = channel_map
         
-        # self.dump = True
+#         # self.dump = True
     
-    def match(self, frag_type, subsys):
-        return (frag_type == daqdataformats.FragmentType.kWIBEth) and (subsys == daqdataformats.SourceID.kDetectorReadout)
+#     def match(self, frag_type, subsys):
+#         return (frag_type == daqdataformats.FragmentType.kWIBEth) and (subsys == daqdataformats.SourceID.kDetectorReadout)
     
-    def unpack(self, frag):
+#     def unpack(self, frag):
 
-        payload_size = frag.get_data_size()
-        print(f"fragment payload size {payload_size}")
-        if not payload_size:
-            return None
+#         payload_size = frag.get_data_size()
+#         print(f"fragment payload size {payload_size}")
+#         if not payload_size:
+#             return None
         
-        wf = fddetdataformats.WIBEthFrame(frag.get_data())
-        dh = wf.get_daqheader()
-        wh = wf.get_wibheader()
-        ts, det_id, crate_no, slot_no, stream_no = (dh.timestamp, dh.det_id, dh.crate_id, dh.slot_id, dh.stream_id)
-        n_chan_per_stream = 64
-        n_streams_per_link = 4
+#         wf = fddetdataformats.WIBEthFrame(frag.get_data())
+#         dh = wf.get_daqheader()
+#         wh = wf.get_wibheader()
+#         ts, det_id, crate_no, slot_no, stream_no = (dh.timestamp, dh.det_id, dh.crate_id, dh.slot_id, dh.stream_id)
+#         n_chan_per_stream = 64
+#         n_streams_per_link = 4
 
-        logging.info(f"ts: 0x{ts:016x} (15 lsb: 0x{ts&0x7fff:04x}) cd_ts_0: 0x{wh.colddata_timestamp_0:04x} cd_ts_1: 0x{wh.colddata_timestamp_1:04x} crate: {crate_no}, slot: {slot_no}, stream: {stream_no}")
+#         logging.info(f"ts: 0x{ts:016x} (15 lsb: 0x{ts&0x7fff:04x}) cd_ts_0: 0x{wh.colddata_timestamp_0:04x} cd_ts_1: 0x{wh.colddata_timestamp_1:04x} crate: {crate_no}, slot: {slot_no}, stream: {stream_no}")
 
-        off_chans = [self.chan_map.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, c) for c in range(n_chan_per_stream)]
+#         off_chans = [self.chan_map.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, c) for c in range(n_chan_per_stream)]
 
-        ts = wibeth_unpack.np_array_timestamp(frag)
-        adcs = wibeth_unpack.np_array_adc(frag)
+#         ts = wibeth_unpack.np_array_timestamp(frag)
+#         adcs = wibeth_unpack.np_array_adc(frag)
 
-        df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(n_chan_per_stream)]))
-        df = df.set_index('ts')
+#         df = pd.DataFrame(collections.OrderedDict([('ts', ts)]+[(off_chans[c], adcs[:,c]) for c in range(n_chan_per_stream)]))
+#         df = df.set_index('ts')
 
-        return df
+#         return df
 
 class WIBFragmentUnpacker(FragmentUnpacker):
     
@@ -231,6 +233,96 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
         return df
 
 
+class TAFragmentPandasUnpacker(FragmentUnpacker):
+
+    def __init__(self, channel_map):
+        super().__init__()
+        if isinstance(channel_map, str):
+            self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        else:
+            self.chan_map = channel_map
+    
+    def match(self, frag_type, subsys):
+        return (frag_type == daqdataformats.FragmentType.kTriggerActivity) and (subsys == daqdataformats.SourceID.kTrigger)
+    
+    def unpack(self, frag):
+
+        # tp_array = []
+        # tp_size = trgdataformats.TriggerPrimitive.sizeof()
+
+        # frag_hdr = frag.get_header()
+        data_size = frag.get_data_size()
+        # if not data_size:
+        #     return None
+
+        offset=0
+        ta_offsets = []
+        n_activiites = 0
+
+        while(offset < data_size):
+            ta_offsets.append(offset)
+
+            ta = trgdataformats.TriggerActivity(frag.get_data(offset))
+
+            # print(offset, data_size)
+            # print(f"TA: n_prims {len(ta)} {ta.sizeof()}")
+            # print(f"TA: start {ta.data.time_start:016x}")
+            # print(f"TA: end {ta.data.time_end:016x}")
+            # print(f"TA: end-start {ta.data.time_end-ta.data.time_start}")
+
+            n_activiites += 1
+            offset += ta.sizeof()
+
+
+
+        # Initialize the TA array buffer
+        ta_array = np.zeros(
+            n_activiites, 
+            dtype=[
+                ('time_start', np.uint64), 
+                ('time_end', np.uint64), 
+                ('time_peak', np.uint64), 
+                ('time_activity', np.uint64), 
+                ('channel_start', np.uint32), 
+                ('channel_end', np.uint32), 
+                ('channel_peak', np.uint32), 
+                ('adc_integral', np.uint32), 
+                ('adc_peak', np.uint16) 
+            ])
+
+        offset=0
+        for i, offset in enumerate(ta_offsets):
+            ta = trgdataformats.TriggerActivity(frag.get_data(offset))
+
+            print(offset, data_size)
+            print(f"TA: n_prims {len(ta)} {ta.sizeof()}")
+            print(f"TA: start {ta.data.time_start:016x}")
+            print(f"TA: end {ta.data.time_end:016x}")
+            print(f"TA: end-start {ta.data.time_end-ta.data.time_start}")
+
+
+            ta_array[i] = (
+                ta.data.time_start,
+                ta.data.time_end,
+                ta.data.time_peak,
+                ta.data.time_activity,
+                ta.data.channel_start,
+                ta.data.channel_end,
+                ta.data.channel_peak,
+                ta.data.adc_integral,
+                ta.data.adc_peak,
+            )
+
+
+        # Create the dataframe
+        df = pd.DataFrame(ta_array)
+        logging.debug(f"TA Dataframe size {len(df)}")
+        # print(df)
+        # Add plane information (here or in user code?)
+        df['plane'] = df['channel_peak'].apply(lambda x: self.chan_map.get_plane_from_offline_channel(x)).astype(np.uint8)
+        return df
+
+
 class DAPHNEStreamFragmentUnpacker(FragmentUnpacker):
     
     def __init__(self):
@@ -316,7 +408,7 @@ class UnpackerService:
                 
                 logging.debug(f"Unpacking Subsys={sid.subsystem}, id={sid.id}")                
                 r = up.unpack(frag)
-                logging.debug(f"Unpacking Subsys={sid.subsystem}, id={sid.id} completed")
+                logging.debug(f"Unpacking Subsys={sid.subsystem}, id={sid.id} completed ({len(r) if r is not None else 0})")
                 res.setdefault(n,{})[sid.id] = r
 
         return res
