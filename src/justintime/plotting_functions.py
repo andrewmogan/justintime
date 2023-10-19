@@ -127,8 +127,10 @@ def make_static_img(df, zmin: int = None, zmax: int = None, title: str = "",colo
 
 
 def make_tp_plot(df_tp, df_ta, xmin, xmax, cmin, cmax, fig_w, fig_h, info, orientation:str=""):
-    print(df_tp)
-    print(df_ta)
+    rich.print("TP Dataset")
+    rich.print(df_tp)
+    rich.print("TA Dataset")
+    rich.print(df_ta)
     if not df_tp.empty:
         if orientation=='horizontal':
             # Axes
@@ -146,6 +148,8 @@ def make_tp_plot(df_tp, df_ta, xmin, xmax, cmin, cmax, fig_w, fig_h, info, orien
             h_row=1
             s_col=2
             s_row=1
+
+
 
             # histogram
             h_args = dict(y=df_tp["channel"],name='channel', nbinsy=(xmax-xmin))
@@ -166,6 +170,7 @@ def make_tp_plot(df_tp, df_ta, xmin, xmax, cmin, cmax, fig_w, fig_h, info, orien
             h_row=2
             s_col=1
             s_row=1
+
             h_args = dict(x=df_tp["channel"],name='channel', nbinsx=(xmax-xmin))
 
         # fig=go.Figure()
@@ -182,8 +187,8 @@ def make_tp_plot(df_tp, df_ta, xmin, xmax, cmin, cmax, fig_w, fig_h, info, orien
         )
         fig.add_trace(
             go.Scattergl(
-                y=df_tp['channel'],
-                x=df_tp['time_peak'],
+                y=y,
+                x=x,
                 mode='markers',name="Trigger Primitives",
                 marker=dict(
                     size=10,
@@ -271,7 +276,7 @@ def make_tp_overlay(df, cmin, cmax, orientation):
                 #     array=df['time_peak']-df["time_start"],
                 #     arrayminus=df["time_over_threshold"]-(df['time_peak']-df["time_start"])
                 # ),
-                mode='markers',name="Trigger Primitives",
+                mode='markers', name="Trigger Primitives",
                 
                 marker=dict(size=df["adc_integral"],
                     sizemode='area',
@@ -291,6 +296,77 @@ def make_tp_overlay(df, cmin, cmax, orientation):
         fig = go.Scatter()
 
     return fig
+
+def make_ta_overlay(df_tas, cmin, cmax, orientation):
+
+    traces = []
+    for i, ta in df_tas.iterrows():
+
+        text=f"start : {ta['time_start']}<br>peak : {ta['time_peak']}<br>end : {ta['time_end']}<br>ch_start : {ta['channel_start']}<br>ch_peak: {ta['channel_peak']}<br>ch_end : {ta['channel_end']}<br>peak adc : {ta['adc_peak']}"
+
+
+        time_points = [
+                    ta['time_start'],
+                    ta['time_start'],
+                    ta['time_end'],
+                    ta['time_end'],
+                    ta['time_start']
+                ]
+        channel_points = [
+                    ta['channel_start'],
+                    ta['channel_end'],
+                    ta['channel_end'],
+                    ta['channel_start'],
+                    ta['channel_start']
+                ]
+        if orientation == 'vertical':
+            x=channel_points
+            y=time_points
+        else:
+            x=time_points
+            y=channel_points
+
+        # if orientation == 'vertical':
+        #     y0=ta['time_start']
+        #     y1=ta['time_end']
+        #     x0=ta['channel_start']
+        #     x1=ta['channel_end']            
+        # else:
+        #     x0=ta['time_start']
+        #     x1=ta['time_end']
+        #     y0=ta['channel_start']
+        #     y1=ta['channel_end']
+
+        traces.append(
+            # go.layout.Shape(
+            #         type="rect",
+            #         x0=x0, y0=y0, x1=x1, y1=y1,
+            #         line=dict(
+            #             color="RoyalBlue",
+            #             width=2,
+            #         ),
+            #         fillcolor="LightSkyBlue",
+            #         opacity=0.5,
+            #         layer='below'
+            #     )
+
+            go.Scatter(
+                name=f"ta[{i}]",
+                text=text,
+                x=x, 
+                y=y, 
+                fill="toself",
+                line=dict(
+                    color="RoyalBlue",
+                    width=2,
+                ),
+                fillcolor="LightSkyBlue",
+                opacity=0.5,
+
+            )
+        )
+    return traces
+
 
 def make_tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
     if not df.empty:

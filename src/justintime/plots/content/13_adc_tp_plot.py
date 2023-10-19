@@ -9,7 +9,7 @@ import rich
 import pandas as pd
 import logging
 from .. import plot_class
-from ... plotting_functions import add_dunedaq_annotation, selection_line, make_static_img,nothing_to_plot,make_tp_plot,make_tp_overlay
+from ... plotting_functions import add_dunedaq_annotation, selection_line, make_static_img, nothing_to_plot, make_tp_plot,make_tp_overlay, make_ta_overlay
 
 def return_obj(dash_app, engine, storage,theme):
     plot_id = "13_adc_tp_plot"
@@ -71,37 +71,18 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
         rich.print(fzmin,fzmax)                                     
         fig = px.imshow(df_adc, zmin=fzmin, zmax=fzmax, title=title, color_continuous_scale=colorscale, aspect="auto")
 
-    if "tp_overlay" in overlay_tps:
-        logging.info(f"TPs in {plane_id}-Plane:")
-        logging.info(df_tps)
-        fig.add_trace(make_tp_overlay(df_tps, fzmin,fzmax, orientation))
-
+    if "ta_overlay" in overlay_tps:
 
         logging.info(f"TPs in {plane_id}-Plane:")
         logging.info(df_tas)
-        for i, ta in df_tas.iterrows():
-            time_points = [
-                        ta['time_start'],
-                        ta['time_start'],
-                        ta['time_end'],
-                        ta['time_end'],
-                        ta['time_start']
-                    ]
-            channel_points = [
-                        ta['channel_start'],
-                        ta['channel_end'],
-                        ta['channel_end'],
-                        ta['channel_start'],
-                        ta['channel_start']
-                    ]
-            fig.add_trace(
-                go.Scatter(
-                    x= channel_points if orientation == 'vertical' else time_points, 
-                    y= time_points if orientation == 'vertical' else channel_points, 
-                    fill="toself"
-                )
-            )
+        for t in make_ta_overlay(df_tas, fzmin,fzmax, orientation):
+            fig.add_trace(t)
 
+    if "tp_overlay" in overlay_tps:
+
+        logging.info(f"TPs in {plane_id}-Plane:")
+        logging.info(df_tps)
+        fig.add_trace(make_tp_overlay(df_tps, fzmin,fzmax, orientation))
     
     fig.update_layout(
         height=height,
@@ -162,7 +143,7 @@ def init_callbacks(dash_app, storage, plot_id, engine, theme):
                     data.init_tp()
                     data.init_ta()
                     # data.init_cnr()
-                    rich.print(static_image,offset,overlay_tps,orientation,height)
+                    # rich.print(static_image,offset,overlay_tps,orientation,height)
                     children = []
                     if 'Z' in adcmap_selection:
                         logging.info("Z Plane selected")
