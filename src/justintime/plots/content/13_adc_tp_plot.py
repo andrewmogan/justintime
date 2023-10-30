@@ -61,27 +61,27 @@ def plot_adc_map(data, plane_id, colorscale, tr_color_range, static_image, offse
     df_tps = getattr(data, f'tp_df_{plane_id}')
     df_tas = getattr(data, f'ta_df_{plane_id}')
 
-    logging.info(f"Raw ADCs in {plane_id}-Plane {note}:")
-    logging.info(df_adc)
+    # logging.debug(f"Raw ADCs in {plane_id}-Plane {note}:")
+    # logging.debug(df_adc)
             
     title = f"{plane_id}-plane offset removal, Run {data.info['run_number']}: {data.info['trigger_number']}"
     if "make_static_image" in static_image:
         fig = make_static_img(df_adc, zmin = fzmin, zmax = fzmax, title=title, colorscale=colorscale, height=height,orientation=orientation)
     else:
-        rich.print(fzmin,fzmax)                                     
+        # richloggi.print(fzmin,fzmax)                                     
         fig = px.imshow(df_adc, zmin=fzmin, zmax=fzmax, title=title, color_continuous_scale=colorscale, aspect="auto")
 
     if "ta_overlay" in overlay_tps:
 
-        logging.info(f"TPs in {plane_id}-Plane:")
-        logging.info(df_tas)
+        logging.debug(f"TAs in {plane_id}-Plane:")
+        logging.debug(df_tas)
         for t in make_ta_overlay(df_tas, fzmin,fzmax, orientation):
             fig.add_trace(t)
 
     if "tp_overlay" in overlay_tps:
 
-        logging.info(f"TPs in {plane_id}-Plane:")
-        logging.info(df_tps)
+        logging.debug(f"TPs in {plane_id}-Plane:")
+        logging.debug(df_tps)
         fig.add_trace(make_tp_overlay(df_tps, fzmin,fzmax, orientation))
     
     fig.update_layout(
@@ -134,10 +134,10 @@ def init_callbacks(dash_app, storage, plot_id, engine, theme):
                 try: data = storage.get_trigger_record_data(trigger_record, raw_data_file)
                 except RuntimeError: return(html.Div("Please choose both a run data file and trigger record"))
 
-                logging.info(f"Initial Time Stamp: {data.ts_min}")
-                logging.info(" ")
-                logging.info("Initial Dataframe:")
-                logging.info(data.df_tsoff)
+                logging.debug(f"Initial Time Stamp: {data.ts_min}")
+                logging.debug(" ")
+                logging.debug("Initial Dataframe:")
+                logging.debug(data.df_tsoff)
                 
                 if len(data.df)!=0 and len(data.df.index!=0):
                     data.init_tp()

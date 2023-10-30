@@ -194,6 +194,22 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
     def match(self, frag_type, subsys):
         return (frag_type == daqdataformats.FragmentType.kTriggerPrimitive) and (subsys == daqdataformats.SourceID.kTrigger)
     
+    @classmethod
+    def dtypes(cls):
+        return [
+                ('time_start', np.uint64), 
+                ('time_peak', np.uint64), 
+                ('time_over_threshold', np.uint64), 
+                ('channel',np.uint32),
+                ('adc_integral', np.uint32), 
+                ('adc_peak', np.uint16), 
+                ('flag', np.uint16),
+            ]
+    
+    @classmethod
+    def empty(cls):
+        return pd.DataFrame(np.empty(0, cls.dtypes()))
+
     def unpack(self, frag):
 
         tp_array = []
@@ -207,15 +223,8 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
         # Initialize the TP array buffer
         tp_array = np.zeros(
             n_frames, 
-            dtype=[
-                ('time_start', np.uint64), 
-                ('time_peak', np.uint64), 
-                ('time_over_threshold', np.uint64), 
-                ('channel',np.uint32),
-                ('adc_integral', np.uint32), 
-                ('adc_peak', np.uint16), 
-                ('flag', np.uint16),
-            ])
+            dtype=self.dtypes()
+        )
 
         
         # Populate the buffer
@@ -245,61 +254,75 @@ class TAFragmentPandasUnpacker(FragmentUnpacker):
     def match(self, frag_type, subsys):
         return (frag_type == daqdataformats.FragmentType.kTriggerActivity) and (subsys == daqdataformats.SourceID.kTrigger)
     
+    @classmethod
+    def dtypes(cls):
+        return [
+            ('time_start', np.uint64), 
+            ('time_end', np.uint64), 
+            ('time_peak', np.uint64), 
+            ('time_activity', np.uint64), 
+            ('channel_start', np.uint32), 
+            ('channel_end', np.uint32), 
+            ('channel_peak', np.uint32), 
+            ('adc_integral', np.uint32), 
+            ('adc_peak', np.uint16) 
+        ]
+
+    @classmethod
+    def empty(cls):
+        return pd.DataFrame(np.empty(0, cls.dtypes()))
+
+
+    # def test_wrapper(self, frag):
+    #     offset=0
+
+    #     b = frag.get_data_bytes()
+    #     taw = trgdataformats.TriggerActivityWrapper(b)
+    #     # ta_data = taw.data
+
+    #     import rich
+    #     rich.print('>'*80)
+    #     rich.print(len(taw))
+    #     rich.print(
+    #         taw.data.time_start,
+    #         taw.data.time_end,
+    #         taw.data.time_peak,
+    #         taw.data.time_activity,
+    #         taw.data.channel_start,
+    #         taw.data.channel_end,
+    #         taw.data.channel_peak,
+    #         taw.data.adc_integral,
+    #         taw.data.adc_peak,
+    #     )
+    #     rich.print('<'*80)
+        
+
     def unpack(self, frag):
 
-        # tp_array = []
-        # tp_size = trgdataformats.TriggerPrimitive.sizeof()
-
-        # frag_hdr = frag.get_header()
+        # self.test_wrapper(frag)
         data_size = frag.get_data_size()
-        # if not data_size:
-        #     return None
 
         offset=0
-        ta_offsets = []
-        n_activiites = 0
+        offsets = []
+        n_entries = 0
 
         while(offset < data_size):
-            ta_offsets.append(offset)
+            offsets.append(offset)
 
             ta = trgdataformats.TriggerActivity(frag.get_data(offset))
 
-            # print(offset, data_size)
-            # print(f"TA: n_prims {len(ta)} {ta.sizeof()}")
-            # print(f"TA: start {ta.data.time_start:016x}")
-            # print(f"TA: end {ta.data.time_end:016x}")
-            # print(f"TA: end-start {ta.data.time_end-ta.data.time_start}")
-
-            n_activiites += 1
+            n_entries += 1
             offset += ta.sizeof()
-
-
 
         # Initialize the TA array buffer
         ta_array = np.zeros(
-            n_activiites, 
-            dtype=[
-                ('time_start', np.uint64), 
-                ('time_end', np.uint64), 
-                ('time_peak', np.uint64), 
-                ('time_activity', np.uint64), 
-                ('channel_start', np.uint32), 
-                ('channel_end', np.uint32), 
-                ('channel_peak', np.uint32), 
-                ('adc_integral', np.uint32), 
-                ('adc_peak', np.uint16) 
-            ])
+            n_entries, 
+            dtype=self.dtypes()
+        )
 
         offset=0
-        for i, offset in enumerate(ta_offsets):
+        for i, offset in enumerate(offsets):
             ta = trgdataformats.TriggerActivity(frag.get_data(offset))
-
-            print(offset, data_size)
-            print(f"TA: n_prims {len(ta)} {ta.sizeof()}")
-            print(f"TA: start {ta.data.time_start:016x}")
-            print(f"TA: end {ta.data.time_end:016x}")
-            print(f"TA: end-start {ta.data.time_end-ta.data.time_start}")
-
 
             ta_array[i] = (
                 ta.data.time_start,
@@ -316,10 +339,70 @@ class TAFragmentPandasUnpacker(FragmentUnpacker):
 
         # Create the dataframe
         df = pd.DataFrame(ta_array)
-        logging.debug(f"TA Dataframe size {len(df)}")
+        # logging.debug(f"TA Dataframe size {len(df)}")
         # print(df)
         # Add plane information (here or in user code?)
         df['plane'] = df['channel_peak'].apply(lambda x: self.chan_map.get_plane_from_offline_channel(x)).astype(np.uint8)
+        return df
+
+
+class TCFragmentPandasUnpacker(FragmentUnpacker):
+
+    def __init__(self):
+        super().__init__()
+
+    def match(self, frag_type, subsys):
+        return (frag_type == daqdataformats.FragmentType.kTriggerCandidate) and (subsys == daqdataformats.SourceID.kTrigger)
+
+    @classmethod
+    def dtypes(cls):
+        return [
+                ('time_start', np.uint64), 
+                ('time_end', np.uint64), 
+                ('time_candidate', np.uint64), 
+            ]
+
+    @classmethod
+    def empty(cls):
+        return pd.DataFrame(np.empty(0, cls.dtypes()))
+
+    def unpack(self, frag):
+
+        data_size = frag.get_data_size()
+
+        offset=0
+        offsets = []
+        n_entries = 0
+
+        while(offset < data_size):
+            offsets.append(offset)
+
+            tc = trgdataformats.TriggerCandidate(frag.get_data(offset))
+
+            n_entries += 1
+            offset += tc.sizeof()
+
+
+        # Initialize the TA array buffer
+        tc_array = np.zeros(
+            n_entries, 
+            self.dtypes()
+        )
+
+        offset=0
+        for i, offset in enumerate(offsets):
+            ta = trgdataformats.TriggerCandidate(frag.get_data(offset))
+
+            tc_array[i] = (
+                ta.data.time_start,
+                ta.data.time_end,
+                ta.data.time_candidate,
+            )
+
+
+        # Create the dataframe
+        df = pd.DataFrame(tc_array)
+        logging.debug(f"TC Dataframe size {len(df)}")
         return df
 
 
@@ -389,6 +472,9 @@ class UnpackerService:
             raise KeyError(f"UnpackerService {name} already registered")
 
         self.fragment_unpackers[name] = unpacker
+
+    def get_unpacker(self, name):
+        return self.fragment_unpackers[name]
         
 
     def unpack(self, raw_data_file, tr_id: int, seq_id: int=0) -> dict:
@@ -403,12 +489,12 @@ class UnpackerService:
 
             for n,up in self.fragment_unpackers.items():
                 if not up.match(frag.get_fragment_type(), sid.subsystem):
-                    logging.debug(f"fragment {sid} (type {frag.get_fragment_type()}) and unpacker {n} - no match")
+                    # logging.debug(f"fragment {sid} (type {frag.get_fragment_type()}) and unpacker {n} - no match")
                     continue
                 
-                logging.debug(f"Unpacking Subsys={sid.subsystem}, id={sid.id}")                
+                logging.debug(f"[{n}] Unpacking Subsys={sid.subsystem}, id={sid.id}")                
                 r = up.unpack(frag)
-                logging.debug(f"Unpacking Subsys={sid.subsystem}, id={sid.id} completed ({len(r) if r is not None else 0})")
+                logging.debug(f"[{n}] Unpacking Subsys={sid.subsystem}, id={sid.id} completed ({len(r) if r is not None else 0})")
                 res.setdefault(n,{})[sid.id] = r
 
         return res

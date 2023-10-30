@@ -39,11 +39,6 @@ def selection_line(partition,run,raw_data_file, trigger_record):
 def make_static_img(df, zmin: int = None, zmax: int = None, title: str = "",colorscale:str="", height:int=None,orientation: str = ""):
     
     if not df.empty:
-        rich.print(df)
-        rich.print(df.columns)
-        rich.print(df.index)
-        rich.print(zmin,zmax)
-       
         xmin, xmax = min(df.columns), max(df.columns)
         #ymin, ymax = min(df.index), max(df.index)
         ymin, ymax = max(df.index), min(df.index)
@@ -202,30 +197,36 @@ def make_tp_plot(df_tp, df_ta, xmin, xmax, cmin, cmax, fig_w, fig_h, info, orien
                 row=s_row, col=s_col
             )
         if not df_ta.empty:
-            for i, ta in df_ta.iterrows():
-                time_points = [
-                            ta['time_start'],
-                            ta['time_start'],
-                            ta['time_end'],
-                            ta['time_end'],
-                            ta['time_start']
-                        ]
-                channel_points = [
-                            ta['channel_start'],
-                            ta['channel_end'],
-                            ta['channel_end'],
-                            ta['channel_start'],
-                            ta['channel_start']
-                        ]
+            traces = make_ta_overlay(df_ta, cmin, cmax, orientation)
+            for t in traces:
                 fig.add_trace(
-                    go.Scatter(
-                        x= channel_points if orientation == 'vertical' else time_points, 
-                        y= time_points if orientation == 'vertical' else channel_points, 
-                        fill="toself"
-                    ),
+                    t,
                     row=s_row, col=s_col
-
                 )
+            # for i, ta in df_ta.iterrows():
+            #     time_points = [
+            #                 ta['time_start'],
+            #                 ta['time_start'],
+            #                 ta['time_end'],
+            #                 ta['time_end'],
+            #                 ta['time_start']
+            #             ]
+            #     channel_points = [
+            #                 ta['channel_start'],
+            #                 ta['channel_end'],
+            #                 ta['channel_end'],
+            #                 ta['channel_start'],
+            #                 ta['channel_start']
+            #             ]
+            #     fig.add_trace(
+            #         go.Scatter(
+            #             x= channel_points if orientation == 'vertical' else time_points, 
+            #             y= time_points if orientation == 'vertical' else channel_points, 
+            #             fill="toself"
+            #         ),
+            #         row=s_row, col=s_col
+
+            #     )
         fig.add_trace(
             go.Histogram(**h_args), 
             row=h_row, col=h_col
@@ -300,24 +301,35 @@ def make_tp_overlay(df, cmin, cmax, orientation):
 def make_ta_overlay(df_tas, cmin, cmax, orientation):
 
     traces = []
+    border_time = 16
+    border_channel = 0.5
     for i, ta in df_tas.iterrows():
 
-        text=f"start : {ta['time_start']}<br>peak : {ta['time_peak']}<br>end : {ta['time_end']}<br>ch_start : {ta['channel_start']}<br>ch_peak: {ta['channel_peak']}<br>ch_end : {ta['channel_end']}<br>peak adc : {ta['adc_peak']}"
+        text=f"""
+start : {ta['time_start']}
+peak : {ta['time_peak']}
+end : {ta['time_end']}
+ch_start : {ta['channel_start']}
+ch_peak: {ta['channel_peak']}
+ch_end : {ta['channel_end']}
+peak adc : {ta['adc_peak']}
+adc_integral : {ta['adc_integral']}
+""".replace('\n','<br>')
 
 
         time_points = [
-                    ta['time_start'],
-                    ta['time_start'],
-                    ta['time_end'],
-                    ta['time_end'],
-                    ta['time_start']
+                    ta['time_start']-border_time,
+                    ta['time_start']-border_time,
+                    ta['time_end']+border_time,
+                    ta['time_end']+border_time,
+                    ta['time_start']-border_time
                 ]
         channel_points = [
-                    ta['channel_start'],
-                    ta['channel_end'],
-                    ta['channel_end'],
-                    ta['channel_start'],
-                    ta['channel_start']
+                    ta['channel_start']-border_channel,
+                    ta['channel_end']+border_channel,
+                    ta['channel_end']+border_channel,
+                    ta['channel_start']-border_channel,
+                    ta['channel_start']-border_channel
                 ]
         if orientation == 'vertical':
             x=channel_points

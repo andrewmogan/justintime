@@ -60,7 +60,7 @@ class TriggerRecordData:
     
     def __init__(self, engine, trigger_record, raw_data_file):
         self.engine = engine
-        self.info, self.df, self.tp_df, self.ta_df = engine.load_entry(raw_data_file, int(trigger_record))
+        self.info, self.df, self.tp_df, self.ta_df, self.tc_df = engine.load_entry(raw_data_file, int(trigger_record))
 
         self.tr_ts = self.info['trigger_timestamp']
         self.tr_ts_sec = self.tr_ts/int(62e6) 
