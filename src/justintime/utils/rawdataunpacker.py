@@ -42,12 +42,13 @@ class WIBEthFragmentNumpyUnpacker(FragmentUnpacker):
         if not frag.get_data_size():
             return None, None
         
-        wf = fddetdataformats.WIBEthFrame(frag.get_data())
-        dh = wf.get_daqheader()
-        wh = wf.get_wibheader()
-        ts, det_id, crate_no, slot_no, stream_no = (dh.timestamp, dh.det_id, dh.crate_id, dh.slot_id, dh.stream_id)
+        if True:
+            wf = fddetdataformats.WIBEthFrame(frag.get_data())
+            dh = wf.get_daqheader()
+            wh = wf.get_wibheader()
+            ts, det_id, crate_no, slot_no, stream_no = (dh.timestamp, dh.det_id, dh.crate_id, dh.slot_id, dh.stream_id)
 
-        logging.info(f"ts: 0x{ts:016x} (15 lsb: 0x{ts&0x7fff:04x}) cd_ts_0: 0x{wh.colddata_timestamp_0:04x} cd_ts_1: 0x{wh.colddata_timestamp_1:04x} crate: {crate_no}, slot: {slot_no}, stream: {stream_no}")
+            logging.info(f"ts: 0x{ts:016x} (15 lsb: 0x{ts&0x7fff:04x}) cd_ts_0: 0x{wh.colddata_timestamp_0:04x} cd_ts_1: 0x{wh.colddata_timestamp_1:04x} crate: {crate_no}, slot: {slot_no}, stream: {stream_no}")
 
         ts = wibeth_unpack.np_array_timestamp(frag)
         adcs = wibeth_unpack.np_array_adc(frag)
@@ -59,11 +60,16 @@ class WIBEthFragmentPandasUnpacker(WIBEthFragmentNumpyUnpacker):
 
     def __init__(self, channel_map):
         super().__init__()
-        self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        # self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        if isinstance(channel_map, str):
+            self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        else:
+            self.chan_map = channel_map
 
     def unpack(self, frag):
 
         payload_size = frag.get_data_size()
+        # print(f"fragment payload size {payload_size}")
         if not payload_size:
             return None
         
@@ -76,10 +82,10 @@ class WIBEthFragmentPandasUnpacker(WIBEthFragmentNumpyUnpacker):
 
         logging.info(f"ts: 0x{ts:016x} (15 lsb: 0x{ts&0x7fff:04x}) cd_ts_0: 0x{wh.colddata_timestamp_0:04x} cd_ts_1: 0x{wh.colddata_timestamp_1:04x} crate: {crate_no}, slot: {slot_no}, stream: {stream_no}")
 
-        link_no = stream_no >> 6;
-        substream_no = stream_no & 0x3f;
+        # link_no = stream_no >> 6;
+        # substream_no = stream_no & 0x3f;
 
-        first_chan = n_chan_per_stream*substream_no
+        # first_chan = n_chan_per_stream*substream_no
         if self.chan_map:
             # off_chans = [self.chan_map.get_offline_channel_from_crate_slot_fiber_chan(crate_no, slot_no, link_no, c) for c in range(first_chan,first_chan+n_chan_per_stream)]
             off_chans = [self.chan_map.get_offline_channel_from_crate_slot_stream_chan(crate_no, slot_no, stream_no, c) for c in range(n_chan_per_stream)]
@@ -138,8 +144,12 @@ class WIBFragmentUnpacker(FragmentUnpacker):
     
     def __init__(self, channel_map):
         super().__init__()
-        self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap')
-    
+        # self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap')
+        if isinstance(channel_map, str):
+            self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        else:
+            self.chan_map = channel_map
+
     def match(self, frag_type, subsys):
         return (frag_type == daqdataformats.FragmentType.kWIB) and (subsys == daqdataformats.SourceID.kDetectorReadout)
     
@@ -174,11 +184,30 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
 
     def __init__(self, channel_map):
         super().__init__()
-        self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap')
+        if isinstance(channel_map, str):
+            self.chan_map = detchannelmaps.make_map(f'{channel_map}ChannelMap') if not channel_map is None else None
+        else:
+            self.chan_map = channel_map
     
     def match(self, frag_type, subsys):
         return (frag_type == daqdataformats.FragmentType.kTriggerPrimitive) and (subsys == daqdataformats.SourceID.kTrigger)
     
+    @classmethod
+    def dtypes(cls):
+        return [
+                ('time_start', np.uint64), 
+                ('time_peak', np.uint64), 
+                ('time_over_threshold', np.uint64), 
+                ('channel',np.uint32),
+                ('adc_integral', np.uint32), 
+                ('adc_peak', np.uint16), 
+                ('flag', np.uint16),
+            ]
+    
+    @classmethod
+    def empty(cls):
+        return pd.DataFrame(np.empty(0, cls.dtypes()))
+
     def unpack(self, frag):
 
         tp_array = []
@@ -192,15 +221,8 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
         # Initialize the TP array buffer
         tp_array = np.zeros(
             n_frames, 
-            dtype=[
-                ('time_start', np.uint64), 
-                ('time_peak', np.uint64), 
-                ('time_over_threshold', np.uint64), 
-                ('channel',np.uint32),
-                ('adc_integral', np.uint32), 
-                ('adc_peak', np.uint16), 
-                ('flag', np.uint16),
-            ])
+            dtype=self.dtypes()
+        )
 
         
         # Populate the buffer
@@ -211,6 +233,8 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
         # Create the dataframe
         df = pd.DataFrame(tp_array)
 
+        logging.debug(f"TP Dataframe size {len(df)}")
+        # print(df)
         # Add plane information (here or in user code?)
         df['plane'] = df['channel'].apply(lambda x: self.chan_map.get_plane_from_offline_channel(x)).astype(np.uint8)
         return df
@@ -259,6 +283,9 @@ class UnpackerService:
             raise KeyError(f"UnpackerService {name} already registered")
 
         self.fragment_unpackers[name] = unpacker
+
+    def get_unpacker(self, name):
+        return self.fragment_unpackers[name]
         
 
     def unpack(self, raw_data_file, tr_id: int, seq_id: int=0) -> dict:
@@ -273,12 +300,12 @@ class UnpackerService:
 
             for n,up in self.fragment_unpackers.items():
                 if not up.match(frag.get_fragment_type(), sid.subsystem):
-                    logging.debug(f"fragment {sid} (type {frag.get_fragment_type()}) and unpacker {n} - no match")
+                    # logging.debug(f"fragment {sid} (type {frag.get_fragment_type()}) and unpacker {n} - no match")
                     continue
                 
-                logging.debug(f"Unpacking Subsys={sid.subsystem}, id={sid.id}")                
+                logging.debug(f"[{n}] Unpacking Subsys={sid.subsystem}, id={sid.id}")                
                 r = up.unpack(frag)
-                logging.debug(f"Unpacking Subsys={sid.subsystem}, id={sid.id} completed")
+                logging.debug(f"[{n}] Unpacking Subsys={sid.subsystem}, id={sid.id} completed ({len(r) if r is not None else 0})")
                 res.setdefault(n,{})[sid.id] = r
 
         return res

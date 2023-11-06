@@ -9,6 +9,7 @@ from matplotlib.colors import Normalize
 from matplotlib import cm
 import numpy as np
 import rich
+import logging
 
 def add_dunedaq_annotation(figure):
     figure.add_annotation(dict(font=dict(color="black",size=12),
@@ -38,11 +39,6 @@ def selection_line(partition,run,raw_data_file, trigger_record):
 def make_static_img(df, zmin: int = None, zmax: int = None, title: str = "",colorscale:str="", height:int=None,orientation: str = ""):
     
     if not df.empty:
-        rich.print(df)
-        rich.print(df.columns)
-        rich.print(df.index)
-        rich.print(zmin,zmax)
-       
         xmin, xmax = min(df.columns), max(df.columns)
         #ymin, ymax = min(df.index), max(df.index)
         ymin, ymax = max(df.index), min(df.index)
@@ -125,41 +121,118 @@ def make_static_img(df, zmin: int = None, zmax: int = None, title: str = "",colo
     return fig
 
 
-def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
-    if not df.empty:
+def make_tp_plot(df_tp, df_ta, xmin, xmax, cmin, cmax, fig_w, fig_h, info, orientation:str=""):
+    rich.print("TP Dataset")
+    rich.print(df_tp)
+    rich.print("TA Dataset")
+    rich.print(df_ta)
+    if not df_tp.empty:
+        if orientation=='horizontal':
+            # Axes
+            y_title="Offline Channel"
+            x_title="Time Ticks"
+            y = df_tp['channel']
+            x = df_tp['time_peak']
+
+            # Subplots
+            column_widths = [0.2,0.9]
+            row_heights = None
+            rows=1
+            cols=2
+            h_col=1
+            h_row=1
+            s_col=2
+            s_row=1
+
+
+
+            # histogram
+            h_args = dict(y=df_tp["channel"],name='channel', nbinsy=(xmax-xmin))
+
+        else:
+            # Axes
+            x_title="Offline Channel"
+            y_title="Time Ticks"
+            x = df_tp['channel']
+            y = df_tp['time_peak']
+
+            # Subplots
+            row_heights = [0.9, 0.2]
+            column_widths = None
+            rows=2
+            cols=1
+            h_col=1
+            h_row=2
+            s_col=1
+            s_row=1
+
+            h_args = dict(x=df_tp["channel"],name='channel', nbinsx=(xmax-xmin))
+
         # fig=go.Figure()
-        fig= make_subplots(
-            rows=1, cols=2, 
+        fig = make_subplots(
+            rows=rows, cols=cols, 
             #subplot_titles=(["Trigger Primitives"]), 
-            column_widths=[0.2,0.9],
+            column_widths=column_widths,
+            row_heights = row_heights,
             horizontal_spacing=0.05,
             shared_yaxes=True,
-            y_title="Offline Channel",
-            x_title="Time Ticks",
+            y_title=y_title,
+            x_title=x_title,
         
         )
         fig.add_trace(
             go.Scattergl(
-                y=df['channel'],
-                x=df['time_peak'],
+                y=y,
+                x=x,
                 mode='markers',name="Trigger Primitives",
                 marker=dict(
                     size=10,
-                    color=df['adc_peak'], #set color equal to a variable
+                    color=df_tp['adc_peak'], #set color equal to a variable
                     colorscale='Plasma', # one of plotly colorscales
                     cmin = cmin,
                     cmax = cmax,
                     showscale=True
                     ),
                 ),
-                row=1, col=2
+                row=s_row, col=s_col
             )
+        if not df_ta.empty:
+            traces = make_ta_overlay(df_ta, cmin, cmax, orientation)
+            for t in traces:
+                fig.add_trace(
+                    t,
+                    row=s_row, col=s_col
+                )
+            # for i, ta in df_ta.iterrows():
+            #     time_points = [
+            #                 ta['time_start'],
+            #                 ta['time_start'],
+            #                 ta['time_end'],
+            #                 ta['time_end'],
+            #                 ta['time_start']
+            #             ]
+            #     channel_points = [
+            #                 ta['channel_start'],
+            #                 ta['channel_end'],
+            #                 ta['channel_end'],
+            #                 ta['channel_start'],
+            #                 ta['channel_start']
+            #             ]
+            #     fig.add_trace(
+            #         go.Scatter(
+            #             x= channel_points if orientation == 'vertical' else time_points, 
+            #             y= time_points if orientation == 'vertical' else channel_points, 
+            #             fill="toself"
+            #         ),
+            #         row=s_row, col=s_col
+
+            #     )
         fig.add_trace(
-        go.Histogram(y=df["channel"],name='channel', nbinsy=(xmax-xmin)), 
-        row=1, col=1,
+            go.Histogram(**h_args), 
+            row=h_row, col=h_col
         )
         
-        fig.update_yaxes(range=[xmin,xmax])
+        # fig.update_yaxes(range=[xmin,xmax])
         fig.update_layout(legend=dict(yanchor="top", y=0.01, xanchor="left", x=1))
 
     else:
@@ -181,7 +254,7 @@ def make_tp_plot(df, xmin, xmax, cmin, cmax, fig_w, fig_h, info):
 
     return fig
 
-def tp_for_adc(df, cmin, cmax, orientation):
+def make_tp_overlay(df, cmin, cmax, orientation):
 
     if orientation == 'horizontal':
         x_label = 'time_peak'
@@ -193,8 +266,8 @@ def tp_for_adc(df, cmin, cmax, orientation):
         raise ValueError(f"Unexpeced orientation value found {orientation}. Expected values [horizontal, vertical]")
 
     if not df.empty:
-        rich.print(2.*max(df['adc_integral'])/(10**2))
-        rich.print(max(df['adc_integral']))
+        # rich.print(2.*max(df['adc_integral'])/(10**2))
+        # rich.print("adc integra", max(df['adc_integral']))
         fig=go.Scattergl(
                 x=df[x_label],
                 y=df[y_label],
@@ -204,7 +277,7 @@ def tp_for_adc(df, cmin, cmax, orientation):
                 #     array=df['time_peak']-df["time_start"],
                 #     arrayminus=df["time_over_threshold"]-(df['time_peak']-df["time_start"])
                 # ),
-                mode='markers',name="Trigger Primitives",
+                mode='markers', name="Trigger Primitives",
                 
                 marker=dict(size=df["adc_integral"],
                     sizemode='area',
@@ -221,11 +294,93 @@ def tp_for_adc(df, cmin, cmax, orientation):
                     ],
                 )   
     else:
-        fig =go.Scatter()
+        fig = go.Scatter()
 
     return fig
 
-def tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
+def make_ta_overlay(df_tas, cmin, cmax, orientation):
+
+    traces = []
+    border_time = 16
+    border_channel = 0.5
+    for i, ta in df_tas.iterrows():
+
+        text=f"""
+start : {ta['time_start']}
+peak : {ta['time_peak']}
+end : {ta['time_end']}
+ch_start : {ta['channel_start']}
+ch_peak: {ta['channel_peak']}
+ch_end : {ta['channel_end']}
+peak adc : {ta['adc_peak']}
+adc_integral : {ta['adc_integral']}
+""".replace('\n','<br>')
+
+
+        time_points = [
+                    ta['time_start']-border_time,
+                    ta['time_start']-border_time,
+                    ta['time_end']+border_time,
+                    ta['time_end']+border_time,
+                    ta['time_start']-border_time
+                ]
+        channel_points = [
+                    ta['channel_start']-border_channel,
+                    ta['channel_end']+border_channel,
+                    ta['channel_end']+border_channel,
+                    ta['channel_start']-border_channel,
+                    ta['channel_start']-border_channel
+                ]
+        if orientation == 'vertical':
+            x=channel_points
+            y=time_points
+        else:
+            x=time_points
+            y=channel_points
+
+        # if orientation == 'vertical':
+        #     y0=ta['time_start']
+        #     y1=ta['time_end']
+        #     x0=ta['channel_start']
+        #     x1=ta['channel_end']            
+        # else:
+        #     x0=ta['time_start']
+        #     x1=ta['time_end']
+        #     y0=ta['channel_start']
+        #     y1=ta['channel_end']
+
+        traces.append(
+            # go.layout.Shape(
+            #         type="rect",
+            #         x0=x0, y0=y0, x1=x1, y1=y1,
+            #         line=dict(
+            #             color="RoyalBlue",
+            #             width=2,
+            #         ),
+            #         fillcolor="LightSkyBlue",
+            #         opacity=0.5,
+            #         layer='below'
+            #     )
+
+            go.Scatter(
+                name=f"ta[{i}]",
+                text=text,
+                x=x, 
+                y=y, 
+                fill="toself",
+                line=dict(
+                    color="RoyalBlue",
+                    width=2,
+                ),
+                fillcolor="LightSkyBlue",
+                opacity=0.5,
+
+            )
+        )
+    return traces
+
+
+def make_tp_density(df,xmin, xmax,cmin,cmax,fig_w, fig_h, info):
     if not df.empty:
         # fig=go.Figure()
         fig=px.density_heatmap(df,y=df['channel'],
@@ -258,18 +413,22 @@ def waveform_tps(fig,df,channel_num):
         
         if channel_num in set(df['channel']):            
             
-            new=(df[df['channel'] == channel_num])
+            tps=(df[df['channel'] == channel_num])
             rich.print("Dataframe used for TPs (with similar offline channels)")
-            rich.print(new)
+            rich.print(tps)
             rich.print("TPs time over threshold (in order of appearance):")                 
-            for i in range(len(new)):
+            # for i in range(len(tps)):
+            for index, tp in tps.iterrows():
+
+
+                # tp = tps.iloc[i]
                                                                                 
-                time_start = new.iloc[i]['time_start']
-                time_over_threshold = new.iloc[i]["time_over_threshold"]
-                time_end = (new.iloc[i]["time_start"]+new.iloc[i]["time_over_threshold"])
-                time_peak = new.iloc[i]["time_peak"]
-                channel =new.iloc[i]["channel"]
-                adc_peak = new.iloc[i]["adc_peak"]
+                time_start = tp['time_start']
+                time_over_threshold = tp["time_over_threshold"]
+                time_end = (tp["time_start"]+tp["time_over_threshold"])
+                time_peak = tp["time_peak"]
+                channel =tp["channel"]
+                adc_peak = tp["adc_peak"]
                 rich.print(time_over_threshold)
                                     
                 fig.add_vrect(time_start, time_end, line_width=0, fillcolor="red", opacity=0.2)
