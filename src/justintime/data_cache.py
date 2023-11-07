@@ -20,7 +20,6 @@ class TriggerRecordCache:
         self.shown_plots = new_shown_plots
 
     def get_trigger_record_data(self, trigger_record, raw_data_file):
-        print(dir(self))
         try:
             tr = self.raw_data_files[raw_data_file][trigger_record]
             # Mark tr as fresh
@@ -61,7 +60,7 @@ class TriggerRecordData:
     
     def __init__(self, engine, trigger_record, raw_data_file):
         self.engine = engine
-        self.info, self.df, self.tp_df, self.fwtp_df = engine.load_entry(raw_data_file, int(trigger_record))
+        self.info, self.df, self.tp_df, self.ta_df, self.tc_df = engine.load_entry(raw_data_file, int(trigger_record))
 
         self.tr_ts = self.info['trigger_timestamp']
         self.tr_ts_sec = self.tr_ts/int(62e6) 
@@ -86,18 +85,20 @@ class TriggerRecordData:
             
         logging.info(f"Timestamp offset: {self.ts_off}")
 
-        self.df_tsoff = self.df.copy()        
+        self.df_tsoff = self.df.copy()    
         self.df_tsoff.index=self.df_tsoff.index.astype('int64')-self.ts_off
         self.channels = list(self.df_tsoff.columns)
-        #rich.print(self.channels[0])
-        self.group_planes = groupby(self.channels, lambda ch: engine.ch_map.get_plane_from_offline_channel(int(ch)))
-        
-        self.planes = {k: [x for x in d if x] for k,d in self.group_planes}
-        self.self_planes = {k:sorted(set(v) & set(self.df_tsoff.columns)) for k,v in self.planes.items()}
 
-        self.df_U =  self.df_tsoff[self.self_planes.get(0, [])]
-        self.df_V =  self.df_tsoff[self.self_planes.get(1, [])]
-        self.df_Z =  self.df_tsoff[self.self_planes.get(2, [])]
+        self.planes = {}
+        for ch in self.channels:
+            p = engine.ch_map.get_plane_from_offline_channel(int(ch))
+            self.planes.setdefault(p, []).append(ch)
+
+        self.safe_planes = {k:sorted(set(v) & set(self.df_tsoff.columns)) for k,v in self.planes.items()}
+
+        self.df_U =  self.df_tsoff[self.safe_planes.get(0, [])]
+        self.df_V =  self.df_tsoff[self.safe_planes.get(1, [])]
+        self.df_Z =  self.df_tsoff[self.safe_planes.get(2, [])]
 
         self.df_U_mean, self.df_U_std = self.df_U.mean(), self.df_U.std()
         self.df_V_mean, self.df_V_std = self.df_V.mean(), self.df_V.std()
@@ -152,19 +153,39 @@ class TriggerRecordData:
     
 
     def init_tp(self):
-        #rich.print(self.tp_df)
         self.tp_df_tsoff = self.tp_df.copy()
-        # self.ts_min = self.tp_df_tsoff['time_start'].min()
-        self.tp_df_tsoff['time_peak'] = (self.tp_df_tsoff['time_peak']-self.ts_off)
-        self.tp_df_tsoff['time_start'] = (self.tp_df_tsoff['time_start']-self.ts_off)
+        self.tp_df_tsoff['time_peak'] = (self.tp_df_tsoff['time_peak'].astype('int64')-self.ts_off)
+        self.tp_df_tsoff['time_start'] = (self.tp_df_tsoff['time_start'].astype('int64')-self.ts_off)
 
-        self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(0, {}))]
-        self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(1, {}))]
-        self.tp_df_Z = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(2, {}))]
-        self.tp_df_O = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(9999, {}))]
+        # self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(0, {}))]
+        # self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(1, {}))]
+        # self.tp_df_Z = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(2, {}))]
+        # self.tp_df_O = self.tp_df_tsoff[self.tp_df_tsoff['channel'].isin(self.planes.get(9999, {}))]
+
+        self.tp_df_U = self.tp_df_tsoff[self.tp_df_tsoff['plane'] == 0]
+        self.tp_df_V = self.tp_df_tsoff[self.tp_df_tsoff['plane'] == 1]
+        self.tp_df_Z = self.tp_df_tsoff[self.tp_df_tsoff['plane'] == 2]
+        self.tp_df_O = self.tp_df_tsoff[self.tp_df_tsoff['plane'] == 9999]
+
+
+        # print(self.tp_df_Z)
+
+
+
+    def init_ta(self):
+        self.ta_df_tsoff = self.ta_df.copy()
+        for c in ('time_start', 'time_end', 'time_peak', 'time_activity'):
+            self.ta_df_tsoff[c] = (self.ta_df_tsoff[c].astype('int64')-self.ts_off)
+
+        # self.ta_df_U = self.ta_df_tsoff[self.ta_df_tsoff['channel_peak'].isin(self.planes.get(0, {}))]
+        # self.ta_df_V = self.ta_df_tsoff[self.ta_df_tsoff['channel_peak'].isin(self.planes.get(1, {}))]
+        # self.ta_df_Z = self.ta_df_tsoff[self.ta_df_tsoff['channel_peak'].isin(self.planes.get(2, {}))]
+        # self.ta_df_O = self.ta_df_tsoff[self.ta_df_tsoff['channel_peak'].isin(self.planes.get(9999, {}))]
         
-
-
+        self.ta_df_U = self.ta_df_tsoff[self.ta_df_tsoff['plane'] == 0]
+        self.ta_df_V = self.ta_df_tsoff[self.ta_df_tsoff['plane'] == 1]
+        self.ta_df_Z = self.ta_df_tsoff[self.ta_df_tsoff['plane'] == 2]
+        self.ta_df_O = self.ta_df_tsoff[self.ta_df_tsoff['plane'] == 9999]
 
     # def init_fft_phase_22(self):
     #     try: self.df_fft

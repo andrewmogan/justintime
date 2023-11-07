@@ -2,7 +2,7 @@ from dash import html, dcc
 from dash.dependencies import Input, Output, State
 import rich
 from .. import ctrl_class
-from ... all_data import TriggerRecordData
+from ... data_cache import TriggerRecordData
 
 def return_obj(dash_app, engine, storage):
     ctrl_id = "16_channel_number_ctrl"

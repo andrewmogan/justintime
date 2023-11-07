@@ -59,20 +59,47 @@ def init_callbacks(dash_app, storage, plot_id,theme):
 
                     if len(data.df)!=0 and len(data.df.index!=0):
 
-                        logging.info("Dataframe in Z-Plane:")
-                        logging.info(data.df_Z)
-                        logging.info("Dataframe in V-Plane:")
-                        logging.info(data.df_V)
-                        logging.info("Dataframe in U-Plane:")
-                        logging.info(data.df_U)
+                        # logging.info("Dataframe in Z-Plane:")
+                        # logging.info(data.df_Z)
+                        # logging.info("Dataframe in V-Plane:")
+                        # logging.info(data.df_V)
+                        # logging.info("Dataframe in U-Plane:")
+                        # logging.info(data.df_U)
                          
 
                         data.init_tp()
                         mean_tot=data.tp_df["time_over_threshold"].mean()
                         flags_raised=(data.tp_df['flag'] == 1).sum()
 
-                        table=pd.DataFrame({ 'TR Attribute': ['Trigger timestamp (ticks)', 'Trigger timestamp (sec from epoc)', 'Trigger date',"Timestamp offset",'Number of TPs detected',"Flags Raised"],
-                                            'Value': [data.tr_ts, data.tr_ts_sec, data.tr_ts_date,data.ts_off,data.tp_df.shape[0],flags_raised]})
+                        # There must be a better way to do this
+                        table=pd.DataFrame({
+                            'TR Attribute': [
+                                'Trigger timestamp (ticks)', 
+                                'Trigger timestamp (sec from epoc)',
+                                'Trigger date',
+                                "Timestamp offset",
+                                "Number of TPC channels",
+                                "Number of TPC channels (Z)",
+                                "Number of TPC channels (V)",
+                                "Number of TPC channels (U)",
+                                'Number of TPC TPs detected',
+                                "Number of TP Flags Raised"
+                            ],
+                            'Value': [
+                                data.tr_ts,
+                                data.tr_ts_sec,
+                                data.tr_ts_date,
+                                data.ts_off,
+                                len(data.df.columns),
+                                len(data.df_Z.columns),
+                                len(data.df_V.columns),
+                                len(data.df_U.columns),
+                                data.tp_df.shape[0],
+                                flags_raised
+                            ]
+                        })
+
+
                              
                         children=([dash_table.DataTable(
                                 id='table',
