@@ -39,11 +39,11 @@ def cli(channel_map_id: str, entry: int, show: bool, interactive: bool, file_pat
 
     rich.print(f"Found Trigger Records: {trl}")
 
-    for i in range(len(trl)):
-        rich.print(f"Reading entry {entry}, TR {trl[entry]}")
+    for i,tr in enumerate(trl):
+        rich.print(f"Reading entry {i}, TR {tr}")
         rich.print("-"*80)
 
-        info, tpc_df, tp_df, ta_df, tc_df = rdm.load_entry(f, trl[entry])
+        info, tpc_df, tp_df, ta_df, tc_df = rdm.load_entry(f, tr)
         # import pandas as pd
         # Permanently changes the pandas settings
         # pd.set_option('display.max_rows', None)
@@ -60,14 +60,15 @@ def cli(channel_map_id: str, entry: int, show: bool, interactive: bool, file_pat
             rich.print(f"Trigger primitives {len(tp_df)}")
             rich.print(tp_df)
             rich.print("-"*80)
-
             rich.print(f"Trigger activities {len(ta_df)}")
             rich.print(ta_df)
             rich.print("-"*80)
 
-        rich.print(f"Trigger candidates {len(tc_df)}")
-        rich.print(tc_df)
-        rich.print("-"*80)
+        # rich.print(f"Trigger candidates {len(tc_df)}")
+        # rich.print(ta_df)
+        # rich.print(f"Trigger activities {len(ta_df)}")
+        # rich.print(tc_df)
+        # rich.print("-"*80)
     
     if interactive:
         import IPython
