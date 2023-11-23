@@ -271,28 +271,35 @@ class TAFragmentPandasUnpacker(FragmentUnpacker):
         return pd.DataFrame(np.empty(0, cls.dtypes()))
 
 
-    # def test_wrapper(self, frag):
-    #     offset=0
+    def test_wrapper(self, frag, offset):
+        offset=0
 
-    #     b = frag.get_data_bytes()
-    #     taw = trgdataformats.TriggerActivityWrapper(b)
-    #     # ta_data = taw.data
+        b = frag.get_data_bytes(offset)
+        ta = trgdataformats.TriggerActivity(b)
 
-    #     import rich
-    #     rich.print('>'*80)
-    #     rich.print(len(taw))
-    #     rich.print(
-    #         taw.data.time_start,
-    #         taw.data.time_end,
-    #         taw.data.time_peak,
-    #         taw.data.time_activity,
-    #         taw.data.channel_start,
-    #         taw.data.channel_end,
-    #         taw.data.channel_peak,
-    #         taw.data.adc_integral,
-    #         taw.data.adc_peak,
-    #     )
-    #     rich.print('<'*80)
+        import rich
+        rich.print('>'*80)
+        rich.print(len(ta))
+        rich.print(f"""
+time [
+    start={ta.data.time_start},
+    end={ta.data.time_end},
+    peak={ta.data.time_peak},
+    act={ta.data.time_activity}], 
+chan: [
+    start={ta.data.channel_start},
+    end={ta.data.channel_end},
+    peak={ta.data.channel_peak}] ,
+adc: [
+    int={ta.data.adc_integral},
+    peak={ta.data.adc_peak}
+]"""
+        )
+        
+        for i in range(len(ta)):
+            rich.print(ta[i].time_start, ta[i].time_peak, ta[i].time_over_threshold)
+
+        rich.print('<'*80)
         
 
     def unpack(self, frag):
@@ -334,11 +341,7 @@ class TAFragmentPandasUnpacker(FragmentUnpacker):
                 ta_o.data.adc_peak,
             )
 
-            ta = trgdataformats.TriggerActivity(frag.get_data_bytes(offset))
-            logging.warning(f"taw: n_inputs {len(ta)}")
-            for i in range(len(ta)):
-                logging.warning(f"{i} {ta[i]}")
-
+            self.test_wrapper(frag, offset)
 
 
         # Create the dataframe
@@ -356,7 +359,7 @@ class TCFragmentPandasUnpacker(FragmentUnpacker):
         super().__init__()
 
     def match(self, frag_type, subsys):
-        return (frag_type == daqdataformats.FragmentType.kTriggerCandidateOverlay) and (subsys == daqdataformats.SourceID.kTrigger)
+        return (frag_type == daqdataformats.FragmentType.kTriggerCandidate) and (subsys == daqdataformats.SourceID.kTrigger)
 
     @classmethod
     def dtypes(cls):
