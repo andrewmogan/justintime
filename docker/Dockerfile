@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM ghcr.io/dune-daq/c8-minimal:latest
+FROM ghcr.io/dune-daq/alma9-minimal:latest
 
 SHELL ["/bin/bash", "-c"] 
 

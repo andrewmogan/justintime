@@ -1,6 +1,6 @@
 
 DCKR_MAKE_HERE:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-DCKR_BASE_IMG=ghcr.io/dune-daq/c8-minimal:latest
+DCKR_BASE_IMG=ghcr.io/dune-daq/alma9-minimal:latest
 # DUNEDAQ_RELEASE=rc-v4.0.0-1
 JINT_ROOT=$(shell git rev-parse --show-toplevel)
 JINT_BRANCH=$(shell git describe --tags --exact-match 2> /dev/null \
