@@ -202,6 +202,7 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
                 ('adc_integral', np.uint32), 
                 ('adc_peak', np.uint16), 
                 ('flag', np.uint16),
+                ('plane', np.uint8),
             ]
     
     @classmethod
@@ -228,7 +229,16 @@ class TPFragmentPandasUnpacker(FragmentUnpacker):
         # Populate the buffer
         for i in range(n_frames):
             tp = trgdataformats.TriggerPrimitive(frag.get_data(i*tp_size))
-            tp_array[i] = (tp.time_start, tp.time_peak, tp.time_over_threshold, tp.channel, tp.adc_integral, tp.adc_peak, tp.flag)
+            tp_array[i] = (
+                tp.time_start,
+                tp.time_peak,
+                tp.time_over_threshold,
+                tp.channel,
+                tp.adc_integral,
+                tp.adc_peak,
+                tp.flag,
+                9999 # placeholder, not set
+            )
 
         # Create the dataframe
         df = pd.DataFrame(tp_array)
@@ -264,6 +274,7 @@ class TAFragmentPandasUnpacker(FragmentUnpacker):
             ('channel_peak', np.uint32), 
             ('adc_integral', np.uint32), 
             ('adc_peak', np.uint16) 
+            ('plane', np.uint8),
         ]
 
     @classmethod
@@ -339,6 +350,7 @@ adc: [
                 ta_o.data.channel_peak,
                 ta_o.data.adc_integral,
                 ta_o.data.adc_peak,
+                9999 # placeholder, not set
             )
 
             self.test_wrapper(frag, offset)
