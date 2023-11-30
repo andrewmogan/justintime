@@ -273,7 +273,7 @@ class TAFragmentPandasUnpacker(FragmentUnpacker):
             ('channel_end', np.uint32), 
             ('channel_peak', np.uint32), 
             ('adc_integral', np.uint32), 
-            ('adc_peak', np.uint16) 
+            ('adc_peak', np.uint16),
             ('plane', np.uint8),
         ]
 
