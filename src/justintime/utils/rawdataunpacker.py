@@ -353,7 +353,7 @@ adc: [
                 9999 # placeholder, not set
             )
 
-            self.test_wrapper(frag, offset)
+            # self.test_wrapper(frag, offset)
 
 
         # Create the dataframe
