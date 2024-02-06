@@ -19,7 +19,7 @@ from .data_cache import TriggerRecordCache
 @click.option('-v', '--verbose', is_flag=True, default=False)
 @click.option('-p', '--port', type=int, default=8001)
 @click.argument('raw_data_path', type=click.Path(exists=True, file_okay=False))
-@click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST', 'FiftyL']))
+@click.argument('channel_map_id', type=click.Choice(['VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST', 'FiftyL','ICEBERG']))
 @click.argument("template",type=click.Choice(['flatly','darkly']),default='flatly')
 def main(verbose: bool, raw_data_path: str, port: int, channel_map_id: str, template: str):
 
