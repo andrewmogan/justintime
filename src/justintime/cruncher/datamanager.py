@@ -80,6 +80,8 @@ class DataManager:
                 return VSTChannelMap()
             case 'FiftyLChannelMap':
                 return detchannelmaps.make_map('FiftyLChannelMap')
+            case 'ICEBERGChannelMap':
+                return detchannelmaps.make_map('ICEBERGChannelMap')
             case _:
                 raise RuntimeError(f"Unknown channel map id '{map_name}'")
 
