@@ -67,23 +67,12 @@ class DataManager:
     def make_channel_map(map_name):
 
 
-        match map_name+'ChannelMap':
-            case 'VDColdboxChannelMap':
-                return detchannelmaps.make_map('VDColdboxChannelMap')
-            # case 'ProtoDUNESP1ChannelMap':
-            #     return detchannelmaps.make_map('ProtoDUNESP1ChannelMap')
-            case 'PD2HDChannelMap':
-                return detchannelmaps.make_map('PD2HDChannelMap')
-            case 'HDColdboxChannelMap':
-                return detchannelmaps.make_map('HDColdboxChannelMap')
-            case 'VSTChannelMap':
-                return VSTChannelMap()
-            case 'FiftyLChannelMap':
-                return detchannelmaps.make_map('FiftyLChannelMap')
-            case 'ICEBERGChannelMap':
-                return detchannelmaps.make_map('ICEBERGChannelMap')
-            case _:
-                raise RuntimeError(f"Unknown channel map id '{map_name}'")
+        allowed_channel_maps = ['VDColdbox', 'PD2HD', 'HDColdbox', 'FiftyL', 'ICEBERG']
+        if map_name == 'VST':
+            return VSTChannelMap()
+        if map_name in allowed_channel_maps:
+            return detchannelmaps.make_map(map_name+'ChannelMap')
+        raise RuntimeError(f"Unknown channel map id '{map_name}'")
 
 
     def __init__(self, data_path: str, channel_map_name: str = 'PDHD') -> None:
