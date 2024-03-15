@@ -67,7 +67,7 @@ class DataManager:
     def make_channel_map(map_name):
 
 
-        allowed_channel_maps = ['VDColdbox', 'PD2HD', 'HDColdbox', 'FiftyL', 'ICEBERG']
+        allowed_channel_maps = ['VDColdbox', 'PD2HD', 'ProtoDUNESP1', 'FiftyL', 'ICEBERG']
         if map_name == 'VST':
             return VSTChannelMap()
         if map_name in allowed_channel_maps:
