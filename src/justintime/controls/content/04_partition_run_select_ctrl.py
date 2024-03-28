@@ -71,16 +71,15 @@ def init_callbacks(dash_app, engine):
     @dash_app.callback(
         Output('run_select_ctrl', 'options'),
         Output('run_select_ctrl', 'value'),
-        Input('partition_storage_id', 'data')
+        Input('partition_storage_id', 'data'),
+        State('run_select_ctrl', 'value')
         )
-    def update_select(stored_value):
+    def update_select(stored_value, stored_run_value):
         logging.debug('update_run_selection called')
         if not stored_value:
             return [], None
-        #options = [{'label':str(n), 'value':str(n)} for n in sorted(stored_value, reverse=True)]
         options = [{'label':str(n), 'value':str(n)} for n in stored_value]
         latest_run_number = max(options, key=lambda x: int(x['label']))['label']
-        #return(options, str(latest_run_number))
         return(options, latest_run_number)
         
 

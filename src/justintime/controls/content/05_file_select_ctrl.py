@@ -31,10 +31,11 @@ def init_callbacks(dash_app, engine):
     @dash_app.callback(
         Output('file_select_ctrl', 'options'),
         Output('file_select_ctrl', 'value'),
-        Input('run_storage_id', 'data')
+        Input('run_storage_id', 'data'),
+        State('file_select_ctrl', 'value')
         )
     
-    def update_select(stored_value):
+    def update_select(stored_value, stored_file_value):
 
         if not stored_value:
             return []
