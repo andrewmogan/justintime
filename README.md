@@ -1,25 +1,31 @@
 # Just in time
 
-Just in time provided a data visualisation project for DUNE exactly when it was needed. Although it worked, it was a small scaled project with no expantion capabilities, and an expandable version of the project was by now long overdue. "It's about time" aims to provide an implementation of the Just in time functionality with code that's easily expandable and much more robust file structure.
+Just in time provided a data visualisation project for DUNE exactly when it was needed. Although it worked, it was a small scaled project with no expansion capabilities, and an expandable version of the project was by now long overdue. "It's about time" aims to provide an implementation of the Just in time functionality with code that's easily expandable and much more robust file structure.
 
 ## Quick start
 
 ### Dev area setup
-```sh
-# Create a  DBT work area witl local python environment
-dbt-create -c <release> <workarea>
-cd <workarea>
+To use `justintime`, you should first setup up a DUNE DAQ environment. You can follow the instructions in the [DUNE DAQ wiki](https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-buildtools/) to do so. For convenience, the steps below will set up a local environment based on a nightly build of DUNE DAQ. These steps are tested and working as of March 2024, but in case they become outdated, please consult the aforementioned wiki link for the most up-to-date information.
+```
+source /cvmfs/dunedaq.opensciencegrid.org/setup_dunedaq.sh
+setup_dbt latest
+cd /some/work/dir
+dbt-create -n <nightly_tag> my_dev_area
+cd my_dev_area/
 source env.sh
-
-# Clone just-in-time here
+git clone https://github.com/DUNE-DAQ/justintime.git
 cd justintime
 pip install -r requirements.txt
+source env.sh
 ```
 
 ### Running Just-in-Time
-```sh
-cd justintime
-source env.sh
-
+To run `justintime`, you need a directory containing HDF5-format DUNE DAQ data files and you need to select a channel map. As of March 2024, the available channel map options are 'VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST', 'FiftyL', and 'ICEBERG'. 
+```
 python -m justintime.app <DATA FOLDER PATH> <CHANNEL_MAP_NAME>
 ```
+By default, this will run `justintime` on port number 8001. You can then navigate to `localhost:8001` in web browser to view the monitoring page. If running `justintime` on a remote host and you want to open the brower on your local machine, you must first set up an ssh tunnel via
+```bash
+ssh -KL 8001:<hostname>:8001 <username>@<hostname> -N
+```
+where `hostname` and `username` are the names of the host machine on which `justintime` is running and the user running it. If you're not sure, run `hostname` and `whoami` in a terminal on the remote host. 
