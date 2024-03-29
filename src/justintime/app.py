@@ -49,6 +49,12 @@ def init_dashboard(dash_app, raw_data_path, channel_map_id,template):
     layout = []
     layout.append(create_navbar(pages))
 
+    interval_time_seconds = 30
+    interval = dcc.Interval(
+        id="refresh_interval", interval=interval_time_seconds*1000, n_intervals=0
+    )
+    layout.append(interval)
+
     layout.append(html.Div(
     children=[
         html.Div(
