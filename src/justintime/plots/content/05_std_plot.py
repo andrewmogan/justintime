@@ -36,7 +36,7 @@ def init_callbacks(dash_app, storage, plot_id,theme):
         State('07_refresh_ctrl', "value"),
         State("partition_select_ctrl","value"),
         State("run_select_ctrl","value"),
-        State('trigger_record_select_ctrl', "value"),
+        Input('trigger_record_select_ctrl', "value"),
         State('file_select_ctrl', "value"),
         State("21_tp_multiplicity_ctrl","value"),
         State(plot_id, "children")

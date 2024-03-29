@@ -111,7 +111,7 @@ def init_callbacks(dash_app, storage, plot_id, engine, theme):
         Input("90_plot_button_ctrl", "n_clicks"),
         Input('13_adc_tp_plot', 'style'),
         State('07_refresh_ctrl', "value"),
-        State('trigger_record_select_ctrl', "value"),
+        Input('trigger_record_select_ctrl', "value"),
         State('file_select_ctrl', "value"),
         State("partition_select_ctrl","value"),
         State("run_select_ctrl","value"),
