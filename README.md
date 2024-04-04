@@ -5,23 +5,24 @@ Just in time provided a data visualisation project for DUNE exactly when it was 
 ## Quick start
 
 ### Dev area setup
-To use `justintime`, you should first setup up a DUNE DAQ environment. You can follow the instructions in the [DUNE DAQ wiki](https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-buildtools/) to do so. For convenience, the steps below will set up a local environment based on a nightly build of DUNE DAQ. These steps are tested and working as of March 2024, but in case they become outdated, please consult the aforementioned wiki link for the most up-to-date information.
+To use `justintime`, you should first setup up a DUNE DAQ environment. You can follow the instructions in the [DUNE DAQ wiki](https://dune-daq-sw.readthedocs.io/en/latest/packages/daq-buildtools/) to do so. 
 ```
-source /cvmfs/dunedaq.opensciencegrid.org/setup_dunedaq.sh
-setup_dbt latest
-cd /some/work/dir
 dbt-create -n <nightly_tag> my_dev_area
 cd my_dev_area/
 source env.sh
+```
+Then, to set up `justintime`,
+```
 git clone https://github.com/DUNE-DAQ/justintime.git
 cd justintime
 pip install -r requirements.txt
-source env.sh
 ```
 
 ### Running Just-in-Time
 To run `justintime`, you need a directory containing HDF5-format DUNE DAQ data files and you need to select a channel map. As of March 2024, the available channel map options are 'VDColdbox', 'ProtoDUNESP1', 'PD2HD', 'VST', 'FiftyL', and 'ICEBERG'. 
 ```
+cd /path/to/justintime/
+source env.sh
 python -m justintime.app <DATA FOLDER PATH> <CHANNEL_MAP_NAME>
 ```
 By default, this will run `justintime` on port number 8001. You can then navigate to `localhost:8001` in web browser to view the monitoring page. If running `justintime` on a remote host and you want to open the brower on your local machine, you must first set up an ssh tunnel via
